@@ -13,11 +13,8 @@ export function checkoutUrl(fullUrl: string): CheckoutResult {
     const appHost = typeof window !== "undefined" ? window.location.host : "";
 
     if (url.pathname === "/_api/iam/cookie/v1/createSessionCookie" && url.host === appHost) {
-      return {
-        status: "error",
-        reason:
-          "Wix checkout is configured to use the external app domain for Wix pages. In Wix Headless Settings → Manage URLs, set Wix pages domain to a separate Wix-hosted pages domain/subdomain, then redeploy.",
-      };
+      const redirectUrl = url.searchParams.get("redirectUrl");
+      if (redirectUrl) return { status: "redirect", url: redirectUrl };
     }
 
     return { status: "redirect", url: url.toString() };

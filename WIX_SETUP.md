@@ -115,9 +115,9 @@ https://www.vinylroom.online
 https://www.vinylroom.online/login-callback.html
 ```
 
-Then set the domain visitors see for Wix-hosted pages such as Events checkout.
-This must be the domain Wix recognizes as the Wix pages/member domain; do not
-use the generated `*.wix-site-host.com` static release URL from `.wix/topology.json`.
+The Wix pages domain can remain the Wix-managed domain shown in Manage URLs.
+When Wix returns a same-domain cookie wrapper on static hosting, the app follows
+the inner Events checkout URL returned by `createRedirectSession()`.
 
 1. Dashboard → Settings → Development & integrations → Headless Settings.
 2. Scroll to **Manage URLs**.

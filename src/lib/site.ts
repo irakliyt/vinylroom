@@ -11,7 +11,7 @@ export function routeUrl(route: string, query?: Record<string, string>): string 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const host = typeof window !== "undefined" ? window.location.hostname : "";
   const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host);
-  const path = isLocal ? route : `${route}.html`;
+  const path = route === "/" ? "/" : isLocal ? route : `${route}.html`;
   const qs = query
     ? "?" + Object.entries(query).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&")
     : "";
