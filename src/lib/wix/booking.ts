@@ -21,8 +21,14 @@ export type CheckoutResult =
  */
 export async function startEventCheckout(room: Room, quantity: number): Promise<CheckoutResult> {
   const client = getBrowserClient();
-  if (!client || !room.wixEventId) {
+  if (!client) {
     return { status: "demo", reason: "Connect a Wix Headless client ID to enable live checkout." };
+  }
+  if (!room.wixEventId) {
+    return {
+      status: "demo",
+      reason: "No published Wix Events are visible to this Headless client yet.",
+    };
   }
 
   try {

@@ -48,6 +48,26 @@ export async function login(returnTo = "/"): Promise<{ status: "redirect" | "dem
   return { status: "redirect" };
 }
 
+export async function loginWithPassword(email: string, password: string): Promise<Member> {
+  const client = getBrowserClient();
+  if (!client) throw new LoginCallbackError("Connect a Wix Headless client ID first.", "demo");
+
+  const result = await client.auth.login({ email, password });
+  if (result.loginState !== "SUCCESS" || !result.data?.sessionToken) {
+    const failure = result as { error?: string; errorCode?: string; loginState: string };
+    throw new LoginCallbackError(
+      failure.error || "Wix could not sign in with those details.",
+      failure.errorCode || failure.loginState,
+    );
+  }
+
+  const tokens = await client.auth.getMemberTokensForDirectLogin(result.data.sessionToken);
+  client.auth.setTokens(tokens);
+  saveTokens(tokens);
+  resetBrowserClient();
+  return getCurrentMember();
+}
+
 /** Complete login on the callback route: exchange the code for member tokens. */
 export async function completeLogin(): Promise<string> {
   const client = getBrowserClient();
