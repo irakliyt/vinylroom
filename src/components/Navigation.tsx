@@ -35,10 +35,10 @@ export default function Navigation({
     <header className="fixed inset-x-0 top-0 z-50">
       <div
         className={`transition-all duration-500 ${
-          scrolled ? "border-b border-edge bg-void/70 backdrop-blur-xl" : "border-b border-transparent"
+          scrolled ? "bg-void/70 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="mx-auto flex max-w-[100rem] items-center justify-between px-5 py-4 sm:px-8 md:grid md:grid-cols-[1fr_auto_1fr] md:gap-8">
+        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 md:grid md:grid-cols-[minmax(16rem,1fr)_auto_minmax(16rem,1fr)] md:gap-10">
           {/* wordmark */}
           <a href="#top" className="group flex items-center gap-3.5 clickable md:justify-self-start">
             <span className="relative flex h-8 w-8 items-center justify-center">
@@ -56,7 +56,7 @@ export default function Navigation({
           </a>
 
           {/* desktop links */}
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="hidden items-center gap-7 md:flex">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -69,7 +69,7 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex items-center gap-3 md:justify-self-end">
+          <div className="flex items-center gap-2.5 md:justify-self-end">
             <div className="hidden items-center gap-2 rounded-full border border-edge px-3 py-1.5 sm:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="text-[0.65rem] uppercase tracking-[0.2em] text-dust">
