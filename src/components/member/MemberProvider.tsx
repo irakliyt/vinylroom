@@ -15,6 +15,7 @@ import {
   loginWithPassword,
   logout as doLogout,
   registerMember,
+  verifyMemberEmail,
   type Member,
 } from "@/lib/wix/auth";
 import { isWixConfigured } from "@/lib/wix/config";
@@ -43,7 +44,9 @@ export function MemberProvider({ children }: { children: ReactNode }) {
   const [demoNotice, setDemoNotice] = useState(false);
   const [loginOpen, setLoginOpen] = useState(false);
   const [returnTo, setReturnTo] = useState("/");
-  const [authMode, setAuthMode] = useState<"sign-in" | "register">("sign-in");
+  const [authMode, setAuthMode] = useState<"sign-in" | "register" | "verify">("sign-in");
+  const [verificationToken, setVerificationToken] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -78,13 +81,27 @@ export function MemberProvider({ children }: { children: ReactNode }) {
       setLoginBusy(true);
       setLoginError("");
       try {
-        const nextMember =
-          authMode === "register"
-            ? await registerMember(email.trim(), password, displayName)
-            : await loginWithPassword(email.trim(), password);
+        let nextMember: Member;
+        if (authMode === "verify") {
+          nextMember = await verifyMemberEmail(verificationToken, verificationCode.trim());
+        } else if (authMode === "register") {
+          const result = await registerMember(email.trim(), password, displayName);
+          if (result.status === "verification-required") {
+            setVerificationToken(result.stateToken);
+            setVerificationCode("");
+            setAuthMode("verify");
+            setLoginError("Check your email for the Wix verification code.");
+            return;
+          }
+          nextMember = result.member;
+        } else {
+          nextMember = await loginWithPassword(email.trim(), password);
+        }
         setMember(nextMember);
         setLoginOpen(false);
         setPassword("");
+        setVerificationCode("");
+        setVerificationToken("");
         setDisplayName("");
         if (returnTo && returnTo !== window.location.pathname) {
           window.location.href = returnTo;
@@ -101,7 +118,7 @@ export function MemberProvider({ children }: { children: ReactNode }) {
         setLoginBusy(false);
       }
     },
-    [authMode, displayName, email, password, returnTo],
+    [authMode, displayName, email, password, returnTo, verificationCode, verificationToken],
   );
 
   const logout = useCallback(async () => {
@@ -139,10 +156,16 @@ export function MemberProvider({ children }: { children: ReactNode }) {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <div className="eyebrow">
-                  {authMode === "register" ? "Member registration" : "Member sign in"}
+                  {authMode === "verify"
+                    ? "Verify email"
+                    : authMode === "register"
+                      ? "Member registration"
+                      : "Member sign in"}
                 </div>
                 <h2 className="mt-2 font-display text-2xl leading-tight text-cream">
-                  {authMode === "register"
+                  {authMode === "verify"
+                    ? "Enter the code Wix sent you."
+                    : authMode === "register"
                     ? "Create a Wix Member account."
                     : "Keep your bookings with your account."}
                 </h2>
@@ -171,30 +194,47 @@ export function MemberProvider({ children }: { children: ReactNode }) {
               </label>
             )}
 
-            <label className="mt-5 block">
-              <span className="text-[0.62rem] uppercase tracking-[0.18em] text-dust">Email</span>
-              <input
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-edge bg-void/50 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber/60"
-              />
-            </label>
+            {authMode === "verify" ? (
+              <label className="mt-5 block">
+                <span className="text-[0.62rem] uppercase tracking-[0.18em] text-dust">Verification code</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  required
+                  value={verificationCode}
+                  onChange={(event) => setVerificationCode(event.target.value)}
+                  className="mt-1.5 w-full rounded-xl border border-edge bg-void/50 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber/60"
+                />
+              </label>
+            ) : (
+              <>
+                <label className="mt-5 block">
+                  <span className="text-[0.62rem] uppercase tracking-[0.18em] text-dust">Email</span>
+                  <input
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-edge bg-void/50 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber/60"
+                  />
+                </label>
 
-            <label className="mt-3 block">
-              <span className="text-[0.62rem] uppercase tracking-[0.18em] text-dust">Password</span>
-              <input
-                type="password"
-                autoComplete={authMode === "register" ? "new-password" : "current-password"}
-                required
-                minLength={6}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="mt-1.5 w-full rounded-xl border border-edge bg-void/50 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber/60"
-              />
-            </label>
+                <label className="mt-3 block">
+                  <span className="text-[0.62rem] uppercase tracking-[0.18em] text-dust">Password</span>
+                  <input
+                    type="password"
+                    autoComplete={authMode === "register" ? "new-password" : "current-password"}
+                    required
+                    minLength={6}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    className="mt-1.5 w-full rounded-xl border border-edge bg-void/50 px-4 py-3 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber/60"
+                  />
+                </label>
+              </>
+            )}
 
             {loginError && <p className="mt-3 text-sm text-amber">{loginError}</p>}
 
@@ -208,25 +248,44 @@ export function MemberProvider({ children }: { children: ReactNode }) {
               }}
             >
               {loginBusy
-                ? authMode === "register"
+                ? authMode === "verify"
+                  ? "Verifying..."
+                  : authMode === "register"
                   ? "Creating account..."
                   : "Signing in..."
-                : authMode === "register"
+                : authMode === "verify"
+                  ? "Verify and sign in"
+                  : authMode === "register"
                   ? "Create account"
                   : "Sign in"}
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode((mode) => (mode === "register" ? "sign-in" : "register"));
-                setLoginError("");
-                setPassword("");
-              }}
-              className="mt-4 w-full text-center text-sm text-parchment transition-colors hover:text-amber clickable"
-            >
-              {authMode === "register" ? "Already a member? Sign in" : "New here? Create account"}
-            </button>
+            {authMode === "verify" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode("register");
+                  setLoginError("");
+                  setVerificationCode("");
+                  setVerificationToken("");
+                }}
+                className="mt-4 w-full text-center text-sm text-parchment transition-colors hover:text-amber clickable"
+              >
+                Use a different email
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthMode((mode) => (mode === "register" ? "sign-in" : "register"));
+                  setLoginError("");
+                  setPassword("");
+                }}
+                className="mt-4 w-full text-center text-sm text-parchment transition-colors hover:text-amber clickable"
+              >
+                {authMode === "register" ? "Already a member? Sign in" : "New here? Create account"}
+              </button>
+            )}
           </form>
         </div>
       )}

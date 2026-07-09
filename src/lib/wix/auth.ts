@@ -26,10 +26,15 @@ type AuthState = {
   loginState: string;
   data?: {
     sessionToken?: string;
+    stateToken?: string;
   };
   error?: string;
   errorCode?: string;
 };
+
+export type RegistrationResult =
+  | { status: "signed-in"; member: Member }
+  | { status: "verification-required"; stateToken: string };
 
 function initials(name?: string): string {
   if (!name) return "♪";
@@ -91,7 +96,11 @@ export async function loginWithPassword(email: string, password: string): Promis
   return memberFromSessionToken(client, result.data.sessionToken);
 }
 
-export async function registerMember(email: string, password: string, name?: string): Promise<Member> {
+export async function registerMember(
+  email: string,
+  password: string,
+  name?: string,
+): Promise<RegistrationResult> {
   const client = getBrowserClient();
   if (!client) throw new LoginCallbackError("Connect a Wix Headless client ID first.", "demo");
 
@@ -103,14 +112,11 @@ export async function registerMember(email: string, password: string, name?: str
   })) as AuthState;
 
   if (result.loginState === "SUCCESS" && result.data?.sessionToken) {
-    return memberFromSessionToken(client, result.data.sessionToken);
+    return { status: "signed-in", member: await memberFromSessionToken(client, result.data.sessionToken) };
   }
 
-  if (result.loginState === "EMAIL_VERIFICATION_REQUIRED") {
-    throw new LoginCallbackError(
-      "Account created. Check your email to verify it, then sign in.",
-      result.loginState,
-    );
+  if (result.loginState === "EMAIL_VERIFICATION_REQUIRED" && result.data?.stateToken) {
+    return { status: "verification-required", stateToken: result.data.stateToken };
   }
 
   if (result.loginState === "OWNER_APPROVAL_REQUIRED") {
@@ -121,6 +127,22 @@ export async function registerMember(email: string, password: string, name?: str
   }
 
   throw authError(result, "Wix could not create that member account.");
+}
+
+export async function verifyMemberEmail(stateToken: string, verificationCode: string): Promise<Member> {
+  const client = getBrowserClient();
+  if (!client) throw new LoginCallbackError("Connect a Wix Headless client ID first.", "demo");
+
+  const result = (await client.auth.processVerification(
+    { verificationCode },
+    { loginState: "EMAIL_VERIFICATION_REQUIRED", data: { stateToken } } as never,
+  )) as AuthState;
+
+  if (result.loginState !== "SUCCESS" || !result.data?.sessionToken) {
+    throw authError(result, "Wix could not verify that code.");
+  }
+
+  return memberFromSessionToken(client, result.data.sessionToken);
 }
 
 /** Complete login on the callback route: exchange the code for member tokens. */
