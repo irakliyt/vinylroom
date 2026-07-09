@@ -135,7 +135,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   });
   const yVinyl = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 160]);
   const yCover = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 60]);
-  const yCard = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -70]);
+  const yCard = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -24]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   // mouse-driven depth tilt for the whole stage
@@ -209,7 +209,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center pb-60 sm:pb-0 [perspective:1400px]"
+          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:pb-28 [perspective:1400px]"
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >
@@ -292,7 +292,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             {/* floating booking card */}
             <motion.div
               style={{ y: isDesktop ? yCard : 0, translateZ: 90, willChange: "transform" }}
-              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem]"
+              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-26%] lg:right-[-2%] lg:w-[55%]"
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
