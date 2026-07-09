@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import SpotlightBackground from "@/components/SpotlightBackground";
 import NoiseOverlay from "@/components/NoiseOverlay";
 import AlbumArt from "@/components/AlbumArt";
@@ -18,25 +18,36 @@ const nextSteps = [
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
 
 export default function ThankYouContent() {
-  const params = useSearchParams();
-  const event = params.get("event") ?? "";
+  const [query, setQuery] = useState<URLSearchParams | null>(null);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setQuery(new URLSearchParams(window.location.search));
+    }, 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  const event = query?.get("event") ?? "";
 
   // Wix appends an order/reservation identifier on a completed checkout. If
   // it's missing, the visitor likely bounced off checkout (declined card,
   // "unavailable" error, or just navigated back) — don't claim their seat is
   // saved when we have no evidence it is.
   const confirmed = !!(
-    params.get("orderNumber") ||
-    params.get("orderId") ||
-    params.get("reservationId") ||
-    params.get("ticketOrderId")
+    query?.get("orderNumber") ||
+    query?.get("orderId") ||
+    query?.get("reservationId") ||
+    query?.get("ticketOrderId")
   );
 
   // Resolve the booked room from the baked catalogue by id, slug, or title.
-  const room =
-    demoRooms.find((r) => r.id === event || r.wixEventSlug === event) ??
-    demoRooms.find((r) => norm(r.title) === norm(event) || norm(event).includes(r.id.replace(/-/g, ""))) ??
-    demoRooms[0];
+  const room = useMemo(
+    () =>
+      demoRooms.find((r) => r.id === event || r.wixEventSlug === event) ??
+      demoRooms.find((r) => norm(r.title) === norm(event) || norm(event).includes(r.id.replace(/-/g, ""))) ??
+      demoRooms[0],
+    [event],
+  );
 
   return (
     <>

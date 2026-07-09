@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import ThankYouContent from "@/components/ThankYouContent";
+import { PlayerProvider } from "@/components/player/PlayerProvider";
 
 export const metadata: Metadata = {
   title: "Your seat is saved — Vinyl Listening Rooms",
@@ -9,8 +10,10 @@ export const metadata: Metadata = {
 
 export default function ThankYou() {
   return (
-    <Suspense>
-      <ThankYouContent />
-    </Suspense>
+    <PlayerProvider>
+      <Suspense>
+        <ThankYouContent />
+      </Suspense>
+    </PlayerProvider>
   );
 }
