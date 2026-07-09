@@ -4,9 +4,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import SpotlightBackground from "@/components/SpotlightBackground";
 import NoiseOverlay from "@/components/NoiseOverlay";
-import VinylDisc from "@/components/VinylDisc";
 import AlbumArt from "@/components/AlbumArt";
 import MemberBookingNote from "@/components/MemberBookingNote";
+import ScratchableVinyl from "@/components/ScratchableVinyl";
 import { rooms as demoRooms } from "@/data/rooms";
 
 const nextSteps = [
@@ -44,11 +44,7 @@ export default function ThankYouContent() {
       <NoiseOverlay />
 
       <main className="relative z-10 flex min-h-[100svh] flex-col items-center justify-center px-5 py-20 text-center">
-        {/* spinning disc crest */}
-        <div className="relative mb-8 h-28 w-28">
-          <div className="absolute inset-[-30%] rounded-full bg-[radial-gradient(circle,rgba(216,154,69,0.25),transparent_60%)] blur-2xl" />
-          <VinylDisc accent={room.sleeve.accent} spinning={confirmed} label={room.genre} className="h-full w-full" />
-        </div>
+        <ScratchableVinyl accent={room.sleeve.accent} autoSpin={confirmed} label={room.genre} />
 
         {confirmed ? (
           <>
