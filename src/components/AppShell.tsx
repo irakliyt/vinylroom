@@ -36,7 +36,7 @@ export default function AppShell({
           <NowPlayingWidget rooms={rooms} />
 
           <main className="relative">
-            <Hero />
+            <Hero rooms={rooms} />
             <FeaturedRooms rooms={rooms} source={source} />
             <HowItWorks />
             <EventDetailPreview event={rooms[0]} />

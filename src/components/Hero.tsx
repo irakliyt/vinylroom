@@ -14,12 +14,16 @@ import VinylDisc from "./VinylDisc";
 import Waveform from "./Waveform";
 import MagneticButton from "./MagneticButton";
 import { useBooking } from "./booking/BookingProvider";
-import { featuredEvent, stats } from "@/data/rooms";
+import { featuredEvent, stats, type Room } from "@/data/rooms";
 
-export default function Hero() {
+export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
+
+  // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
+  // checkout — the static `featuredEvent` import never has a wixEventId.
+  const featured = rooms?.find((r) => r.id === featuredEvent.id) ?? featuredEvent;
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -126,9 +130,9 @@ export default function Hero() {
               className="absolute left-[2%] top-0 w-[76%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
             >
               <AlbumArt
-                sleeve={featuredEvent.sleeve}
-                label="Blue Note After Dark"
-                sub="Jazz · Warsaw"
+                sleeve={featured.sleeve}
+                label={featured.title}
+                sub={`${featured.genre} · ${featured.city}`}
               />
             </motion.div>
 
@@ -142,21 +146,21 @@ export default function Hero() {
                 <Waveform bars={4} className="h-3 w-5" />
               </div>
               <div className="mt-2 font-display text-lg leading-tight text-cream">
-                Blue Note After Dark
+                {featured.title}
               </div>
               <div className="mt-1 flex items-center gap-2 text-xs text-parchment">
-                <span>Fri · 21:00</span>
+                <span>{featured.day} · {featured.time}</span>
                 <span className="h-1 w-1 rounded-full bg-dust" />
-                <span>Warsaw</span>
+                <span>{featured.city}</span>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-edge pt-3">
                 <div>
-                  <div className="text-sm font-medium text-cream">$18</div>
-                  <div className="text-[0.65rem] text-amber">3 of 8 seats left</div>
+                  <div className="text-sm font-medium text-cream">{featured.price}</div>
+                  <div className="text-[0.65rem] text-amber">{featured.seatsLeft} of {featured.capacity} seats left</div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => open(featuredEvent)}
+                  onClick={() => open(featured)}
                   className="rounded-full bg-cream px-3 py-1.5 text-xs font-medium text-void transition-transform hover:scale-105 clickable"
                 >
                   Reserve
