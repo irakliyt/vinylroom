@@ -46,9 +46,17 @@ const SAMPLE = [
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function errorMessage(err) {
+  const code = err?.details?.applicationError?.code;
+  if (code === 403) {
+    return [
+      "403 permission denied.",
+      "The API key can read this site but cannot create Wix Events.",
+      "Edit or create an API key with site access to this site and Wix Events write/manage permissions.",
+    ].join(" ");
+  }
   return (
     err?.details?.applicationError?.description ||
-    err?.details?.applicationError?.code ||
+    code ||
     err?.response?.data?.message ||
     err?.message ||
     JSON.stringify(err, Object.getOwnPropertyNames(err), 2) ||

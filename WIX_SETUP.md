@@ -69,7 +69,8 @@ ticket each via the API. Needs an API key (step below). Field shapes vary a
 little across SDK versions, so treat it as a starting point:
 
 ```bash
-# 1. Create an API key with the "Wix Events" permission:
+# 1. Create an API key with access to this site and Wix Events write/manage
+#    permissions. Read-only Events access can query events but cannot seed them.
 #    https://manage.wix.com/account/api-keys
 # 2. Find your site's metaSiteId (dashboard URL: /dashboard/<SITE_ID>/...)
 # 3. Add both to .env.local (WIX_API_KEY, WIX_SITE_ID), then:
