@@ -23,7 +23,7 @@ export default function EventDetailPreview({ event }: { event?: Room }) {
   const e = event ?? featuredEvent;
 
   return (
-    <section id="event" className="relative z-10 mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
+    <section id="event" className="relative z-10 mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
       <Reveal className="mb-12 flex items-center gap-4">
         <span className="eyebrow">A night, in full</span>
         <span className="h-px flex-1 bg-edge" />

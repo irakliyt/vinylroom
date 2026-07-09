@@ -25,7 +25,7 @@ export default function HowItWorks() {
 
   return (
     <section id="how" className="relative z-10 border-y border-edge bg-pitch/40">
-      <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
+      <div className="mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
         <Reveal className="flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-end">
           <div className="max-w-xl">
             <span className="eyebrow">How it works</span>

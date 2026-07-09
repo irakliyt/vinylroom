@@ -31,7 +31,7 @@ const cols = [
 export default function Footer() {
   return (
     <footer className="relative z-10 border-t border-edge bg-pitch/50">
-      <div className="mx-auto max-w-7xl px-5 py-16 sm:px-8">
+      <div className="mx-auto max-w-[100rem] px-5 py-16 sm:px-8">
         <div className="grid grid-cols-2 gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
             <div className="flex items-center gap-3">

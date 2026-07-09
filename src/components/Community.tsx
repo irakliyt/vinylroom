@@ -42,7 +42,7 @@ function CountUp({ value }: { value: string }) {
 
 export default function Community() {
   return (
-    <section id="community" className="relative z-10 mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
+    <section id="community" className="relative z-10 mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
       <div className="grid grid-cols-1 gap-14 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
         {/* manifesto + stats */}
         <div>

@@ -148,7 +148,7 @@ export default function CreateRoomPreview() {
 
   return (
     <section id="host" className="relative z-10 border-y border-edge bg-pitch/40">
-      <div className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
+      <div className="mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
         <Reveal className="max-w-xl">
           <span className="eyebrow">Host mode</span>
           <h2 className="mt-4 text-balance font-display text-[clamp(2.2rem,5vw,3.8rem)] leading-[0.98] text-cream">

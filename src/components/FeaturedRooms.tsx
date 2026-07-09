@@ -21,7 +21,7 @@ export default function FeaturedRooms({
   );
 
   return (
-    <section id="rooms" className="relative z-10 mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:py-32">
+    <section id="rooms" className="relative z-10 mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
       <Reveal className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-xl">
           <div className="flex items-center gap-3">
