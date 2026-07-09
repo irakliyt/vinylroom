@@ -95,10 +95,6 @@ wix release       # uploads ./out to the Wix site, returns the live URL
 - `wix.config.json`'s `appId` is the Wix CLI/static-hosting app id. It is
   separate from `NEXT_PUBLIC_WIX_CLIENT_ID`, which is the Headless OAuth client
   used for Events, checkout, and member auth.
-- `NEXT_PUBLIC_WIX_PAGES_ORIGIN` must point at the Wix pages domain above, or at
-  the custom Wix pages subdomain configured in Headless Settings → Manage URLs.
-  Do not point it at `https://www.vinylroom.online`; that is the external app
-  domain and does not serve Wix's `_api/iam/cookie/v1/createSessionCookie`.
 - Data is **baked at build time** (static export can't do request-time SSR) —
   re-run the two commands above to refresh events/prices/availability.
 - The frontend is hosted statically, then reads Wix Events and creates checkout
@@ -119,7 +115,9 @@ https://www.vinylroom.online
 https://www.vinylroom.online/login-callback.html
 ```
 
-Then set the domain visitors see for Wix-hosted pages such as Events checkout:
+Then set the domain visitors see for Wix-hosted pages such as Events checkout.
+This must be the domain Wix recognizes as the Wix pages/member domain; do not
+use the generated `*.wix-site-host.com` static release URL from `.wix/topology.json`.
 
 1. Dashboard → Settings → Development & integrations → Headless Settings.
 2. Scroll to **Manage URLs**.

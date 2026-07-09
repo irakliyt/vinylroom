@@ -1,5 +1,4 @@
 import { getBrowserClient } from "./browser";
-import { WIX_PAGES_ORIGIN } from "./config";
 import { routeUrl } from "@/lib/site";
 import { type Room } from "@/data/rooms";
 
@@ -8,32 +7,22 @@ export type CheckoutResult =
   | { status: "demo"; reason: string }
   | { status: "error"; reason: string };
 
-export function checkoutUrl(fullUrl: string): string {
+export function checkoutUrl(fullUrl: string): CheckoutResult {
   try {
     const url = new URL(fullUrl);
-    const pages = new URL(WIX_PAGES_ORIGIN);
+    const appHost = typeof window !== "undefined" ? window.location.host : "";
 
-    if (url.pathname === "/_api/iam/cookie/v1/createSessionCookie") {
-      url.protocol = pages.protocol;
-      url.host = pages.host;
-
-      const redirectUrl = url.searchParams.get("redirectUrl");
-      if (redirectUrl) {
-        const redirect = new URL(redirectUrl);
-        if (redirect.pathname.startsWith("/__events/")) {
-          redirect.protocol = pages.protocol;
-          redirect.host = pages.host;
-          url.searchParams.set("redirectUrl", redirect.toString());
-        }
-      }
-    } else if (url.pathname.startsWith("/__events/")) {
-      url.protocol = pages.protocol;
-      url.host = pages.host;
+    if (url.pathname === "/_api/iam/cookie/v1/createSessionCookie" && url.host === appHost) {
+      return {
+        status: "error",
+        reason:
+          "Wix checkout is configured to use the external app domain for Wix pages. In Wix Headless Settings → Manage URLs, set Wix pages domain to a separate Wix-hosted pages domain/subdomain, then redeploy.",
+      };
     }
 
-    return url.toString();
+    return { status: "redirect", url: url.toString() };
   } catch {
-    return fullUrl;
+    return { status: "redirect", url: fullUrl };
   }
 }
 
@@ -103,7 +92,7 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
 
     const url = session.redirectSession?.fullUrl;
     if (!url) return { status: "error", reason: "Checkout session could not be created." };
-    return { status: "redirect", url: checkoutUrl(url) };
+    return checkoutUrl(url);
   } catch (err) {
     return {
       status: "error",

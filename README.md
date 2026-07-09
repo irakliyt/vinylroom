@@ -28,11 +28,6 @@ built-in demo data; set a Headless OAuth **Client ID** and it goes live:
 cp .env.example .env.local     # add NEXT_PUBLIC_WIX_CLIENT_ID
 ```
 
-For checkout handoff, keep `NEXT_PUBLIC_WIX_PAGES_ORIGIN` pointed at the Wix
-pages domain from Headless Settings → Manage URLs. The external app can stay on
-`https://www.vinylroom.online`, but Wix's `_api/iam/cookie` endpoint must run on
-the Wix pages domain.
-
 - Data: [`src/lib/wix/rooms.ts`](src/lib/wix/rooms.ts) fetches events server-side
   (ISR, 60s) and maps them to rooms, merging the editorial extras (genre, mood,
   vinyl lineup, equipment) by slug. Any failure falls back to demo data.

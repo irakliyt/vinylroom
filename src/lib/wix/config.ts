@@ -11,8 +11,4 @@
  */
 export const WIX_CLIENT_ID = process.env.NEXT_PUBLIC_WIX_CLIENT_ID?.trim() || "";
 
-export const WIX_PAGES_ORIGIN =
-  process.env.NEXT_PUBLIC_WIX_PAGES_ORIGIN?.trim().replace(/\/$/, "") ||
-  "https://ocftju-vinyl-list-7876da37-irakliyt.wix-site-host.com";
-
 export const isWixConfigured = WIX_CLIENT_ID.length > 0;
