@@ -62,6 +62,8 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
 
   const accent = active?.accent ?? teaser.sleeve.accent;
   const isPlaying = player.playing;
+  const teaserHit = firstPlayable(teaser.records);
+  const coverArtwork = active?.artwork ?? teaserHit?.preview.artwork;
 
   return (
     <AnimatePresence>
@@ -91,13 +93,13 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
                       style={{ background: accent, opacity: 0.45, animation: "breathe 2.4s ease-in-out infinite" }}
                     />
                   )}
-                  {active?.artwork ? (
+                  {coverArtwork ? (
                     <div
                       className="h-full w-full overflow-hidden rounded-full ring-1 ring-edge"
                       style={{ animation: isPlaying ? "spin-slow 5s linear infinite" : undefined }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={active.artwork} alt="" width={48} height={48} className="h-full w-full object-cover opacity-90" />
+                      <img src={coverArtwork} alt="" width={48} height={48} className="h-full w-full object-cover opacity-95" />
                     </div>
                   ) : (
                     <VinylDisc accent={accent} spinning={isPlaying} label={teaser.genre} className="h-full w-full" />
@@ -174,7 +176,17 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
               onClick={() => setOpen(true)}
               className="relative h-12 w-12 clickable"
             >
-              <VinylDisc accent={accent} spinning={isPlaying} className="h-full w-full" />
+              {coverArtwork ? (
+                <span
+                  className="block h-full w-full overflow-hidden rounded-full ring-1 ring-edge"
+                  style={{ animation: isPlaying ? "spin-slow 5s linear infinite" : undefined }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={coverArtwork} alt="" className="h-full w-full object-cover" />
+                </span>
+              ) : (
+                <VinylDisc accent={accent} spinning={isPlaying} className="h-full w-full" />
+              )}
               <span className="absolute -right-0.5 -top-0.5 flex h-3 w-3">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber opacity-60" />
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-amber" />

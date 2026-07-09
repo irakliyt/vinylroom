@@ -9,11 +9,11 @@ import { usePlayer } from "./player/PlayerProvider";
  * has ever played this session so it doesn't get missed.
  */
 export default function SoundToggle() {
-  const { current, playing, hasEverPlayed, resume } = usePlayer();
+  const { current, playing, resume } = usePlayer();
   if (!current) return null;
 
   const label = playing ? "Turn sound off" : "Turn sound on";
-  const needsHint = !hasEverPlayed;
+  const needsHint = !playing;
 
   return (
     <button
@@ -21,16 +21,17 @@ export default function SoundToggle() {
       onClick={resume}
       aria-label={label}
       title={label}
-      className={`relative flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border text-cream transition-colors hover:border-amber/70 clickable ${
+      className={`relative flex h-10 shrink-0 items-center justify-center gap-2 overflow-visible rounded-full border text-cream transition-colors hover:border-amber/80 clickable ${
         needsHint
-          ? "border-amber/60 bg-amber/10 px-3 shadow-[0_0_28px_-12px_rgba(216,154,69,0.95)]"
+          ? "border-amber bg-amber/15 px-4 shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
           : "w-9 border-edge-strong"
       }`}
+      style={needsHint ? ({ "--pulse-color": "rgba(216,154,69,0.78)", animation: "ring-pulse 1.15s ease-out infinite" } as React.CSSProperties) : undefined}
     >
       {needsHint && (
         <>
-          <span className="absolute inset-0 rounded-full" style={{ animation: "ring-pulse 1.8s ease-out infinite" }} />
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber" />
+          <span className="absolute inset-[-6px] rounded-full border border-amber/30" style={{ animation: "ring-pulse 1.45s ease-out infinite" }} />
+          <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-amber shadow-[0_0_16px_rgba(216,154,69,1)]" />
         </>
       )}
       {playing ? (
@@ -47,7 +48,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
-      {needsHint && <span className="text-[0.65rem] font-medium uppercase tracking-[0.18em] text-amber">Sound on</span>}
+      {needsHint && <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-amber">Sound on</span>}
     </button>
   );
 }
