@@ -35,8 +35,6 @@ type PlayerCtx = {
 };
 
 const Ctx = createContext<PlayerCtx | null>(null);
-const INTRO_KEY = "vlr:intro-played";
-
 function getIntroTrack(): Track | null {
   const introPreview = getPreview("AC/DC — Thunderstruck");
   if (!introPreview) return null;
@@ -97,37 +95,15 @@ export function PlayerProvider({
     audio.addEventListener("play", onPlay);
     audio.addEventListener("pause", onPause);
 
-    // ── Intro: greet the visitor with AC/DC — Thunderstruck, quietly. It's
-    // always cued as `current` (so the sound toggle has something to control
-    // even after a reload), but the AUTOPLAY ATTEMPT only fires once per
-    // session — browsers block unmuted autoplay anyway, so on the first
-    // rejection we arm a one-shot gesture starter instead of retrying forever.
-    let cleanupIntro = () => {};
+    // Cue the intro so Sound On can start it, but never attach it to an
+    // arbitrary gesture: a mobile scroll or tap must not start audio.
     const intro = introEnabled ? getIntroTrack() : null;
     if (intro) {
-      audio.volume = 0.18; // never loud
+      audio.volume = 1;
       audio.src = intro.previewUrl;
-
-      if (!sessionStorage.getItem(INTRO_KEY)) {
-        const start = () => {
-          sessionStorage.setItem(INTRO_KEY, "1");
-          if (audio.currentSrc || audio.src) audio.play().catch(() => {});
-        };
-        // optimistic attempt (works where autoplay is permitted)
-        audio.play().then(() => sessionStorage.setItem(INTRO_KEY, "1")).catch(() => {
-          // blocked → arm a one-shot gesture starter
-          window.addEventListener("pointerdown", start, { once: true });
-          window.addEventListener("keydown", start, { once: true });
-          cleanupIntro = () => {
-            window.removeEventListener("pointerdown", start);
-            window.removeEventListener("keydown", start);
-          };
-        });
-      }
     }
 
     return () => {
-      cleanupIntro();
       audio.pause();
       audio.remove();
     };
