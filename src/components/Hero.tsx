@@ -43,6 +43,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [djMode, setDjMode] = useState(false);
   const [scratching, setScratching] = useState(false);
   const [scratchRotation, setScratchRotation] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
   // checkout — the static `featuredEvent` import never has a wixEventId.
@@ -57,6 +58,14 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   useEffect(() => {
     djModeRef.current = djMode;
   }, [djMode]);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 640px)");
+    const update = () => setIsDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const toggleDjMode = () => {
     const next = !djMode;
@@ -200,21 +209,21 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center [perspective:1400px]"
+          className="relative flex items-center justify-center pb-60 sm:pb-0 [perspective:1400px]"
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >
           <motion.div
             style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d", willChange: "transform" }}
-            className="relative aspect-square w-full max-w-[26rem]"
+            className="relative aspect-[0.92] w-full max-w-[26rem] sm:aspect-square"
           >
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
 
             {/* vinyl sliding out behind the sleeve */}
             <motion.div
-              style={{ y: yVinyl, translateZ: -40, willChange: "transform" }}
-              className="absolute right-[-7%] top-[11%] w-[76%]"
+              style={{ y: isDesktop ? yVinyl : 0, translateZ: -40, willChange: "transform" }}
+              className="absolute right-[-3%] top-[12%] w-[70%] sm:right-[-7%] sm:top-[11%] sm:w-[76%]"
             >
               <div className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
               <div
@@ -235,8 +244,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
             {/* album sleeve in front */}
             <motion.div
-              style={{ y: yCover, translateZ: 40, willChange: "transform" }}
-              className="pointer-events-none absolute left-[3%] top-[2%] w-[70%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
+              style={{ y: isDesktop ? yCover : 0, translateZ: 40, willChange: "transform" }}
+              className="pointer-events-none absolute left-[5%] top-[3%] w-[65%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)] sm:left-[3%] sm:top-[2%] sm:w-[70%]"
             >
               {activeTrack?.artwork ? (
                 <div className="relative aspect-square w-full overflow-hidden rounded-[3px] bg-charcoal">
@@ -260,12 +269,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               onPointerMove={moveScratch}
               onPointerUp={stopScratch}
               onPointerCancel={stopScratch}
-              className="absolute right-[0%] top-[23%] z-20 h-[42%] w-[36%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable"
+              className="absolute right-[-1%] top-[22%] z-20 h-[42%] w-[36%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%]"
             >
               <span className="sr-only">Drag the vinyl to scratch</span>
             </button>
 
-            <div className="absolute right-[-14%] top-[13%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/90 px-1.5 py-1.5 shadow-[0_0_34px_-12px_rgba(216,154,69,1)] backdrop-blur-md">
+            <div className="absolute left-[5%] top-[78%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/90 px-1.5 py-1.5 shadow-[0_0_34px_-12px_rgba(216,154,69,1)] backdrop-blur-md sm:left-auto sm:right-[-14%] sm:top-[13%]">
               <button
                 type="button"
                 onClick={toggleDjMode}
@@ -282,8 +291,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
             {/* floating booking card */}
             <motion.div
-              style={{ y: yCard, translateZ: 90, willChange: "transform" }}
-              className="absolute bottom-[-9%] right-[1%] w-[60%] max-w-[14.75rem] rounded-2xl p-4 glass glow-warm"
+              style={{ y: isDesktop ? yCard : 0, translateZ: 90, willChange: "transform" }}
+              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem]"
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
