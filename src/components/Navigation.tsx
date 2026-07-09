@@ -69,7 +69,7 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex items-center gap-2.5 md:justify-self-end">
+          <div className="flex items-center gap-4 md:justify-self-end">
             <div className="hidden items-center gap-2 rounded-full border border-edge px-3 py-1.5 sm:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="text-[0.65rem] uppercase tracking-[0.2em] text-dust">

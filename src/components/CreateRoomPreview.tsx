@@ -15,6 +15,9 @@ type HostDraft = {
   title: string;
   genre: Genre;
   moods: string[];
+  date: string;
+  time: string;
+  venue: string;
   capacity: number;
   price: number;
   isPrivate: boolean;
@@ -43,11 +46,26 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
 const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
+const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e?apps-override=8c087fcd-3385-41d3-8fc0-6e80fb536630";
+
+function defaultEventDate() {
+  const date = new Date();
+  date.setDate(date.getDate() + 14);
+  return date.toISOString().slice(0, 10);
+}
+
+function scheduleLabel(date: string, time: string) {
+  if (!date) return "Set a date";
+  return `${new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(`${date}T12:00:00`))} · ${time || "Set a time"}`;
+}
 
 export default function CreateRoomPreview() {
   const [title, setTitle] = useState("Late Night on the Blue Side");
   const [genreIdx, setGenreIdx] = useState(0);
   const [moods, setMoods] = useState<string[]>(["Warm", "Slow", "Intimate"]);
+  const [eventDate, setEventDate] = useState(defaultEventDate);
+  const [eventTime, setEventTime] = useState("20:00");
+  const [venue, setVenue] = useState("A room in Warsaw");
   const [capacity, setCapacity] = useState(8);
   const [price, setPrice] = useState(18);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -58,6 +76,7 @@ export default function CreateRoomPreview() {
   ]);
   const [justOpened, setJustOpened] = useState(false);
   const [draftMessage, setDraftMessage] = useState("");
+  const [formError, setFormError] = useState("");
   const [lastDraft, setLastDraft] = useState<HostDraft | null>(null);
   const player = usePlayer();
 
@@ -101,6 +120,8 @@ export default function CreateRoomPreview() {
     `Event title: ${draft.title}`,
     `Genre: ${draft.genre}`,
     `Mood: ${draft.moods.join(", ") || "Not set"}`,
+    `When: ${scheduleLabel(draft.date, draft.time)}`,
+    `Where: ${draft.venue}`,
     `Capacity: ${draft.capacity}`,
     `Seat price: ${draft.price === 0 ? "Free" : `$${draft.price}`}`,
     `Visibility: ${draft.isPrivate ? "Private" : "Public"}`,
@@ -110,11 +131,19 @@ export default function CreateRoomPreview() {
   ].join("\n");
 
   const saveDraft = () => {
+    if (!title.trim() || !eventDate || !eventTime || !venue.trim() || records.length === 0) {
+      setFormError("Add a title, date, time, location, and at least one record before preparing the event.");
+      return;
+    }
+
     const draft: HostDraft = {
       id: `room-${Date.now()}`,
       title: title.trim() || "Untitled listening room",
       genre: genre.g,
       moods,
+      date: eventDate,
+      time: eventTime,
+      venue: venue.trim(),
       capacity,
       price,
       isPrivate,
@@ -127,12 +156,14 @@ export default function CreateRoomPreview() {
       localStorage.setItem(HOST_DRAFTS_KEY, JSON.stringify([draft, ...existing].slice(0, 12)));
       setLastDraft(draft);
       setJustOpened(true);
-      setDraftMessage("Draft saved on this device.");
+      setFormError("");
+      setDraftMessage("Room brief ready. Continue in Wix Events to create the ticketed event.");
       setTimeout(() => setJustOpened(false), 2800);
     } catch {
       setLastDraft(draft);
       setJustOpened(true);
-      setDraftMessage("Draft prepared. Copy it before leaving this page.");
+      setFormError("");
+      setDraftMessage("Room brief ready. Copy it before opening Wix Events.");
     }
   };
 
@@ -144,6 +175,13 @@ export default function CreateRoomPreview() {
     } catch {
       setDraftMessage("Could not copy automatically. Select the draft details and copy them.");
     }
+  };
+
+  const openWixDashboard = () => {
+    if (!lastDraft) return;
+    void navigator.clipboard.writeText(draftSummary(lastDraft)).catch(() => {});
+    window.open(WIX_DASHBOARD_URL, "_blank", "noopener,noreferrer");
+    setDraftMessage("Wix dashboard opened. The room brief is ready to paste into a new ticketed event.");
   };
 
   return (
@@ -173,6 +211,36 @@ export default function CreateRoomPreview() {
                 className="mt-2 w-full border-b border-edge-strong bg-transparent pb-2 font-display text-2xl text-cream outline-none transition-colors placeholder:text-dust focus:border-amber"
               />
             </label>
+
+            <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-[0.9fr_0.7fr_1.4fr]">
+              <label className="block">
+                <span className="eyebrow text-[0.62rem]">Date</span>
+                <input
+                  type="date"
+                  value={eventDate}
+                  onChange={(e) => setEventDate(e.target.value)}
+                  className="mt-2 w-full border-b border-edge-strong bg-transparent pb-2 text-sm text-cream outline-none transition-colors focus:border-amber"
+                />
+              </label>
+              <label className="block">
+                <span className="eyebrow text-[0.62rem]">Doors</span>
+                <input
+                  type="time"
+                  value={eventTime}
+                  onChange={(e) => setEventTime(e.target.value)}
+                  className="mt-2 w-full border-b border-edge-strong bg-transparent pb-2 text-sm text-cream outline-none transition-colors focus:border-amber"
+                />
+              </label>
+              <label className="block">
+                <span className="eyebrow text-[0.62rem]">Location</span>
+                <input
+                  value={venue}
+                  onChange={(e) => setVenue(e.target.value)}
+                  placeholder="A room in Warsaw"
+                  className="mt-2 w-full border-b border-edge-strong bg-transparent pb-2 text-sm text-cream outline-none transition-colors placeholder:text-dust focus:border-amber"
+                />
+              </label>
+            </div>
 
             {/* genre pills */}
             <div className="mt-8">
@@ -359,6 +427,8 @@ export default function CreateRoomPreview() {
                   {title || "Your night"}
                 </h3>
 
+                <p className="mt-2 text-[0.72rem] text-dust">{scheduleLabel(eventDate, eventTime)} · {venue || "Set a location"}</p>
+
                 <div className="mt-3 flex items-center gap-1.5">
                   {records.length ? (
                     records.slice(0, 5).map((r) => {
@@ -403,22 +473,32 @@ export default function CreateRoomPreview() {
               className="mt-4 w-full rounded-full py-3.5 text-sm font-medium text-void transition-all clickable"
               style={{ background: "linear-gradient(135deg,#e8b45f,#b45f2a)", boxShadow: "0 16px 40px -14px rgba(216,154,69,0.6)" }}
             >
-              {justOpened ? "✓ Draft saved" : "Save room draft"}
+              {justOpened ? "✓ Wix room brief ready" : "Prepare Wix Events draft"}
             </button>
+            {formError && <p className="mt-3 text-sm text-amber">{formError}</p>}
             {lastDraft && (
               <div className="mt-3 rounded-2xl border border-edge bg-void/50 p-3 text-left">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-xs text-parchment">{draftMessage}</p>
-                  <button
-                    type="button"
-                    onClick={copyDraft}
-                    className="shrink-0 rounded-full border border-edge-strong px-3 py-1.5 text-xs text-cream transition-colors hover:border-amber/50 clickable"
-                  >
-                    Copy draft
-                  </button>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={copyDraft}
+                      className="rounded-full border border-edge-strong px-3 py-1.5 text-xs text-cream transition-colors hover:border-amber/50 clickable"
+                    >
+                      Copy brief
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openWixDashboard}
+                      className="rounded-full bg-cream px-3 py-1.5 text-xs font-medium text-void transition-transform hover:scale-[1.03] clickable"
+                    >
+                      Open Wix Events
+                    </button>
+                  </div>
                 </div>
                 <p className="mt-2 text-[0.68rem] text-dust">
-                  Saved fields: title, genre, mood, capacity, price, visibility, and crate.
+                  Prepared fields: event details, ticket capacity and price, visibility, mood, and crate.
                 </p>
               </div>
             )}
