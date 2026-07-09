@@ -17,7 +17,7 @@ import { useBooking } from "./booking/BookingProvider";
 import { usePlayer } from "./player/PlayerProvider";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
-const SCRATCH_SRC = "/audio/liecio-vinyl-effect-loop-110210.mp3";
+const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
 function pointerAngle(e: React.PointerEvent<HTMLButtonElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -58,46 +58,28 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   useEffect(() => {
     djModeRef.current = djMode;
-    if (!djMode) return;
-    const audio = scratchAudio.current;
-    if (!audio) return;
-    audio.loop = true;
-    audio.volume = 0.65;
-    audio.playbackRate = 1;
-    audio.play().catch(() => {});
   }, [djMode]);
 
-  const toggleDjMode = async () => {
+  const toggleDjMode = () => {
     const next = !djMode;
     djModeRef.current = next;
     setDjMode(next);
     const audio = scratchAudio.current;
     if (!audio) return;
-    if (next) {
-      audio.loop = true;
-      audio.volume = 0.65;
-      audio.playbackRate = 1;
-      await audio.play().catch(() => {});
-    } else {
+    if (!next) {
       audio.pause();
       audio.currentTime = 0;
       audio.playbackRate = 1;
     }
   };
 
-  const startScratch = async (e: React.PointerEvent<HTMLButtonElement>) => {
+  const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     djModeRef.current = true;
     setDjMode(true);
     setScratching(true);
     lastAngle.current = pointerAngle(e);
     lastAt.current = performance.now();
-    const audio = scratchAudio.current;
-    if (audio) {
-      audio.loop = true;
-      audio.volume = 0.72;
-      await audio.play().catch(() => {});
-    }
   };
 
   const moveScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -112,6 +94,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     const audio = scratchAudio.current;
     if (audio) {
+      audio.loop = true;
       audio.volume = Math.min(0.35 + speed * 0.6, 0.95);
       audio.playbackRate = Math.min(0.7 + speed * 1.7, 2);
       if (audio.paused) audio.play().catch(() => {});
@@ -124,7 +107,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     }
     setScratching(false);
     const audio = scratchAudio.current;
-    if (audio && !djModeRef.current) {
+    if (audio) {
       audio.pause();
       audio.currentTime = 0;
       audio.playbackRate = 1;
@@ -277,7 +260,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               )}
             </motion.div>
 
-            <div className="absolute right-[-18%] top-[3%] z-30 flex items-center gap-2 rounded-full border border-amber/55 bg-void/90 px-2 py-1.5 shadow-[0_0_38px_-8px_rgba(216,154,69,1)] backdrop-blur-md">
+            <div className="absolute right-[-20%] top-[18%] z-30 flex items-center gap-2 rounded-full border border-amber/55 bg-void/90 px-2 py-1.5 shadow-[0_0_38px_-8px_rgba(216,154,69,1)] backdrop-blur-md">
               <button
                 type="button"
                 onClick={toggleDjMode}
@@ -288,7 +271,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 DJ mode
               </button>
               <span className="hidden whitespace-nowrap pr-2 text-[0.65rem] text-parchment sm:inline">
-                {scratching ? "Scratching" : djMode ? "Sound on" : "Drag vinyl"}
+                {scratching ? "Scratching" : "Drag vinyl"}
               </span>
             </div>
 

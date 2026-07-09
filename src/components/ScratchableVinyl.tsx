@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import VinylDisc from "@/components/VinylDisc";
 
-const SCRATCH_SRC = "/audio/liecio-vinyl-effect-loop-110210.mp3";
+const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
 function angleFromCenter(e: React.PointerEvent<HTMLButtonElement>) {
   const rect = e.currentTarget.getBoundingClientRect();
@@ -47,30 +47,18 @@ export default function ScratchableVinyl({
     djModeRef.current = djMode;
   }, [djMode]);
 
-  const playScratch = async () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.loop = true;
-    audio.volume = 0.62;
-    try {
-      await audio.play();
-    } catch {
-      /* Browser may block until the next gesture; pointerdown will retry. */
-    }
-  };
-
   const pauseScratch = () => {
     if (settleTimer.current) window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
       const audio = audioRef.current;
-      if (!audio || scratching || djModeRef.current) return;
+      if (!audio || scratching) return;
       audio.pause();
       audio.currentTime = 0;
       audio.playbackRate = 1;
-    }, 650);
+    }, 160);
   };
 
-  const armDjMode = async () => {
+  const armDjMode = () => {
     const next = !djMode;
     djModeRef.current = next;
     setDjMode(next);
@@ -78,11 +66,7 @@ export default function ScratchableVinyl({
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (next) {
-      audio.currentTime = audio.currentTime || 0;
-      audio.playbackRate = 1;
-      await playScratch();
-    } else {
+    if (!next) {
       if (settleTimer.current) window.clearTimeout(settleTimer.current);
       audio.pause();
       audio.currentTime = 0;
@@ -90,14 +74,13 @@ export default function ScratchableVinyl({
     }
   };
 
-  const onPointerDown = async (e: React.PointerEvent<HTMLButtonElement>) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     djModeRef.current = true;
     setDjMode(true);
     setScratching(true);
     lastAngle.current = angleFromCenter(e);
     lastAt.current = performance.now();
-    await playScratch();
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -184,7 +167,7 @@ export default function ScratchableVinyl({
           DJ scratch mode
         </button>
         <span className="whitespace-nowrap pr-2 text-[0.66rem] text-parchment">
-          {scratching ? "Scratching" : djMode ? "Sound on" : "Drag record"}
+          {scratching ? "Scratching" : "Drag record"}
         </span>
       </div>
     </div>

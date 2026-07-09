@@ -40,16 +40,16 @@ export default function Navigation({
       >
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
           {/* wordmark */}
-          <a href="#top" className="group flex items-center gap-3 clickable">
+          <a href="#top" className="group flex items-center gap-3.5 clickable">
             <span className="relative flex h-8 w-8 items-center justify-center">
               <span className="absolute inset-0 rounded-full grooves shadow-[inset_0_0_8px_rgba(0,0,0,0.9)]" />
               <span className="relative h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(216,154,69,0.8)]" />
             </span>
-            <span className="flex flex-col leading-none">
-              <span className="font-display text-[1.05rem] tracking-tight text-cream">
+            <span className="flex flex-col gap-1 leading-none">
+              <span className="font-display text-[1.05rem] leading-[0.95] tracking-tight text-cream">
                 Vinyl Rooms
               </span>
-              <span className="text-[0.55rem] uppercase tracking-[0.3em] text-dust">
+              <span className="text-[0.54rem] uppercase leading-none tracking-[0.32em] text-dust">
                 Listening sessions
               </span>
             </span>
