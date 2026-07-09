@@ -81,6 +81,14 @@ export default function ScratchableVinyl({
     setScratching(true);
     lastAngle.current = angleFromCenter(e);
     lastAt.current = performance.now();
+
+    const audio = audioRef.current;
+    if (audio) {
+      audio.loop = true;
+      audio.volume = 0.01;
+      audio.playbackRate = 1;
+      audio.play().catch(() => {});
+    }
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {

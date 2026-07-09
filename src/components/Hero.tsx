@@ -49,9 +49,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const featured = rooms?.find((r) => r.id === featuredEvent.id) ?? featuredEvent;
   const activeTrack = player.current;
   const stageTitle = activeTrack ? activeTrack.track : featured.title;
-  const stageSubtitle = activeTrack
-    ? `${activeTrack.artist}${activeTrack.roomTitle ? ` · ${activeTrack.roomTitle}` : ""}`
-    : `${featured.day} · ${featured.time}`;
+  const stageSubtitle = activeTrack ? activeTrack.artist : `${featured.day} · ${featured.time}`;
   const stageLocation = activeTrack?.city ?? featured.city;
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
@@ -80,6 +78,14 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     setScratching(true);
     lastAngle.current = pointerAngle(e);
     lastAt.current = performance.now();
+
+    const audio = scratchAudio.current;
+    if (audio) {
+      audio.loop = true;
+      audio.volume = 0.01;
+      audio.playbackRate = 1;
+      audio.play().catch(() => {});
+    }
   };
 
   const moveScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -203,23 +209,17 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             className="relative aspect-square w-full max-w-[26rem]"
           >
             {/* warm halo */}
-            <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
+            <div className="pointer-events-none absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
 
             {/* vinyl sliding out behind the sleeve */}
             <motion.div
               style={{ y: yVinyl, translateZ: -40, willChange: "transform" }}
-              className="absolute right-[-14%] top-[8%] w-[82%]"
+              className="absolute right-[-7%] top-[11%] w-[76%]"
             >
-              <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
-              <button
-                type="button"
-                aria-label="DJ scratch the hero record"
-                aria-pressed={djMode}
-                onPointerDown={startScratch}
-                onPointerMove={moveScratch}
-                onPointerUp={stopScratch}
-                onPointerCancel={stopScratch}
-                className="relative block w-full touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable"
+              <div className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none relative block w-full rounded-full"
                 style={{
                   transform: `rotate(${scratchRotation}deg)`,
                   animation: !scratching ? "spin-slow 6s linear infinite" : undefined,
@@ -230,26 +230,18 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                   className={`pointer-events-none absolute inset-[-5%] rounded-full border transition-opacity ${djMode ? "opacity-100" : "opacity-0"}`}
                   style={{ borderColor: stageAccent, boxShadow: `0 0 36px -8px ${stageAccent}` }}
                 />
-              </button>
+              </div>
             </motion.div>
 
             {/* album sleeve in front */}
             <motion.div
               style={{ y: yCover, translateZ: 40, willChange: "transform" }}
-              className="absolute left-[2%] top-0 w-[76%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
+              className="pointer-events-none absolute left-[3%] top-[2%] w-[70%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
             >
               {activeTrack?.artwork ? (
                 <div className="relative aspect-square w-full overflow-hidden rounded-[3px] bg-charcoal">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={activeTrack.artwork} alt="" className="h-full w-full object-cover" />
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-void/85 to-transparent p-[7%]">
-                    <div className="font-display text-[clamp(0.7rem,1.6vw,1rem)] leading-tight text-cream">
-                      {activeTrack.record}
-                    </div>
-                    <div className="mt-0.5 text-[0.6rem] uppercase tracking-[0.22em] text-cream/60">
-                      {activeTrack.artist}
-                    </div>
-                  </div>
                 </div>
               ) : (
                 <AlbumArt
@@ -260,17 +252,30 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               )}
             </motion.div>
 
-            <div className="absolute right-[-20%] top-[18%] z-30 flex items-center gap-2 rounded-full border border-amber/55 bg-void/90 px-2 py-1.5 shadow-[0_0_38px_-8px_rgba(216,154,69,1)] backdrop-blur-md">
+            <button
+              type="button"
+              aria-label="DJ scratch the hero record"
+              aria-pressed={scratching}
+              onPointerDown={startScratch}
+              onPointerMove={moveScratch}
+              onPointerUp={stopScratch}
+              onPointerCancel={stopScratch}
+              className="absolute right-[0%] top-[23%] z-20 h-[42%] w-[36%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable"
+            >
+              <span className="sr-only">Drag the vinyl to scratch</span>
+            </button>
+
+            <div className="absolute right-[-14%] top-[13%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/90 px-1.5 py-1.5 shadow-[0_0_34px_-12px_rgba(216,154,69,1)] backdrop-blur-md">
               <button
                 type="button"
                 onClick={toggleDjMode}
-                className={`rounded-full px-4 py-2 text-[0.65rem] font-bold uppercase tracking-[0.18em] transition-colors clickable ${
+                className={`rounded-full px-3.5 py-2 text-[0.62rem] font-bold uppercase tracking-[0.18em] transition-colors clickable ${
                   djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
                 }`}
               >
                 DJ mode
               </button>
-              <span className="hidden whitespace-nowrap pr-2 text-[0.65rem] text-parchment sm:inline">
+              <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
                 {scratching ? "Scratching" : "Drag vinyl"}
               </span>
             </div>
@@ -278,29 +283,33 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             {/* floating booking card */}
             <motion.div
               style={{ y: yCard, translateZ: 90, willChange: "transform" }}
-              className="absolute -bottom-2 -right-2 w-[64%] max-w-[15rem] rounded-2xl p-4 glass glow-warm"
+              className="absolute bottom-[-9%] right-[1%] w-[60%] max-w-[14.75rem] rounded-2xl p-4 glass glow-warm"
             >
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
                 <Waveform bars={4} className="h-3 w-5" color={stageAccent} playing={player.playing} />
               </div>
-              <div className="mt-2 font-display text-lg leading-tight text-cream">
+              <div className="mt-3 truncate font-display text-[1.05rem] leading-tight text-cream">
                 {stageTitle}
               </div>
-              <div className="mt-1 flex items-center gap-2 text-xs text-parchment">
-                <span className="truncate">{stageSubtitle}</span>
-                <span className="h-1 w-1 rounded-full bg-dust" />
-                <span>{stageLocation}</span>
+              <div className="mt-2 space-y-1 text-[0.72rem] leading-snug text-parchment">
+                <div className="truncate">{stageSubtitle}</div>
+                <div className="flex items-center gap-2 text-dust">
+                  <span className="h-1 w-1 rounded-full bg-dust" />
+                  <span className="truncate">{stageLocation}</span>
+                </div>
               </div>
-              <div className="mt-3 flex items-center justify-between border-t border-edge pt-3">
+              <div className="mt-4 flex items-center justify-between gap-3 border-t border-edge pt-3">
                 <div>
                   <div className="text-sm font-medium text-cream">{featured.price}</div>
-                  <div className="text-[0.65rem] text-amber">{featured.seatsLeft} of {featured.capacity} seats left</div>
+                  <div className="mt-0.5 text-[0.65rem] leading-none text-amber">
+                    {featured.seatsLeft} of {featured.capacity} seats left
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => open(featured)}
-                  className="rounded-full bg-cream px-3 py-1.5 text-xs font-medium text-void transition-transform hover:scale-105 clickable"
+                  className="shrink-0 rounded-full bg-cream px-3 py-1.5 text-xs font-medium text-void transition-transform hover:scale-105 clickable"
                 >
                   Reserve
                 </button>
