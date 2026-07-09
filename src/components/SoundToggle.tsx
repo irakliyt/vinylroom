@@ -13,6 +13,7 @@ export default function SoundToggle() {
   if (!current) return null;
 
   const label = playing ? "Turn sound off" : "Turn sound on";
+  const needsHint = !hasEverPlayed;
 
   return (
     <button
@@ -20,9 +21,13 @@ export default function SoundToggle() {
       onClick={resume}
       aria-label={label}
       title={label}
-      className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-edge-strong text-cream transition-colors hover:border-amber/60 clickable"
+      className={`relative flex h-9 shrink-0 items-center justify-center gap-2 rounded-full border text-cream transition-colors hover:border-amber/70 clickable ${
+        needsHint
+          ? "border-amber/60 bg-amber/10 px-3 shadow-[0_0_28px_-12px_rgba(216,154,69,0.95)]"
+          : "w-9 border-edge-strong"
+      }`}
     >
-      {!hasEverPlayed && (
+      {needsHint && (
         <>
           <span className="absolute inset-0 rounded-full" style={{ animation: "ring-pulse 1.8s ease-out infinite" }} />
           <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber" />
@@ -42,6 +47,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
+      {needsHint && <span className="text-[0.65rem] font-medium uppercase tracking-[0.18em] text-amber">Sound on</span>}
     </button>
   );
 }

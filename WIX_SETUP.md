@@ -90,11 +90,15 @@ wix release       # uploads ./out to the Wix site, returns the live URL
 ```
 
 - **Live URL:** https://www.vinylroom.online
-- **Wix fallback URL:** https://wqlfaa-vinyl-list-7876da37-irakliyt.wix-site-host.com
+- **Wix fallback URL:** https://ocftju-vinyl-list-7876da37-irakliyt.wix-site-host.com
 - **Hosting site dashboard:** https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e
 - `wix.config.json`'s `appId` is the Wix CLI/static-hosting app id. It is
   separate from `NEXT_PUBLIC_WIX_CLIENT_ID`, which is the Headless OAuth client
   used for Events, checkout, and member auth.
+- `NEXT_PUBLIC_WIX_PAGES_ORIGIN` must point at the Wix pages domain above, or at
+  the custom Wix pages subdomain configured in Headless Settings → Manage URLs.
+  Do not point it at `https://www.vinylroom.online`; that is the external app
+  domain and does not serve Wix's `_api/iam/cookie/v1/createSessionCookie`.
 - Data is **baked at build time** (static export can't do request-time SSR) —
   re-run the two commands above to refresh events/prices/availability.
 - The frontend is hosted statically, then reads Wix Events and creates checkout

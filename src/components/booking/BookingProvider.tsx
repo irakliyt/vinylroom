@@ -26,6 +26,22 @@ export function useBooking() {
 type Step = "seats" | "details" | "result";
 type Status = "idle" | "loading" | "demo" | "error";
 
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timeout = window.setTimeout(() => reject(new Error("Wix checkout took too long to respond. Please try again.")), ms);
+    promise.then(
+      (value) => {
+        window.clearTimeout(timeout);
+        resolve(value);
+      },
+      (error) => {
+        window.clearTimeout(timeout);
+        reject(error);
+      },
+    );
+  });
+}
+
 export function BookingProvider({ children }: { children: ReactNode }) {
   const [room, setRoom] = useState<Room | null>(null);
   const [step, setStep] = useState<Step>("seats");
@@ -63,14 +79,20 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
     if (!room || !validName || !validEmail) return;
     setStatus("loading");
-    const res = await startEventCheckout(room, qty);
-    if (res.status === "redirect") {
-      window.location.href = res.url; // → Wix-hosted checkout + payment
-      return;
+    try {
+      const res = await withTimeout(startEventCheckout(room, qty), 20000);
+      if (res.status === "redirect") {
+        window.location.href = res.url; // → Wix-hosted checkout + payment
+        return;
+      }
+      setStep("result");
+      setStatus(res.status === "demo" ? "demo" : "error");
+      setMessage(res.reason);
+    } catch (err) {
+      setStep("result");
+      setStatus("error");
+      setMessage(err instanceof Error ? err.message : "Something went wrong starting checkout.");
     }
-    setStep("result");
-    setStatus(res.status === "demo" ? "demo" : "error");
-    setMessage(res.reason);
   }, [room, qty, name, email]);
 
   const value = useMemo(() => ({ open }), [open]);

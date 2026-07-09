@@ -4,10 +4,7 @@ import { useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
 import AlbumArt from "./AlbumArt";
 import VinylDisc from "./VinylDisc";
-import Waveform from "./Waveform";
 import { useBooking } from "./booking/BookingProvider";
-import { usePlayer, type Track } from "./player/PlayerProvider";
-import { firstPlayable } from "@/lib/previews";
 import { type Room } from "@/data/rooms";
 
 function Heart({ filled }: { filled: boolean }) {
@@ -23,27 +20,6 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
   const ref = useRef<HTMLElement>(null);
   const [saved, setSaved] = useState(false);
   const { open } = useBooking();
-  const player = usePlayer();
-
-  const hit = firstPlayable(room.records);
-  const isThis = !!hit && player.current?.previewUrl === hit.preview.previewUrl;
-  const isPlaying = isThis && player.playing;
-
-  const togglePreview = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!hit) return;
-    const t: Track = {
-      record: hit.record,
-      track: hit.preview.track,
-      artist: hit.preview.artist,
-      previewUrl: hit.preview.previewUrl,
-      artwork: hit.preview.artwork,
-      roomTitle: room.title,
-      city: room.city,
-      accent: room.sleeve.accent,
-    };
-    player.toggle(t);
-  };
 
   const mx = useMotionValue(0.5);
   const my = useMotionValue(0.5);
@@ -77,7 +53,6 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
         rotateX: rx,
         rotateY: ry,
         transformStyle: "preserve-3d",
-        boxShadow: isPlaying ? `0 0 0 1.5px ${room.sleeve.accent}, 0 20px 60px -20px ${room.sleeve.accent}66` : undefined,
       }}
       className="group relative flex flex-col overflow-hidden rounded-2xl border border-edge bg-gradient-to-b from-charcoal/60 to-pitch/80 p-4 transition-[border-color,box-shadow] duration-500 hover:border-amber/25 [perspective:1000px]"
     >
@@ -87,47 +62,20 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
       {/* artwork stage */}
       <div className="relative [transform:translateZ(40px)]" style={{ transformStyle: "preserve-3d" }}>
         <div className="relative aspect-square">
-          {/* vinyl slides out on hover (and spins while previewing) */}
-          <div className={`absolute right-0 top-0 aspect-square w-full transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[22%] ${isPlaying ? "translate-x-[22%]" : "translate-x-0"}`}>
-            <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={isPlaying} className="w-full" />
+          {/* vinyl slides out on hover as a sleeve detail, not a playback control */}
+          <div className="absolute right-0 top-0 aspect-square w-full translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[22%]">
+            <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={false} className="w-full" />
           </div>
           {/* sleeve */}
           <div className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-1 group-hover:-translate-x-[3%]">
             <AlbumArt sleeve={room.sleeve} className="shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]" />
           </div>
 
-          {/* play preview overlay */}
-          {hit && (
-            <button
-              type="button"
-              aria-label={isPlaying ? `Pause preview: ${hit.preview.track}` : `Play preview: ${hit.preview.track} — ${hit.preview.artist}`}
-              title={`Preview: ${hit.preview.track} — ${hit.preview.artist}`}
-              onClick={togglePreview}
-              className={`absolute left-1/2 top-1/2 z-20 flex h-14 w-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-void transition-all duration-300 clickable ${
-                isThis ? "scale-105 opacity-100" : "scale-95 opacity-90 group-hover:scale-105 group-hover:opacity-100"
-              }`}
-              style={{
-                background: "linear-gradient(135deg,#e8b45f,#b45f2a)",
-                boxShadow: isPlaying
-                  ? "0 0 0 6px rgba(216,154,69,0.18), 0 12px 34px -8px rgba(216,154,69,0.9)"
-                  : "0 12px 34px -8px rgba(216,154,69,0.75)",
-              }}
-            >
-              {isPlaying ? (
-                <span className="flex gap-1"><i className="h-4 w-1 rounded-full bg-void" /><i className="h-4 w-1 rounded-full bg-void" /></span>
-              ) : (
-                <span className="ml-0.5">▶</span>
-              )}
-            </button>
-          )}
-
-          {/* now spinning / now playing badge — names the actual track so the
-             preview's intent (and what's audible) is never ambiguous */}
-          {(room.nowSpinning || isPlaying) && (
+          {room.nowSpinning && (
             <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full bg-void/70 px-2.5 py-1 backdrop-blur-sm">
-              <Waveform bars={3} className="h-2.5 w-3 shrink-0" color={room.sleeve.accent} playing={isPlaying || !!room.nowSpinning} />
+              <span className="h-2 w-2 shrink-0 rounded-full ring-2 ring-cream/15" style={{ background: room.sleeve.accent }} />
               <span className="truncate text-[0.6rem] uppercase tracking-[0.16em] text-cream/80">
-                {isPlaying ? `Playing · ${hit?.preview.track}` : "Now spinning"}
+                Now spinning
               </span>
             </div>
           )}
