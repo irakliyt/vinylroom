@@ -23,15 +23,15 @@ export default function SoundToggle() {
       title={label}
       className={`relative flex h-10 shrink-0 items-center justify-center gap-2 overflow-visible rounded-full border text-cream transition-colors hover:border-amber/80 clickable ${
         needsHint
-          ? "border-amber bg-amber/15 px-4 shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
-          : "w-9 border-edge-strong"
+          ? "h-9 border-amber bg-amber/15 px-3 shadow-[0_0_26px_-8px_rgba(216,154,69,1)] sm:h-10 sm:px-4 sm:shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
+          : "h-9 w-9 border-edge-strong sm:h-10 sm:w-10"
       }`}
       style={needsHint ? ({ "--pulse-color": "rgba(216,154,69,0.78)", animation: "ring-pulse 1.15s ease-out infinite" } as React.CSSProperties) : undefined}
     >
       {needsHint && (
         <>
-          <span className="absolute inset-[-6px] rounded-full border border-amber/30" style={{ animation: "ring-pulse 1.45s ease-out infinite" }} />
-          <span className="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-amber shadow-[0_0_16px_rgba(216,154,69,1)]" />
+          <span className="absolute inset-[-4px] rounded-full border border-amber/30 sm:inset-[-6px]" style={{ animation: "ring-pulse 1.45s ease-out infinite" }} />
+          <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_16px_rgba(216,154,69,1)] sm:h-3 sm:w-3" />
         </>
       )}
       {playing ? (
@@ -48,7 +48,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
-      {needsHint && <span className="whitespace-nowrap text-[0.72rem] font-bold uppercase tracking-[0.2em] text-amber">Sound on</span>}
+      {needsHint && <span className="whitespace-nowrap text-[0.66rem] font-bold uppercase tracking-[0.14em] text-amber sm:text-[0.72rem] sm:tracking-[0.2em]">Sound on</span>}
     </button>
   );
 }

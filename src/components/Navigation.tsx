@@ -40,16 +40,16 @@ export default function Navigation({
       >
         <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[minmax(14rem,1fr)_auto_minmax(28rem,1fr)] xl:gap-10">
           {/* wordmark */}
-          <a href="#top" className="group flex shrink-0 items-center gap-3.5 clickable xl:justify-self-start">
+          <a href="#top" className="group flex shrink-0 items-center gap-2.5 sm:gap-3.5 clickable xl:justify-self-start">
             <span className="relative flex h-8 w-8 items-center justify-center">
               <span className="absolute inset-0 rounded-full grooves shadow-[inset_0_0_8px_rgba(0,0,0,0.9)]" />
               <span className="relative h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(216,154,69,0.8)]" />
             </span>
             <span className="flex flex-col gap-1 leading-none">
-              <span className="font-display text-[1.05rem] leading-[0.95] tracking-tight text-cream">
+              <span className="font-display text-[1rem] leading-[0.95] tracking-tight text-cream sm:text-[1.05rem]">
                 Vinyl Rooms
               </span>
-              <span className="text-[0.54rem] uppercase leading-none tracking-[0.32em] text-dust">
+              <span className="hidden text-[0.54rem] uppercase leading-none tracking-[0.32em] text-dust sm:block">
                 Listening sessions
               </span>
             </span>
@@ -127,7 +127,7 @@ export default function Navigation({
                   </a>
                 ))}
               </div>
-              <div className="mt-auto border-t border-edge pt-6">
+              <div className="mt-10 border-t border-edge pt-6">
                 <a
                   href="#host"
                   onClick={() => setOpen(false)}
