@@ -158,7 +158,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden">
       <audio ref={scratchAudio} preload="auto" src={SCRATCH_SRC} />
-      <div className="mx-auto grid min-h-[100svh] max-w-7xl grid-cols-1 items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:pt-28">
+      <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
         {/* ── Copy ── */}
         <motion.div style={{ opacity }} className="relative z-10 max-w-xl">
           <motion.div
@@ -209,13 +209,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:-translate-x-14 lg:pb-28 [perspective:1400px]"
+          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >
           <motion.div
             style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d", willChange: "transform" }}
-            className="relative aspect-[0.92] w-full max-w-[26rem] sm:aspect-square"
+            className="relative aspect-[0.92] w-full max-w-[26rem] sm:aspect-square lg:max-w-[34rem]"
           >
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
@@ -292,7 +292,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             {/* floating booking card */}
             <motion.div
               style={{ y: isDesktop ? yCard : 0, translateZ: 90, willChange: "transform" }}
-              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-26%] lg:right-[38%] lg:w-[55%]"
+              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-14%] lg:right-[38%] lg:w-[55%]"
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
