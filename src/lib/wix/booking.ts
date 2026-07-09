@@ -62,11 +62,12 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
 
     // 3. Build the Wix-hosted checkout URL and hand off.
     const returnUrl = routeUrl("/thank-you", { event: eventSlug });
+    const homeUrl = routeUrl("/");
     const session = await client.redirects.createRedirectSession({
       eventsCheckout: { eventSlug, reservationId },
       callbacks: {
         thankYouPageUrl: returnUrl,
-        postFlowUrl: returnUrl,
+        postFlowUrl: homeUrl,
       },
     });
 
