@@ -91,6 +91,9 @@ wix release       # uploads ./out to the Wix site, returns the live URL
 - **Live URL:** https://www.vinylroom.online
 - **Wix fallback URL:** https://wqlfaa-vinyl-list-7876da37-irakliyt.wix-site-host.com
 - **Hosting site dashboard:** https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e
+- `wix.config.json`'s `appId` is the Wix CLI/static-hosting app id. It is
+  separate from `NEXT_PUBLIC_WIX_CLIENT_ID`, which is the Headless OAuth client
+  used for Events, checkout, and member auth.
 - Data is **baked at build time** (static export can't do request-time SSR) —
   re-run the two commands above to refresh events/prices/availability.
 - The frontend is hosted statically, then reads Wix Events and creates checkout
@@ -120,9 +123,9 @@ Then set the domain visitors see for Wix-hosted pages such as Events checkout:
 Wix-hosted checkout cannot use the same root domain as the external app. For
 this site, use a subdomain such as `checkout.vinylroom.online` or
 `portal.vinylroom.online`. Until this is configured, `createRedirectSession()`
-will keep returning the free Wix pages URL, currently
-`https://irakliyt.wixsite.com/my-site-132/...`, even though the external app
-itself is live at `https://www.vinylroom.online`.
+will return whichever Wix pages domain is attached to the configured Headless
+OAuth client, even though the external app itself is live at
+`https://www.vinylroom.online`.
 
 ## How the pieces map
 
