@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function ThankYou() {
   return (
-    <PlayerProvider>
+    <PlayerProvider introEnabled={false}>
       <Suspense>
         <ThankYouContent />
       </Suspense>

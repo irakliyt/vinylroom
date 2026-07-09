@@ -32,6 +32,7 @@ export default function ScratchableVinyl({
   const lastAngle = useRef(0);
   const lastAt = useRef(0);
   const settleTimer = useRef<number | null>(null);
+  const djModeRef = useRef(false);
   const [djMode, setDjMode] = useState(false);
   const [scratching, setScratching] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -42,11 +43,15 @@ export default function ScratchableVinyl({
     };
   }, []);
 
+  useEffect(() => {
+    djModeRef.current = djMode;
+  }, [djMode]);
+
   const playScratch = async () => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.loop = true;
-    audio.volume = 0.55;
+    audio.volume = 0.62;
     try {
       await audio.play();
     } catch {
@@ -58,21 +63,36 @@ export default function ScratchableVinyl({
     if (settleTimer.current) window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
       const audio = audioRef.current;
-      if (!audio || scratching) return;
+      if (!audio || scratching || djModeRef.current) return;
       audio.pause();
       audio.currentTime = 0;
       audio.playbackRate = 1;
-    }, 220);
+    }, 650);
   };
 
   const armDjMode = async () => {
-    setDjMode((v) => !v);
-    await playScratch();
-    pauseScratch();
+    const next = !djMode;
+    djModeRef.current = next;
+    setDjMode(next);
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (next) {
+      audio.currentTime = audio.currentTime || 0;
+      audio.playbackRate = 1;
+      await playScratch();
+    } else {
+      if (settleTimer.current) window.clearTimeout(settleTimer.current);
+      audio.pause();
+      audio.currentTime = 0;
+      audio.playbackRate = 1;
+    }
   };
 
   const onPointerDown = async (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    djModeRef.current = true;
     setDjMode(true);
     setScratching(true);
     lastAngle.current = angleFromCenter(e);
@@ -97,6 +117,7 @@ export default function ScratchableVinyl({
     if (audio) {
       audio.volume = Math.min(0.35 + speed * 0.55, 0.9);
       audio.playbackRate = Math.min(0.65 + speed * 1.6, 1.9);
+      if (audio.paused) audio.play().catch(() => {});
     }
   };
 
@@ -163,7 +184,7 @@ export default function ScratchableVinyl({
           DJ scratch mode
         </button>
         <span className="whitespace-nowrap pr-2 text-[0.66rem] text-parchment">
-          {scratching ? "Scratching" : "Drag record"}
+          {scratching ? "Scratching" : djMode ? "Sound on" : "Drag record"}
         </span>
       </div>
     </div>

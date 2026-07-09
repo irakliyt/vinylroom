@@ -14,16 +14,26 @@ import VinylDisc from "./VinylDisc";
 import Waveform from "./Waveform";
 import MagneticButton from "./MagneticButton";
 import { useBooking } from "./booking/BookingProvider";
+import { usePlayer } from "./player/PlayerProvider";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
+  const player = usePlayer();
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
   // checkout — the static `featuredEvent` import never has a wixEventId.
   const featured = rooms?.find((r) => r.id === featuredEvent.id) ?? featuredEvent;
+  const activeTrack = player.current;
+  const stageTitle = activeTrack ? activeTrack.track : featured.title;
+  const stageSubtitle = activeTrack
+    ? `${activeTrack.artist}${activeTrack.roomTitle ? ` · ${activeTrack.roomTitle}` : ""}`
+    : `${featured.day} · ${featured.time}`;
+  const stageLocation = activeTrack?.city ?? featured.city;
+  const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
+  const stageLabel = activeTrack ? "Now playing" : "Now spinning";
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -121,7 +131,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               className="absolute right-[-14%] top-[8%] w-[82%]"
             >
               <div className="absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
-              <VinylDisc label="Kind of Blue" accent="#7fa8e8" spinning className="w-full" />
+              <VinylDisc label={activeTrack ? activeTrack.track : "Kind of Blue"} accent={stageAccent} spinning className="w-full" />
             </motion.div>
 
             {/* album sleeve in front */}
@@ -131,8 +141,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             >
               <AlbumArt
                 sleeve={featured.sleeve}
-                label={featured.title}
-                sub={`${featured.genre} · ${featured.city}`}
+                label={activeTrack?.record ?? featured.title}
+                sub={activeTrack ? activeTrack.artist : `${featured.genre} · ${featured.city}`}
               />
             </motion.div>
 
@@ -142,16 +152,16 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               className="absolute -bottom-2 -right-2 w-[64%] max-w-[15rem] rounded-2xl p-4 glass glow-warm"
             >
               <div className="flex items-center justify-between">
-                <span className="eyebrow text-[0.6rem]">Now spinning</span>
-                <Waveform bars={4} className="h-3 w-5" />
+                <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
+                <Waveform bars={4} className="h-3 w-5" color={stageAccent} playing={player.playing} />
               </div>
               <div className="mt-2 font-display text-lg leading-tight text-cream">
-                {featured.title}
+                {stageTitle}
               </div>
               <div className="mt-1 flex items-center gap-2 text-xs text-parchment">
-                <span>{featured.day} · {featured.time}</span>
+                <span className="truncate">{stageSubtitle}</span>
                 <span className="h-1 w-1 rounded-full bg-dust" />
-                <span>{featured.city}</span>
+                <span>{stageLocation}</span>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-edge pt-3">
                 <div>

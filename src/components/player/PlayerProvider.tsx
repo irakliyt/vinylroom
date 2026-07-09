@@ -57,9 +57,15 @@ export function usePlayer() {
   return ctx;
 }
 
-export function PlayerProvider({ children }: { children: ReactNode }) {
+export function PlayerProvider({
+  children,
+  introEnabled = true,
+}: {
+  children: ReactNode;
+  introEnabled?: boolean;
+}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [current, setCurrent] = useState<Track | null>(() => getIntroTrack());
+  const [current, setCurrent] = useState<Track | null>(() => (introEnabled ? getIntroTrack() : null));
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [hasEverPlayed, setHasEverPlayed] = useState(false);
@@ -97,7 +103,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // session — browsers block unmuted autoplay anyway, so on the first
     // rejection we arm a one-shot gesture starter instead of retrying forever.
     let cleanupIntro = () => {};
-    const intro = getIntroTrack();
+    const intro = introEnabled ? getIntroTrack() : null;
     if (intro) {
       audio.volume = 0.18; // never loud
       audio.src = intro.previewUrl;
@@ -125,7 +131,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       audio.pause();
       audio.remove();
     };
-  }, []);
+  }, [introEnabled]);
 
   const toggle = useCallback(
     (t: Track) => {

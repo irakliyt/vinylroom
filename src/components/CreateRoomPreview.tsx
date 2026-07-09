@@ -10,6 +10,17 @@ import { type Genre, type Sleeve } from "@/data/rooms";
 import previewsData from "@/data/previews.json";
 
 type Preview = { track: string; artist: string; previewUrl: string; artwork: string };
+type HostDraft = {
+  id: string;
+  title: string;
+  genre: Genre;
+  moods: string[];
+  capacity: number;
+  price: number;
+  isPrivate: boolean;
+  records: string[];
+  createdAt: string;
+};
 
 // Searchable album pool built from the real (iTunes-backed) catalogue.
 const ALBUM_POOL = Object.entries(previewsData as Record<string, Preview>)
@@ -31,6 +42,7 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 ];
 
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
+const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
 
 export default function CreateRoomPreview() {
   const [title, setTitle] = useState("Late Night on the Blue Side");
@@ -45,6 +57,8 @@ export default function CreateRoomPreview() {
     "Bill Evans Trio — Waltz for Debby",
   ]);
   const [justOpened, setJustOpened] = useState(false);
+  const [draftMessage, setDraftMessage] = useState("");
+  const [lastDraft, setLastDraft] = useState<HostDraft | null>(null);
   const player = usePlayer();
 
   const genre = GENRE_OPTS[genreIdx];
@@ -83,6 +97,54 @@ export default function CreateRoomPreview() {
     setRecords((p) => (p.includes(r) ? p.filter((x) => x !== r) : [...p, r]));
 
   const moodLine = useMemo(() => moods.join(" · ") || "Set a mood", [moods]);
+  const draftSummary = (draft: HostDraft) => [
+    `Event title: ${draft.title}`,
+    `Genre: ${draft.genre}`,
+    `Mood: ${draft.moods.join(", ") || "Not set"}`,
+    `Capacity: ${draft.capacity}`,
+    `Seat price: ${draft.price === 0 ? "Free" : `$${draft.price}`}`,
+    `Visibility: ${draft.isPrivate ? "Private" : "Public"}`,
+    "",
+    "Crate:",
+    ...draft.records.map((record) => `- ${record}`),
+  ].join("\n");
+
+  const saveDraft = () => {
+    const draft: HostDraft = {
+      id: `room-${Date.now()}`,
+      title: title.trim() || "Untitled listening room",
+      genre: genre.g,
+      moods,
+      capacity,
+      price,
+      isPrivate,
+      records,
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const existing = JSON.parse(localStorage.getItem(HOST_DRAFTS_KEY) ?? "[]") as HostDraft[];
+      localStorage.setItem(HOST_DRAFTS_KEY, JSON.stringify([draft, ...existing].slice(0, 12)));
+      setLastDraft(draft);
+      setJustOpened(true);
+      setDraftMessage("Draft saved on this device.");
+      setTimeout(() => setJustOpened(false), 2800);
+    } catch {
+      setLastDraft(draft);
+      setJustOpened(true);
+      setDraftMessage("Draft prepared. Copy it before leaving this page.");
+    }
+  };
+
+  const copyDraft = async () => {
+    if (!lastDraft) return;
+    try {
+      await navigator.clipboard.writeText(draftSummary(lastDraft));
+      setDraftMessage("Draft copied. Paste it into your Wix Events setup.");
+    } catch {
+      setDraftMessage("Could not copy automatically. Select the draft details and copy them.");
+    }
+  };
 
   return (
     <section id="host" className="relative z-10 border-y border-edge bg-pitch/40">
@@ -337,19 +399,28 @@ export default function CreateRoomPreview() {
 
             <button
               type="button"
-              onClick={() => {
-                setJustOpened(true);
-                setTimeout(() => setJustOpened(false), 2800);
-              }}
+              onClick={saveDraft}
               className="mt-4 w-full rounded-full py-3.5 text-sm font-medium text-void transition-all clickable"
               style={{ background: "linear-gradient(135deg,#e8b45f,#b45f2a)", boxShadow: "0 16px 40px -14px rgba(216,154,69,0.6)" }}
             >
-              {justOpened ? "✓ Room saved as a draft" : "Open this room"}
+              {justOpened ? "✓ Draft saved" : "Save room draft"}
             </button>
-            {justOpened && (
-              <p className="mt-2 text-center text-[0.68rem] text-dust">
-                This is a concept demo — connect your Wix account as a host to publish it for real.
-              </p>
+            {lastDraft && (
+              <div className="mt-3 rounded-2xl border border-edge bg-void/50 p-3 text-left">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-xs text-parchment">{draftMessage}</p>
+                  <button
+                    type="button"
+                    onClick={copyDraft}
+                    className="shrink-0 rounded-full border border-edge-strong px-3 py-1.5 text-xs text-cream transition-colors hover:border-amber/50 clickable"
+                  >
+                    Copy draft
+                  </button>
+                </div>
+                <p className="mt-2 text-[0.68rem] text-dust">
+                  Saved fields: title, genre, mood, capacity, price, visibility, and crate.
+                </p>
+              </div>
             )}
           </Reveal>
         </div>
