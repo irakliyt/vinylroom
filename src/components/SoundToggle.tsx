@@ -48,7 +48,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
-      {needsHint && <span className="text-[0.72rem] font-bold uppercase tracking-[0.2em] text-amber">Sound on</span>}
+      {needsHint && <span className="whitespace-nowrap text-[0.72rem] font-bold uppercase tracking-[0.2em] text-amber">Sound on</span>}
     </button>
   );
 }

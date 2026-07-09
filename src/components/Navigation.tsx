@@ -38,9 +38,9 @@ export default function Navigation({
           scrolled ? "bg-void/70 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 md:grid md:grid-cols-[minmax(16rem,1fr)_auto_minmax(16rem,1fr)] md:gap-10">
+        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[minmax(14rem,1fr)_auto_minmax(28rem,1fr)] xl:gap-10">
           {/* wordmark */}
-          <a href="#top" className="group flex items-center gap-3.5 clickable md:justify-self-start">
+          <a href="#top" className="group flex shrink-0 items-center gap-3.5 clickable xl:justify-self-start">
             <span className="relative flex h-8 w-8 items-center justify-center">
               <span className="absolute inset-0 rounded-full grooves shadow-[inset_0_0_8px_rgba(0,0,0,0.9)]" />
               <span className="relative h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(216,154,69,0.8)]" />
@@ -56,12 +56,12 @@ export default function Navigation({
           </a>
 
           {/* desktop links */}
-          <div className="hidden items-center gap-7 md:flex">
+          <div className="hidden shrink-0 items-center gap-7 md:flex">
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
-                className="group relative text-sm text-parchment transition-colors hover:text-cream"
+                className="group relative whitespace-nowrap text-sm text-parchment transition-colors hover:text-cream"
               >
                 {l.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-amber transition-all duration-300 group-hover:w-full" />
@@ -69,10 +69,10 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex items-center gap-4 md:justify-self-end">
-            <div className="hidden items-center gap-2 rounded-full border border-edge px-3 py-1.5 sm:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
+          <div className="flex shrink-0 items-center gap-4 xl:justify-self-end">
+            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 2xl:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
-              <span className="text-[0.65rem] uppercase tracking-[0.2em] text-dust">
+              <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
               </span>
             </div>
@@ -80,7 +80,7 @@ export default function Navigation({
             <MemberMenu variant="bar" />
             <a
               href="#host"
-              className="hidden rounded-full bg-cream px-4 py-2 text-sm font-medium text-void transition-transform duration-300 hover:scale-[1.03] sm:inline-block clickable"
+              className="hidden shrink-0 whitespace-nowrap rounded-full bg-cream px-5 py-2 text-sm font-medium text-void transition-transform duration-300 hover:scale-[1.03] xl:inline-block clickable"
             >
               Host a night
             </a>

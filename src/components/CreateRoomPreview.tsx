@@ -46,7 +46,7 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
 const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
-const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e?apps-override=8c087fcd-3385-41d3-8fc0-6e80fb536630";
+const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e/events";
 
 function defaultEventDate() {
   const date = new Date();
