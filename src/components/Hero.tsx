@@ -292,7 +292,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             {/* floating booking card */}
             <motion.div
               style={{ y: isDesktop ? yCard : 0, translateZ: 90, willChange: "transform" }}
-              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-26%] lg:right-[-2%] lg:w-[55%]"
+              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-26%] lg:right-[38%] lg:w-[55%]"
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
