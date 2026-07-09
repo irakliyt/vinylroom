@@ -25,7 +25,12 @@ export default function ThankYouContent() {
   // it's missing, the visitor likely bounced off checkout (declined card,
   // "unavailable" error, or just navigated back) — don't claim their seat is
   // saved when we have no evidence it is.
-  const confirmed = !!(params.get("orderId") || params.get("reservationId") || params.get("ticketOrderId"));
+  const confirmed = !!(
+    params.get("orderNumber") ||
+    params.get("orderId") ||
+    params.get("reservationId") ||
+    params.get("ticketOrderId")
+  );
 
   // Resolve the booked room from the baked catalogue by id, slug, or title.
   const room =

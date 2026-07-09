@@ -26,6 +26,11 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
   }
 
   try {
+    const eventSlug = room.wixEventSlug;
+    if (!eventSlug) {
+      return { status: "error", reason: "This live event is missing its Wix checkout slug." };
+    }
+
     // 1. Resolve a ticket definition (prefer the one carried on the room, else
     //    ask for the event's available tickets).
     let ticketDefinitionId = room.wixTicketDefinitionId;
@@ -50,9 +55,9 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
     }
 
     // 3. Build the Wix-hosted checkout URL and hand off.
-    const returnUrl = routeUrl("/thank-you", { event: room.wixEventSlug ?? room.id });
+    const returnUrl = routeUrl("/thank-you", { event: eventSlug });
     const session = await client.redirects.createRedirectSession({
-      eventsCheckout: { eventSlug: room.wixEventSlug, reservationId },
+      eventsCheckout: { eventSlug, reservationId },
       callbacks: {
         thankYouPageUrl: returnUrl,
         postFlowUrl: returnUrl,

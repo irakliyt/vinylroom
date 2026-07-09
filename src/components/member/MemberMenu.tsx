@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useMember } from "./MemberProvider";
 
 export default function MemberMenu({ variant = "bar" }: { variant?: "bar" | "drawer" }) {
-  const { member, loading, configured, demoNotice, login, logout, dismissDemo } = useMember();
+  const { member, loading, demoNotice, login, logout, dismissDemo } = useMember();
   const [open, setOpen] = useState(false);
 
   if (loading) return null;

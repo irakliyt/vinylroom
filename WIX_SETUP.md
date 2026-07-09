@@ -33,7 +33,8 @@ ID is set, then flips to **Live from Wix**.
 3. Under **Login settings / allowed domains & redirect URIs**, add your dev +
    prod origins **and** the member-login callback:
    - `http://localhost:3200` and `http://localhost:3200/login-callback`
-   - your deployed URL + `…/login-callback` (e.g. `https://vinyl-rooms.vercel.app/login-callback`)
+   - your deployed URL + the static callback file, e.g.
+     `https://www.vinylroom.online/login-callback.html`
 4. Copy the **Client ID**.
 
 ## 5. Point the app at it
@@ -87,24 +88,28 @@ npm run build     # next export → ./out (Wix Events data is baked in at build)
 wix release       # uploads ./out to the Wix site, returns the live URL
 ```
 
-- **Live URL:** https://vinyl-list-7876da37-irakliyt.wix-site-host.com
+- **Live URL:** https://www.vinylroom.online
+- **Wix fallback URL:** https://wqlfaa-vinyl-list-7876da37-irakliyt.wix-site-host.com
 - **Hosting site dashboard:** https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e
 - Data is **baked at build time** (static export can't do request-time SSR) —
   re-run the two commands above to refresh events/prices/availability.
-- The frontend is hosted on this site but reads events from the **data site**
-  (`vinylroom.online`) via `NEXT_PUBLIC_WIX_CLIENT_ID` — that's the headless split.
+- The frontend is hosted statically, then reads Wix Events and creates checkout
+  sessions through the OAuth app configured in `NEXT_PUBLIC_WIX_CLIENT_ID`.
 
 ### ⚠️ Make Sign-in + checkout work on the hosted domain
 
 Data display works out of the box. For **member login** and **Reserve → checkout**
-to work on the hosted URL, add it to the OAuth app's **Allowed redirect domains**
-(Settings → Headless → OAuth apps), alongside `http://localhost:3000`:
+to work on the hosted URL, add the domain to the OAuth app's **Allowed redirect
+domains** and add the exact callback URL to **Allowed redirect URIs**
+(Settings → Headless → OAuth apps), alongside your local dev origin:
 
 ```
-https://vinyl-list-7876da37-irakliyt.wix-site-host.com
+https://www.vinylroom.online
+https://www.vinylroom.online/login-callback.html
 ```
 
-Until then, those flows only work locally on `http://localhost:3000`.
+Until then, those flows only work locally on the dev origin you added, such as
+`http://localhost:3200`.
 
 ## How the pieces map
 
@@ -115,16 +120,18 @@ Until then, those flows only work locally on `http://localhost:3000`.
 | Genre, mood, vinyl lineup, equipment | Editorial extras in `src/data/rooms.ts`, merged by slug |
 | Reserve a seat | `orders.createReservation` → `redirects.createRedirectSession({ eventsCheckout })` → Wix-hosted checkout |
 | Payment | Handled on Wix via your connected payment provider |
-| After payment | Visitor returns to `/thank-you` (the checkout `thankYouPageUrl`) |
-| Sign in / accounts | Wix members OAuth → `/login-callback`; tokens persist in the browser so bookings tie to the member |
+| After payment | Visitor returns to `/thank-you.html` (the checkout `thankYouPageUrl`) |
+| Sign in / accounts | Wix members OAuth → `/login-callback.html`; tokens persist in the browser so bookings tie to the member |
 
 ### Member accounts (optional but recommended)
 
 The **Sign in** button in the header runs Wix member login (PKCE OAuth):
-`generateOAuthData` → Wix-hosted login → back to `/login-callback` →
+`generateOAuthData` → Wix-hosted login → back to `/login-callback.html` →
 `getMemberTokens`. Tokens persist in `localStorage`, so a signed-in guest's
 reservations are attached to their Wix member account and their session survives
-reloads. No extra setup beyond adding the `/login-callback` redirect URI above.
+reloads. No extra setup beyond adding the `/login-callback.html` redirect URI above.
+Wix returns the OAuth `code` and `state` in the URL fragment (`#code=...`), which
+matches the JavaScript SDK's Wix-managed login flow.
 Code: [`src/lib/wix/auth.ts`](src/lib/wix/auth.ts) ·
 [`src/components/member/MemberProvider.tsx`](src/components/member/MemberProvider.tsx).
 

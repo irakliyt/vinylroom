@@ -9,18 +9,14 @@ import { stats, testimonials } from "@/data/rooms";
 function CountUp({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, amount: 0.6 });
-  const [display, setDisplay] = useState("0");
-
   const numeric = parseFloat(value.replace(/[^0-9.]/g, ""));
+  const [display, setDisplay] = useState(() => (Number.isNaN(numeric) ? value : "0"));
   const decimals = value.includes(".") ? 1 : 0;
   const prefix = value.match(/^[^0-9]*/)?.[0] ?? "";
   const suffix = value.match(/[^0-9.]*$/)?.[0] ?? "";
 
   useEffect(() => {
-    if (!inView || Number.isNaN(numeric)) {
-      if (Number.isNaN(numeric)) setDisplay(value);
-      return;
-    }
+    if (!inView || Number.isNaN(numeric)) return;
     let raf = 0;
     const duration = 1400;
     let start: number | null = null;

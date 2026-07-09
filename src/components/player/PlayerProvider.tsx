@@ -35,6 +35,21 @@ type PlayerCtx = {
 };
 
 const Ctx = createContext<PlayerCtx | null>(null);
+const INTRO_KEY = "vlr:intro-played";
+
+function getIntroTrack(): Track | null {
+  const introPreview = getPreview("AC/DC — Thunderstruck");
+  if (!introPreview) return null;
+  return {
+    record: "AC/DC — Thunderstruck",
+    track: introPreview.track,
+    artist: introPreview.artist,
+    previewUrl: introPreview.previewUrl,
+    artwork: introPreview.artwork,
+    roomTitle: "Warming up the room",
+    accent: "#e2a552",
+  };
+}
 
 export function usePlayer() {
   const ctx = useContext(Ctx);
@@ -44,7 +59,7 @@ export function usePlayer() {
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [current, setCurrent] = useState<Track | null>(null);
+  const [current, setCurrent] = useState<Track | null>(() => getIntroTrack());
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [hasEverPlayed, setHasEverPlayed] = useState(false);
@@ -81,21 +96,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     // even after a reload), but the AUTOPLAY ATTEMPT only fires once per
     // session — browsers block unmuted autoplay anyway, so on the first
     // rejection we arm a one-shot gesture starter instead of retrying forever.
-    const introPreview = getPreview("AC/DC — Thunderstruck");
-    const INTRO_KEY = "vlr:intro-played";
     let cleanupIntro = () => {};
-    if (introPreview) {
-      const intro: Track = {
-        record: "AC/DC — Thunderstruck",
-        track: introPreview.track,
-        artist: introPreview.artist,
-        previewUrl: introPreview.previewUrl,
-        artwork: introPreview.artwork,
-        roomTitle: "Warming up the room",
-        accent: "#e2a552",
-      };
+    const intro = getIntroTrack();
+    if (intro) {
       audio.volume = 0.18; // never loud
-      setCurrent(intro);
       audio.src = intro.previewUrl;
 
       if (!sessionStorage.getItem(INTRO_KEY)) {

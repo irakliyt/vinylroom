@@ -31,18 +31,30 @@ const client = createClient({
 });
 
 // Slugs match src/data/rooms.ts so the app can merge its editorial extras.
+// Prices are USD — the site's currency.
 const SAMPLE = [
-  { title: "Blue Note After Dark", city: "Warsaw", tz: "Europe/Warsaw", price: "45", currency: "PLN", cap: 8, days: 5, hour: 21 },
-  { title: "Radiohead: In Rainbows, Full Album", city: "Berlin", tz: "Europe/Berlin", price: "18", currency: "EUR", cap: 12, days: 6, hour: 20 },
-  { title: "90s Hip-Hop on Wax", city: "London", tz: "Europe/London", price: "15", currency: "GBP", cap: 20, days: 4, hour: 22 },
-  { title: "Ambient Sunday Session", city: "Lisbon", tz: "Europe/Lisbon", price: "12", currency: "EUR", cap: 10, days: 7, hour: 17 },
-  { title: "Japanese City Pop Evening", city: "Amsterdam", tz: "Europe/Amsterdam", price: "20", currency: "EUR", cap: 14, days: 5, hour: 20 },
-  { title: "Wine, Soul & Motown", city: "Paris", tz: "Europe/Paris", price: "28", currency: "EUR", cap: 16, days: 6, hour: 19 },
-  { title: "Man·Machine: Kraftwerk & Kin", city: "Düsseldorf", tz: "Europe/Berlin", price: "16", currency: "EUR", cap: 18, days: 3, hour: 21 },
-  { title: "Laurel Canyon: Rumours & Friends", city: "Kraków", tz: "Europe/Warsaw", price: "50", currency: "PLN", cap: 12, days: 7, hour: 18 },
+  { title: "Blue Note After Dark", city: "Warsaw", tz: "Europe/Warsaw", price: "18", currency: "USD", cap: 8, days: 5, hour: 21 },
+  { title: "Radiohead: In Rainbows, Full Album", city: "Berlin", tz: "Europe/Berlin", price: "18", currency: "USD", cap: 12, days: 6, hour: 20 },
+  { title: "90s Hip-Hop on Wax", city: "London", tz: "Europe/London", price: "15", currency: "USD", cap: 20, days: 4, hour: 22 },
+  { title: "Ambient Sunday Session", city: "Lisbon", tz: "Europe/Lisbon", price: "12", currency: "USD", cap: 10, days: 7, hour: 17 },
+  { title: "Japanese City Pop Evening", city: "Amsterdam", tz: "Europe/Amsterdam", price: "20", currency: "USD", cap: 14, days: 5, hour: 20 },
+  { title: "Wine, Soul & Motown", city: "Paris", tz: "Europe/Paris", price: "28", currency: "USD", cap: 16, days: 6, hour: 19 },
+  { title: "Man·Machine: Kraftwerk & Kin", city: "Düsseldorf", tz: "Europe/Berlin", price: "16", currency: "USD", cap: 18, days: 3, hour: 21 },
+  { title: "Laurel Canyon: Rumours & Friends", city: "Kraków", tz: "Europe/Warsaw", price: "15", currency: "USD", cap: 12, days: 7, hour: 18 },
 ];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function errorMessage(err) {
+  return (
+    err?.details?.applicationError?.description ||
+    err?.details?.applicationError?.code ||
+    err?.response?.data?.message ||
+    err?.message ||
+    JSON.stringify(err, Object.getOwnPropertyNames(err), 2) ||
+    String(err)
+  );
+}
 
 // The SDK expects real Date objects here (it transforms them to REST timestamps).
 function futureDate(daysAhead, hour) {
@@ -137,8 +149,7 @@ for (const s of SAMPLE) {
     ok++;
     console.log(`  ✓ ${s.title}  (id=${eventId}, slug=${slug})`);
   } catch (err) {
-    const msg = err?.details?.applicationError?.description ?? err?.message ?? err;
-    console.log(`  ✗ ${s.title} — ${msg}`);
+    console.log(`  ✗ ${s.title} — ${errorMessage(err)}`);
   }
   await sleep(700);
 }

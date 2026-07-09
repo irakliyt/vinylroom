@@ -11,6 +11,16 @@ export type Member = {
   initials: string;
 } | null;
 
+export class LoginCallbackError extends Error {
+  constructor(
+    message: string,
+    public readonly code?: string,
+  ) {
+    super(message);
+    this.name = "LoginCallbackError";
+  }
+}
+
 function initials(name?: string): string {
   if (!name) return "♪";
   return name
@@ -33,7 +43,7 @@ export async function login(returnTo = "/"): Promise<{ status: "redirect" | "dem
   const redirectUri = routeUrl(LOGIN_CALLBACK_PATH);
   const oauthData = client.auth.generateOAuthData(redirectUri, returnTo);
   sessionStorage.setItem(OAUTH_KEY, JSON.stringify(oauthData));
-  const { authUrl } = await client.auth.getAuthUrl(oauthData, { responseMode: "query" });
+  const { authUrl } = await client.auth.getAuthUrl(oauthData);
   window.location.href = authUrl;
   return { status: "redirect" };
 }
@@ -47,7 +57,12 @@ export async function completeLogin(): Promise<string> {
   const oauthData = raw ? JSON.parse(raw) : null;
   if (!oauthData) return "/";
 
-  const { code, state } = client.auth.parseFromUrl(window.location.href, "query");
+  const parsed = client.auth.parseFromUrl(window.location.href);
+  if (parsed.error) {
+    throw new LoginCallbackError(parsed.errorDescription || parsed.error, parsed.error);
+  }
+
+  const { code, state } = parsed;
   const tokens = await client.auth.getMemberTokens(code, state, oauthData);
   client.auth.setTokens(tokens);
   saveTokens(tokens);
