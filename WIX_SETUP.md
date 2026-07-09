@@ -99,17 +99,30 @@ wix release       # uploads ./out to the Wix site, returns the live URL
 ### ⚠️ Make Sign-in + checkout work on the hosted domain
 
 Data display works out of the box. For **member login** and **Reserve → checkout**
-to work on the hosted URL, add the domain to the OAuth app's **Allowed redirect
-domains** and add the exact callback URL to **Allowed redirect URIs**
-(Settings → Headless → OAuth apps), alongside your local dev origin:
+to work on the hosted URL, configure both the external app domain and the Wix
+pages domain.
+
+First, add the app domain to the OAuth app's **Allowed redirect domains** and
+add the exact callback URL to **Allowed redirect URIs** (Settings → Headless →
+OAuth apps), alongside your local dev origin:
 
 ```
 https://www.vinylroom.online
 https://www.vinylroom.online/login-callback.html
 ```
 
-Until then, those flows only work locally on the dev origin you added, such as
-`http://localhost:3200`.
+Then set the domain visitors see for Wix-hosted pages such as Events checkout:
+
+1. Dashboard → Settings → Development & integrations → Headless Settings.
+2. Scroll to **Manage URLs**.
+3. In **Wix pages domain**, connect a domain/subdomain for Wix-hosted pages.
+
+Wix-hosted checkout cannot use the same root domain as the external app. For
+this site, use a subdomain such as `checkout.vinylroom.online` or
+`portal.vinylroom.online`. Until this is configured, `createRedirectSession()`
+will keep returning the free Wix pages URL, currently
+`https://irakliyt.wixsite.com/my-site-132/...`, even though the external app
+itself is live at `https://www.vinylroom.online`.
 
 ## How the pieces map
 
