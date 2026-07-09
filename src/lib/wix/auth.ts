@@ -21,6 +21,16 @@ export class LoginCallbackError extends Error {
   }
 }
 
+type BrowserClient = NonNullable<ReturnType<typeof getBrowserClient>>;
+type AuthState = {
+  loginState: string;
+  data?: {
+    sessionToken?: string;
+  };
+  error?: string;
+  errorCode?: string;
+};
+
 function initials(name?: string): string {
   if (!name) return "♪";
   return name
@@ -30,6 +40,27 @@ function initials(name?: string): string {
     .slice(0, 2)
     .join("")
     .toUpperCase();
+}
+
+async function memberFromSessionToken(client: BrowserClient, sessionToken: string): Promise<Member> {
+  const tokens = await client.auth.getMemberTokensForDirectLogin(sessionToken);
+  client.auth.setTokens(tokens);
+  saveTokens(tokens);
+  resetBrowserClient();
+  return getCurrentMember();
+}
+
+function authError(result: AuthState, fallback: string): LoginCallbackError {
+  const messageByCode: Record<string, string> = {
+    emailAlreadyExists: "That email is already a Wix Member. Sign in instead.",
+    invalidPassword: "Wrong password, or this email is not a Wix Member yet. Create an account first.",
+    resetPassword: "This member needs a password reset before signing in.",
+    missingCaptchaToken: "Wix needs a captcha check before continuing. Try the hosted Wix sign-in flow.",
+    invalidCaptchaToken: "The captcha check failed. Try again in a moment.",
+    invalidEmail: "Enter a valid email address.",
+  };
+  const message = result.errorCode ? messageByCode[result.errorCode] : undefined;
+  return new LoginCallbackError(message || result.error || fallback, result.errorCode || result.loginState);
 }
 
 /**
@@ -52,20 +83,44 @@ export async function loginWithPassword(email: string, password: string): Promis
   const client = getBrowserClient();
   if (!client) throw new LoginCallbackError("Connect a Wix Headless client ID first.", "demo");
 
-  const result = await client.auth.login({ email, password });
+  const result = (await client.auth.login({ email, password })) as AuthState;
   if (result.loginState !== "SUCCESS" || !result.data?.sessionToken) {
-    const failure = result as { error?: string; errorCode?: string; loginState: string };
+    throw authError(result, "Wix could not sign in with those details.");
+  }
+
+  return memberFromSessionToken(client, result.data.sessionToken);
+}
+
+export async function registerMember(email: string, password: string, name?: string): Promise<Member> {
+  const client = getBrowserClient();
+  if (!client) throw new LoginCallbackError("Connect a Wix Headless client ID first.", "demo");
+
+  const nickname = name?.trim();
+  const result = (await client.auth.register({
+    email,
+    password,
+    ...(nickname ? { profile: { nickname } } : {}),
+  })) as AuthState;
+
+  if (result.loginState === "SUCCESS" && result.data?.sessionToken) {
+    return memberFromSessionToken(client, result.data.sessionToken);
+  }
+
+  if (result.loginState === "EMAIL_VERIFICATION_REQUIRED") {
     throw new LoginCallbackError(
-      failure.error || "Wix could not sign in with those details.",
-      failure.errorCode || failure.loginState,
+      "Account created. Check your email to verify it, then sign in.",
+      result.loginState,
     );
   }
 
-  const tokens = await client.auth.getMemberTokensForDirectLogin(result.data.sessionToken);
-  client.auth.setTokens(tokens);
-  saveTokens(tokens);
-  resetBrowserClient();
-  return getCurrentMember();
+  if (result.loginState === "OWNER_APPROVAL_REQUIRED") {
+    throw new LoginCallbackError(
+      "Account created. It needs site owner approval before you can sign in.",
+      result.loginState,
+    );
+  }
+
+  throw authError(result, "Wix could not create that member account.");
 }
 
 /** Complete login on the callback route: exchange the code for member tokens. */
