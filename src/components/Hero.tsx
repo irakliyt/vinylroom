@@ -209,7 +209,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:pb-28 [perspective:1400px]"
+          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:-translate-x-14 lg:pb-28 [perspective:1400px]"
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >
