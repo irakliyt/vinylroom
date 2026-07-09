@@ -35,7 +35,7 @@ export default function Navigation({
     <header className="fixed inset-x-0 top-0 z-50">
       <div
         className={`transition-all duration-500 ${
-          scrolled ? "bg-void/70 backdrop-blur-xl" : ""
+          scrolled || open ? "bg-void/90 backdrop-blur-xl" : ""
         }`}
       >
         <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[minmax(14rem,1fr)_auto_minmax(28rem,1fr)] xl:gap-10">
@@ -69,7 +69,7 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center gap-4 xl:justify-self-end">
+          <div className="flex shrink-0 items-center gap-2.5 md:gap-4 xl:justify-self-end">
             <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 2xl:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
@@ -88,6 +88,7 @@ export default function Navigation({
             <button
               type="button"
               aria-label="Menu"
+              aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
               className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-full border border-edge md:hidden clickable"
             >
@@ -106,31 +107,36 @@ export default function Navigation({
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden border-b border-edge bg-pitch/95 backdrop-blur-xl md:hidden"
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-0 bottom-0 top-[4.5rem] overflow-y-auto border-b border-edge bg-void/98 backdrop-blur-xl md:hidden"
           >
-            <div className="flex flex-col px-5 py-4">
-              {links.map((l) => (
+            <div className="mx-auto flex min-h-full max-w-lg flex-col px-5 pb-8 pt-7">
+              <div className="border-t border-edge">
+                {links.map((l, index) => (
+                  <a
+                    key={l.href}
+                    href={l.href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center justify-between border-b border-edge py-4 font-display text-[clamp(1.65rem,8vw,2.25rem)] leading-none text-cream"
+                  >
+                    <span>{l.label}</span>
+                    <span className="text-sm text-amber/70">0{index + 1}</span>
+                  </a>
+                ))}
+              </div>
+              <div className="mt-auto border-t border-edge pt-6">
                 <a
-                  key={l.href}
-                  href={l.href}
+                  href="#host"
                   onClick={() => setOpen(false)}
-                  className="border-b border-edge py-3 font-display text-2xl text-cream last:border-0"
+                  className="block rounded-full bg-cream py-3.5 text-center text-sm font-medium text-void"
                 >
-                  {l.label}
+                  Host a night
                 </a>
-              ))}
-              <a
-                href="#host"
-                onClick={() => setOpen(false)}
-                className="mt-4 rounded-full bg-cream py-3 text-center text-sm font-medium text-void"
-              >
-                Host a night
-              </a>
-              <MemberMenu variant="drawer" />
+                <MemberMenu variant="drawer" />
+              </div>
             </div>
           </motion.div>
         )}

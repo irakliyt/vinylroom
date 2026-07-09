@@ -16,7 +16,7 @@ export default function MemberMenu({ variant = "bar" }: { variant?: "bar" | "dra
       return (
         <button
           onClick={logout}
-          className="mt-2 flex items-center gap-3 border-t border-edge py-3 text-left text-cream"
+          className="mt-4 flex w-full items-center gap-3 rounded-lg border border-edge px-4 py-3 text-left text-cream transition-colors hover:border-amber/50 clickable"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber text-xs font-semibold text-void">
             {member.initials}
@@ -31,11 +31,12 @@ export default function MemberMenu({ variant = "bar" }: { variant?: "bar" | "dra
     return (
       <button
         onClick={() => login()}
-        className="mt-2 border-t border-edge py-3 text-left font-display text-2xl text-cream"
+        className="relative mt-4 flex w-full items-center justify-between rounded-lg border border-edge px-4 py-3 text-left text-sm text-cream transition-colors hover:border-amber/50 clickable"
       >
-        Sign in
+        <span>Member sign in</span>
+        <span className="text-amber" aria-hidden>+</span>
         {demoNotice && (
-          <span className="mt-1 block text-xs text-amber">
+          <span className="absolute left-0 top-full mt-2 block text-xs text-amber">
             Connect a Wix Client ID to enable accounts.
           </span>
         )}
