@@ -75,6 +75,7 @@ export default function CreateRoomPreview() {
   const [price, setPrice] = useState(18);
   const [isPrivate, setIsPrivate] = useState(false);
   const [query, setQuery] = useState("");
+  const [showAllAlbums, setShowAllAlbums] = useState(false);
   const [records, setRecords] = useState<string[]>([
     "Miles Davis — Kind of Blue",
     "Bill Evans Trio — Waltz for Debby",
@@ -95,6 +96,10 @@ export default function CreateRoomPreview() {
       (a, b) => Number(records.includes(b.record)) - Number(records.includes(a.record)),
     );
   }, [query, records]);
+  const visibleResults = useMemo(() => {
+    if (showAllAlbums || query.trim()) return results.slice(0, 14);
+    return results.slice(0, 8);
+  }, [query, results, showAllAlbums]);
   const art = (record: string) => ALBUM_POOL.find((a) => a.record === record)?.artwork;
   const firstPlayable = ALBUM_POOL.find((a) => records.includes(a.record));
   const previewIsThis = !!firstPlayable && player.current?.record === firstPlayable.record;
@@ -367,19 +372,32 @@ export default function CreateRoomPreview() {
                 <span className="text-beige">⌕</span>
                 <input
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setShowAllAlbums(false);
+                  }}
                   placeholder="Search albums — artist or title…"
                   className="w-full bg-transparent text-sm text-cream outline-none placeholder:text-dust"
                 />
                 {query && (
-                  <button type="button" onClick={() => setQuery("")} aria-label="Clear" className="text-dust hover:text-cream clickable">×</button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQuery("");
+                      setShowAllAlbums(false);
+                    }}
+                    aria-label="Clear"
+                    className="text-dust hover:text-cream clickable"
+                  >
+                    ×
+                  </button>
                 )}
               </div>
               <div className="no-scrollbar mt-3 max-h-60 space-y-1.5 overflow-y-auto pr-1">
                 {results.length === 0 && (
                   <div className="px-3 py-4 text-center text-xs text-dust">No albums match “{query}”.</div>
                 )}
-                {results.map((a) => {
+                {visibleResults.map((a) => {
                   const on = records.includes(a.record);
                   return (
                     <button
@@ -408,6 +426,15 @@ export default function CreateRoomPreview() {
                     </button>
                   );
                 })}
+                {!query.trim() && !showAllAlbums && results.length > visibleResults.length && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllAlbums(true)}
+                    className="w-full rounded-lg border border-edge px-3 py-2 text-center text-xs text-parchment transition-colors hover:border-edge-strong hover:text-cream clickable"
+                  >
+                    Show more albums
+                  </button>
+                )}
               </div>
             </div>
 

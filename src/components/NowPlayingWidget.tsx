@@ -9,6 +9,10 @@ import { usePlayer, type Track } from "./player/PlayerProvider";
 import { firstPlayable } from "@/lib/previews";
 import { rooms as demoRooms, type Room } from "@/data/rooms";
 
+function smallArtwork(url?: string) {
+  return url?.replace(/\/300x300bb\.(jpg|png)$/i, "/100x100bb.$1");
+}
+
 /**
  * Floating player. Before anything plays it teases the rooms that are "now
  * spinning" and its play button starts that room's first previewable record.
@@ -64,6 +68,7 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
   const isPlaying = player.playing;
   const teaserHit = firstPlayable(teaser.records);
   const coverArtwork = active?.artwork ?? teaserHit?.preview.artwork;
+  const thumbArtwork = smallArtwork(coverArtwork);
 
   return (
     <AnimatePresence>
@@ -93,13 +98,21 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
                       style={{ background: accent, opacity: 0.45, animation: "breathe 2.4s ease-in-out infinite" }}
                     />
                   )}
-                  {coverArtwork ? (
+                  {thumbArtwork ? (
                     <div
                       className="h-full w-full overflow-hidden rounded-full ring-1 ring-edge"
                       style={{ animation: isPlaying ? "spin-slow 5s linear infinite" : undefined }}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={coverArtwork} alt="" width={48} height={48} className="h-full w-full object-cover opacity-95" />
+                      <img
+                        src={thumbArtwork}
+                        alt=""
+                        width={48}
+                        height={48}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-cover opacity-95"
+                      />
                     </div>
                   ) : (
                     <VinylDisc accent={accent} spinning={isPlaying} label={teaser.genre} className="h-full w-full" />
@@ -176,13 +189,21 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
               onClick={() => setOpen(true)}
               className="relative h-12 w-12 clickable"
             >
-              {coverArtwork ? (
+              {thumbArtwork ? (
                 <span
                   className="block h-full w-full overflow-hidden rounded-full ring-1 ring-edge"
                   style={{ animation: isPlaying ? "spin-slow 5s linear infinite" : undefined }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={coverArtwork} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={thumbArtwork}
+                    alt=""
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 </span>
               ) : (
                 <VinylDisc accent={accent} spinning={isPlaying} className="h-full w-full" />
