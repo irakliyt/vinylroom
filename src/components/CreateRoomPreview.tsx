@@ -6,6 +6,7 @@ import AlbumArt from "./AlbumArt";
 import Waveform from "./Waveform";
 import Reveal from "./Reveal";
 import { usePlayer, type Track } from "./player/PlayerProvider";
+import { artworkVariant } from "@/lib/artwork";
 import { type Genre, type Sleeve } from "@/data/rooms";
 import previewsData from "@/data/previews.json";
 
@@ -48,10 +49,6 @@ const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "No
 const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
 const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e/events";
 const STUDIO_STEPS = ["Record", "Mood", "Room", "Tickets"];
-
-function smallArtwork(url: string) {
-  return url.replace(/\/300x300bb\.(jpg|png)$/i, "/100x100bb.$1");
-}
 
 function defaultEventDate() {
   const date = new Date();
@@ -410,7 +407,7 @@ export default function CreateRoomPreview() {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={smallArtwork(a.artwork)}
+                        src={artworkVariant(a.artwork, 100)}
                         alt=""
                         width={36}
                         height={36}
@@ -515,7 +512,7 @@ export default function CreateRoomPreview() {
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           key={r}
-                          src={smallArtwork(a)}
+                          src={artworkVariant(a, 100)}
                           alt=""
                           width={24}
                           height={24}

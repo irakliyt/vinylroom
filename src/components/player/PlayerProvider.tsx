@@ -10,6 +10,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { artworkVariant } from "@/lib/artwork";
 import { getPreview } from "@/lib/previews";
 
 export type Track = {
@@ -43,7 +44,7 @@ function getIntroTrack(): Track | null {
     track: introPreview.track,
     artist: introPreview.artist,
     previewUrl: introPreview.previewUrl,
-    artwork: introPreview.artwork,
+    artwork: artworkVariant(introPreview.artwork, 220) ?? introPreview.artwork,
     roomTitle: "Warming up the room",
     accent: "#e2a552",
   };

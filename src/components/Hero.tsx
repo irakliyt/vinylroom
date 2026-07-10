@@ -15,6 +15,7 @@ import Waveform from "./Waveform";
 import MagneticButton from "./MagneticButton";
 import { useBooking } from "./booking/BookingProvider";
 import { usePlayer } from "./player/PlayerProvider";
+import { artworkVariant } from "@/lib/artwork";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
@@ -50,6 +51,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageLocation = activeTrack?.city ?? featured.city;
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
+  const activeArtwork = artworkVariant(activeTrack?.artwork, 220);
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -401,10 +403,18 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               }}
               className="pointer-events-none absolute left-[2%] top-[5%] w-[68%] rounded-[4px] shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] sm:left-[3%] sm:top-[2%] sm:w-[70%] sm:shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
             >
-              {activeTrack?.artwork ? (
+              {activeArtwork ? (
                 <div className="relative aspect-square w-full overflow-hidden rounded-[3px] bg-charcoal">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={activeTrack.artwork} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={activeArtwork}
+                    alt=""
+                    width={220}
+                    height={220}
+                    decoding="async"
+                    fetchPriority="low"
+                    className="h-full w-full object-cover"
+                  />
                 </div>
               ) : (
                 <AlbumArt

@@ -6,12 +6,9 @@ import VinylDisc from "./VinylDisc";
 import Waveform from "./Waveform";
 import LiveWaveform from "./player/LiveWaveform";
 import { usePlayer, type Track } from "./player/PlayerProvider";
+import { artworkVariant } from "@/lib/artwork";
 import { firstPlayable } from "@/lib/previews";
 import { rooms as demoRooms, type Room } from "@/data/rooms";
-
-function smallArtwork(url?: string) {
-  return url?.replace(/\/300x300bb\.(jpg|png)$/i, "/100x100bb.$1");
-}
 
 /**
  * Floating player. Before anything plays it teases the rooms that are "now
@@ -68,7 +65,7 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
   const isPlaying = player.playing;
   const teaserHit = firstPlayable(teaser.records);
   const coverArtwork = active?.artwork ?? teaserHit?.preview.artwork;
-  const thumbArtwork = smallArtwork(coverArtwork);
+  const thumbArtwork = artworkVariant(coverArtwork, 100);
 
   return (
     <AnimatePresence>
