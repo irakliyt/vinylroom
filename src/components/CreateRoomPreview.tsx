@@ -327,6 +327,7 @@ export default function CreateRoomPreview() {
                 </div>
                 <input
                   type="range"
+                  aria-label="Room capacity"
                   min={2}
                   max={24}
                   value={capacity}
@@ -341,6 +342,7 @@ export default function CreateRoomPreview() {
                 </div>
                 <input
                   type="range"
+                  aria-label="Seat price"
                   min={0}
                   max={120}
                   step={5}
@@ -408,6 +410,7 @@ export default function CreateRoomPreview() {
               <button
                 type="button"
                 role="switch"
+                aria-label="Make this room private"
                 aria-checked={isPrivate}
                 onClick={() => setIsPrivate((v) => !v)}
                 className={`relative h-7 w-12 rounded-full transition-colors duration-300 clickable ${isPrivate ? "bg-burnt" : "bg-edge-strong"}`}
