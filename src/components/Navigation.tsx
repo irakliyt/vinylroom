@@ -38,9 +38,9 @@ export default function Navigation({
           scrolled || open ? "bg-void/90 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="relative mx-auto grid max-w-[92rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-edge/60 px-4 py-3.5 pr-28 sm:px-8 sm:py-4 sm:pr-8 md:flex md:justify-between xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
+        <nav className="relative mx-auto flex max-w-[92rem] items-center justify-between gap-3 border-b border-edge/60 px-4 py-3.5 sm:px-8 sm:py-4 xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
           {/* wordmark */}
-          <a href="#top" className="group flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 clickable xl:justify-self-start">
+          <a href="#top" className="group flex min-w-0 max-w-[8.75rem] shrink items-center gap-2.5 sm:max-w-none sm:gap-3.5 clickable xl:justify-self-start">
             <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
               <span className="absolute inset-0 rounded-full grooves shadow-[inset_0_0_8px_rgba(0,0,0,0.9)]" />
               <span className="relative h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(216,154,69,0.8)]" />
@@ -56,7 +56,7 @@ export default function Navigation({
           </a>
 
           {/* desktop links */}
-          <div className="hidden min-w-0 items-center justify-center gap-5 md:flex 2xl:gap-7">
+          <div className="hidden min-w-0 items-center justify-center gap-5 xl:flex 2xl:gap-7">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -69,17 +69,19 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="absolute right-4 top-3.5 flex min-w-0 shrink-0 items-center justify-end gap-2 sm:static md:gap-3 xl:justify-self-end">
+          <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 md:gap-3 xl:justify-self-end">
             <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1800px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
               </span>
             </div>
-            <span className="hidden sm:block">
+            <span className="fixed left-[9.5rem] top-3.5 z-[60] block xl:static">
               <SoundToggle />
             </span>
-            <MemberMenu variant="bar" />
+            <span className="hidden xl:block">
+              <MemberMenu variant="bar" />
+            </span>
             <a
               href="#host"
               className="hidden shrink-0 whitespace-nowrap rounded-full bg-cream px-5 py-2 text-sm font-medium text-void transition-transform duration-300 hover:scale-[1.03] xl:inline-block clickable"
@@ -92,8 +94,8 @@ export default function Navigation({
               aria-label="Menu"
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              style={{ left: "min(calc(100vw - 3.25rem), 338px)" }}
-              className="fixed top-3.5 z-[60] flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-edge bg-void/80 md:hidden clickable"
+              style={{ left: "min(calc(100vw - 3.25rem), 21rem)" }}
+              className="fixed top-3.5 z-[60] flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-edge bg-void/80 xl:hidden clickable"
             >
               <span
                 className={`h-px w-4 bg-cream transition-all ${open ? "translate-y-[3px] rotate-45" : ""}`}
@@ -114,7 +116,7 @@ export default function Navigation({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto border-b border-edge bg-void/98 md:hidden"
+            className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto border-b border-edge bg-void/98 xl:hidden"
           >
             <div className="mx-auto flex min-h-full max-w-lg flex-col px-5 pb-8 pt-7">
               <div className="mb-5 flex items-center justify-between rounded-2xl border border-edge bg-pitch/70 px-4 py-3">

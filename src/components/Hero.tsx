@@ -381,7 +381,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 className="pointer-events-none relative block w-full rounded-full"
                 style={{
                   transform: `rotate(${scratchRotation}deg)`,
-                  animation: !scratching ? "spin-slow 6s linear infinite" : undefined,
+                  animation: !scratching ? "spin-slow 10s linear infinite" : undefined,
                 }}
               >
                 <VinylDisc label={activeTrack ? activeTrack.track : "Kind of Blue"} accent={stageAccent} spinning={false} className="w-full" />
@@ -436,7 +436,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               onContextMenu={(e) => e.preventDefault()}
               className="absolute right-[0%] top-[16%] z-20 h-[56%] w-[47%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%] sm:h-[42%] sm:w-[36%]"
             >
-              <span className="sr-only">Drag the vinyl to scratch</span>
+              <span className="sr-only">Press and drag the disc to scratch</span>
             </button>
 
             <div className="absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
@@ -450,7 +450,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 DJ mode
               </button>
               <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
-                {scratching ? "Scratching" : "Drag vinyl"}
+                {scratching ? "Scratching" : "Press + drag disc"}
               </span>
             </div>
 

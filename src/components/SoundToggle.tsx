@@ -21,9 +21,9 @@ export default function SoundToggle() {
       onClick={resume}
       aria-label={label}
       title={label}
-      className={`relative flex h-10 shrink-0 items-center justify-center gap-1.5 overflow-visible rounded-full border text-cream transition-colors hover:border-amber/80 clickable sm:gap-2 ${
+      className={`relative flex h-10 shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border text-cream transition-colors hover:border-amber/80 clickable sm:gap-2 sm:overflow-visible ${
         needsHint
-          ? "h-9 w-10 border-amber bg-amber/15 px-0 shadow-[0_0_18px_-8px_rgba(216,154,69,1)] sm:h-10 sm:w-auto sm:max-w-none sm:px-4 sm:shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
+          ? "h-9 w-[6.75rem] border-amber bg-amber/15 px-2.5 shadow-[0_0_18px_-8px_rgba(216,154,69,1)] sm:h-10 sm:w-auto sm:max-w-none sm:px-4 sm:shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
           : "h-9 w-9 border-edge-strong sm:h-10 sm:w-10"
       }`}
       style={needsHint ? ({ "--pulse-color": "rgba(216,154,69,0.62)", animation: "ring-pulse 1.45s ease-out infinite" } as React.CSSProperties) : undefined}
@@ -48,7 +48,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
-      {needsHint && <span className="hidden truncate whitespace-nowrap text-[0.72rem] font-bold uppercase tracking-[0.2em] text-amber sm:inline">Sound on</span>}
+      {needsHint && <span className="truncate whitespace-nowrap text-[0.56rem] font-bold uppercase tracking-[0.12em] text-amber sm:text-[0.72rem] sm:tracking-[0.2em]">Sound on</span>}
     </button>
   );
 }

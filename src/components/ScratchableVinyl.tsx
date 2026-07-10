@@ -179,7 +179,7 @@ export default function ScratchableVinyl({
           DJ scratch mode
         </button>
         <span className="whitespace-nowrap pr-1.5 text-[0.58rem] text-parchment sm:pr-2 sm:text-[0.66rem]">
-          {scratching ? "Scratching" : "Drag record"}
+          {scratching ? "Scratching" : "Press + drag record"}
         </span>
       </div>
     </div>
