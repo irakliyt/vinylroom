@@ -21,9 +21,18 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(true);
   const [idx, setIdx] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const spinning = rooms.filter((r) => r.nowSpinning);
   const active = player.current;
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 640px)");
+    const update = () => setIsDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setVisible(window.scrollY > window.innerHeight * 0.8);
@@ -41,6 +50,7 @@ export default function NowPlayingWidget({ rooms = demoRooms }: { rooms?: Room[]
 
   // Keep it on screen whenever audio is playing, even near the top.
   const show = visible || !!active;
+  if (!isDesktop) return null;
   if (spinning.length === 0 && !active) return null;
 
   const teaser = spinning[idx % Math.max(spinning.length, 1)] ?? rooms[0];
