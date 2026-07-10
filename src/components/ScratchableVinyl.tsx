@@ -122,8 +122,8 @@ export default function ScratchableVinyl({
 
   return (
     <div className="relative mx-auto mb-14 h-36 w-36 sm:mb-16 sm:h-44 sm:w-44">
-      <audio ref={audioRef} preload="auto" src={SCRATCH_SRC} />
-      <div className="absolute inset-[-30%] rounded-full bg-[radial-gradient(circle,rgba(216,154,69,0.25),transparent_60%)] blur-2xl" />
+      <audio ref={audioRef} preload="none" src={SCRATCH_SRC} />
+      <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(216,154,69,0.16),transparent_62%)] blur-xl sm:inset-[-30%] sm:bg-[radial-gradient(circle,rgba(216,154,69,0.25),transparent_60%)] sm:blur-2xl" />
       <div className="pointer-events-none absolute -inset-4 rounded-full border border-amber/25 shadow-[0_0_38px_-10px_rgba(216,154,69,0.95)]" />
 
       <button
@@ -155,7 +155,7 @@ export default function ScratchableVinyl({
       </div>
 
       <div className="pointer-events-none absolute -right-28 top-3 hidden w-28 -rotate-12 sm:block">
-        <div className="mb-1 rounded-full border border-amber/40 bg-void/75 px-3 py-1 text-center text-[0.6rem] font-medium uppercase tracking-[0.18em] text-amber shadow-[0_0_26px_-8px_rgba(216,154,69,0.95)] backdrop-blur-md">
+        <div className="mb-1 rounded-full border border-amber/40 bg-void/75 px-3 py-1 text-center text-[0.6rem] font-medium uppercase tracking-[0.18em] text-amber shadow-[0_0_26px_-8px_rgba(216,154,69,0.95)] sm:backdrop-blur-md">
           Scratch it
         </div>
         <div className="relative ml-1 h-10">
@@ -164,17 +164,17 @@ export default function ScratchableVinyl({
         </div>
       </div>
 
-      <div className="absolute -bottom-10 left-1/2 flex w-max -translate-x-1/2 items-center gap-2 rounded-full border border-amber/35 bg-void/85 px-2 py-1.5 shadow-[0_0_30px_-12px_rgba(216,154,69,0.95)] backdrop-blur-md">
+      <div className="absolute -bottom-10 left-1/2 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-1.5 rounded-full border border-amber/35 bg-void/90 px-2 py-1.5 shadow-[0_0_24px_-12px_rgba(216,154,69,0.95)] sm:gap-2 sm:bg-void/85 sm:backdrop-blur-md">
         <button
           type="button"
           onClick={armDjMode}
-          className={`rounded-full px-4 py-2 text-[0.66rem] font-semibold uppercase tracking-[0.16em] transition-colors clickable ${
+          className={`rounded-full px-3 py-2 text-[0.58rem] font-semibold uppercase tracking-[0.12em] transition-colors clickable sm:px-4 sm:text-[0.66rem] sm:tracking-[0.16em] ${
             djMode ? "bg-amber text-void" : "text-cream hover:text-amber"
           }`}
         >
           DJ scratch mode
         </button>
-        <span className="whitespace-nowrap pr-2 text-[0.66rem] text-parchment">
+        <span className="whitespace-nowrap pr-1.5 text-[0.58rem] text-parchment sm:pr-2 sm:text-[0.66rem]">
           {scratching ? "Scratching" : "Drag record"}
         </span>
       </div>

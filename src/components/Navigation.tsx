@@ -38,15 +38,15 @@ export default function Navigation({
           scrolled || open ? "bg-void/90 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
+        <nav className="relative mx-auto grid max-w-[92rem] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-edge/60 px-4 py-3.5 pr-28 sm:px-8 sm:py-4 sm:pr-8 md:flex md:justify-between xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
           {/* wordmark */}
-          <a href="#top" className="group flex shrink-0 items-center gap-2.5 sm:gap-3.5 clickable xl:justify-self-start">
-            <span className="relative flex h-8 w-8 items-center justify-center">
+          <a href="#top" className="group flex min-w-0 shrink items-center gap-2.5 sm:gap-3.5 clickable xl:justify-self-start">
+            <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
               <span className="absolute inset-0 rounded-full grooves shadow-[inset_0_0_8px_rgba(0,0,0,0.9)]" />
               <span className="relative h-2.5 w-2.5 rounded-full bg-amber shadow-[0_0_10px_rgba(216,154,69,0.8)]" />
             </span>
-            <span className="flex flex-col gap-1 leading-none">
-              <span className="font-display text-[1rem] leading-[0.95] tracking-tight text-cream sm:text-[1.05rem]">
+            <span className="flex min-w-0 flex-col gap-1 leading-none">
+              <span className="truncate font-display text-[0.95rem] leading-[0.95] tracking-tight text-cream sm:text-[1.05rem]">
                 Vinyl Rooms
               </span>
               <span className="hidden text-[0.54rem] uppercase leading-none tracking-[0.32em] text-dust sm:block">
@@ -69,14 +69,16 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2.5 md:gap-3 xl:justify-self-end">
+          <div className="absolute right-4 top-3.5 flex min-w-0 shrink-0 items-center justify-end gap-2 sm:static md:gap-3 xl:justify-self-end">
             <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1800px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
               </span>
             </div>
-            <SoundToggle />
+            <span className="hidden sm:block">
+              <SoundToggle />
+            </span>
             <MemberMenu variant="bar" />
             <a
               href="#host"
@@ -90,7 +92,8 @@ export default function Navigation({
               aria-label="Menu"
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
-              className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-full border border-edge md:hidden clickable"
+              style={{ left: "min(calc(100vw - 3.25rem), 338px)" }}
+              className="fixed top-3.5 z-[60] flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-1.5 rounded-full border border-edge bg-void/80 md:hidden clickable"
             >
               <span
                 className={`h-px w-4 bg-cream transition-all ${open ? "translate-y-[3px] rotate-45" : ""}`}
@@ -111,16 +114,20 @@ export default function Navigation({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 bottom-0 top-[4.5rem] overflow-y-auto border-b border-edge bg-void/98 backdrop-blur-xl md:hidden"
+            className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto border-b border-edge bg-void/98 md:hidden"
           >
             <div className="mx-auto flex min-h-full max-w-lg flex-col px-5 pb-8 pt-7">
+              <div className="mb-5 flex items-center justify-between rounded-2xl border border-edge bg-pitch/70 px-4 py-3">
+                <span className="text-sm text-parchment">Sound</span>
+                <SoundToggle />
+              </div>
               <div className="border-t border-edge">
                 {links.map((l, index) => (
                   <a
                     key={l.href}
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center justify-between border-b border-edge py-4 font-display text-[clamp(1.45rem,7vw,2rem)] leading-none text-cream"
+                    className="flex items-center justify-between border-b border-edge py-3.5 font-display text-[clamp(1.25rem,6vw,1.7rem)] leading-none text-cream"
                   >
                     <span>{l.label}</span>
                     <span className="text-sm text-amber/70">0{index + 1}</span>

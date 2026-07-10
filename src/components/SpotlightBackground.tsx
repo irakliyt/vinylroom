@@ -65,14 +65,14 @@ export default function SpotlightBackground() {
 
       {/* smoky drifting gradients — transform-only keyframes, promoted to their own layer */}
       <div
-        className="absolute -left-[20%] -top-[20%] h-[70vh] w-[70vh] rounded-full opacity-50 blur-[70px] [will-change:transform]"
+        className="absolute -left-[20%] -top-[20%] hidden h-[70vh] w-[70vh] rounded-full opacity-50 blur-[70px] [will-change:transform] sm:block"
         style={{
           background: "radial-gradient(circle, rgba(74,23,23,0.55), transparent 70%)",
           animation: "drift 16s ease-in-out infinite",
         }}
       />
       <div
-        className="absolute -bottom-[15%] -right-[10%] h-[65vh] w-[65vh] rounded-full opacity-40 blur-[80px] [will-change:transform]"
+        className="absolute -bottom-[15%] -right-[10%] hidden h-[65vh] w-[65vh] rounded-full opacity-40 blur-[80px] [will-change:transform] sm:block"
         style={{
           background: "radial-gradient(circle, rgba(180,95,42,0.4), transparent 70%)",
           animation: "drift 20s ease-in-out infinite reverse",
@@ -82,7 +82,7 @@ export default function SpotlightBackground() {
       {/* cursor spotlight — 800px pre-rendered radial we only translate */}
       <div
         ref={spot}
-        className="absolute left-0 top-0 h-[800px] w-[800px] [will-change:transform]"
+        className="absolute left-0 top-0 hidden h-[800px] w-[800px] [will-change:transform] sm:block"
         style={{
           background:
             "radial-gradient(circle at center, rgba(216,154,69,0.12), transparent 60%)",

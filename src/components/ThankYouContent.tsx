@@ -63,7 +63,7 @@ export default function ThankYouContent() {
         {confirmed ? (
           <>
             <span className="eyebrow">Your seat is saved</span>
-            <h1 className="mt-4 max-w-2xl text-balance font-display text-[clamp(2.4rem,6vw,4.2rem)] leading-[0.98] text-cream">
+            <h1 className="mt-4 max-w-[21rem] text-balance font-display text-[clamp(2.05rem,10vw,2.55rem)] leading-[1] text-cream sm:max-w-2xl sm:text-[clamp(2.4rem,6vw,4.2rem)] sm:leading-[0.98]">
               A chair is waiting for you in the dark.
             </h1>
             <p className="mt-5 max-w-md text-lg text-parchment">
@@ -74,7 +74,7 @@ export default function ThankYouContent() {
         ) : (
           <>
             <span className="eyebrow text-amber">Checkout wasn&apos;t confirmed</span>
-            <h1 className="mt-4 max-w-2xl text-balance font-display text-[clamp(2.2rem,5.5vw,3.8rem)] leading-[0.98] text-cream">
+            <h1 className="mt-4 max-w-[21rem] text-balance font-display text-[clamp(2rem,9.5vw,2.45rem)] leading-[1] text-cream sm:max-w-2xl sm:text-[clamp(2.2rem,5.5vw,3.8rem)] sm:leading-[0.98]">
               We didn&apos;t hear back from checkout.
             </h1>
             <p className="mt-5 max-w-md text-lg text-parchment">

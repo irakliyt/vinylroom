@@ -1,8 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,300;1,9..144,400&display=swap');
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: 'Fraunces', 'Cormorant Garamond', Georgia, serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 
@@ -218,6 +217,13 @@
     background: linear-gradient(135deg, #e8b45f, #b45f2a);
     border: 2px solid var(--color-void);
     cursor: pointer;
+  }
+}
+
+@media (max-width: 639px) {
+  .glass {
+    background: linear-gradient(160deg, rgba(46, 28, 19, 0.82), rgba(14, 11, 9, 0.94));
+    backdrop-filter: none;
   }
 }
 

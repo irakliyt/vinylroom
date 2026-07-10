@@ -187,23 +187,40 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden lg:min-h-[150svh]">
-      <audio ref={scratchAudio} preload="auto" src={SCRATCH_SRC} />
-      <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:sticky lg:top-0 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
+      <audio ref={scratchAudio} preload="none" src={SCRATCH_SRC} />
+      <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-10 px-5 pb-14 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:sticky lg:top-0 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
         {/* ── Copy ── */}
-        <motion.div style={{ opacity, y: copyY }} className="relative z-10 max-w-xl">
+        <motion.div style={{ opacity: isDesktop ? opacity : 1, y: isDesktop ? copyY : 0 }} className="relative z-10 max-w-xl">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-edge bg-pitch/40 px-3 py-1.5 backdrop-blur-sm"
+            className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-edge bg-pitch/70 px-3 py-1.5 sm:mb-6 sm:bg-pitch/40 sm:backdrop-blur-sm"
           >
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber" />
-            <span className="text-[0.65rem] uppercase tracking-[0.28em] text-beige">
+            <span className="truncate text-[0.58rem] uppercase tracking-[0.2em] text-beige sm:text-[0.65rem] sm:tracking-[0.28em]">
               A room. A record. People who listen.
             </span>
           </motion.div>
 
-          <h1 className="text-balance font-display text-[clamp(2.7rem,6.5vw,5.2rem)] leading-[0.95] text-cream">
+          <h1 className="font-display text-[clamp(2.45rem,10.6vw,2.85rem)] leading-[0.96] text-cream sm:hidden">
+            Host
+            <br />
+            unforgettable
+            <br />
+            <span className="relative inline-block italic">
+              nights
+              <span className="absolute -bottom-1 left-0 h-px w-full bg-gradient-to-r from-amber/70 to-transparent" />
+            </span>
+            <br />
+            around the
+            <br />
+            records
+            <br />
+            you love.
+          </h1>
+
+          <h1 className="hidden text-balance font-display text-[clamp(2.7rem,6.5vw,5.2rem)] leading-[0.95] text-cream sm:block">
             Host unforgettable{" "}
             <span className="relative inline-block italic">
               nights
@@ -212,12 +229,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             around the records you love.
           </h1>
 
-          <p className="mt-7 max-w-md text-lg leading-relaxed text-parchment">
+          <p className="mt-6 max-w-[22rem] text-base leading-relaxed text-parchment sm:mt-7 sm:max-w-md sm:text-lg">
             Create intimate vinyl listening sessions, invite real music lovers, and
             turn your collection into a shared evening.
           </p>
 
-          <div className="mt-9 flex flex-wrap items-center gap-4">
+          <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <MagneticButton href="#host">Create a listening room →</MagneticButton>
             <MagneticButton href="#rooms" variant="ghost">
               Explore upcoming nights
@@ -225,11 +242,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
           </div>
 
           {/* trust strip */}
-          <div className="mt-12 flex flex-wrap gap-x-8 gap-y-4 border-t border-edge pt-6">
+          <div className="mt-9 grid grid-cols-3 gap-3 border-t border-edge pt-5 sm:mt-12 sm:flex sm:flex-wrap sm:gap-x-8 sm:gap-y-4 sm:pt-6">
             {stats.map((s) => (
               <div key={s.label}>
-                <div className="font-display text-2xl text-cream">{s.value}</div>
-                <div className="text-[0.7rem] uppercase tracking-[0.18em] text-dust">
+                <div className="font-display text-xl text-cream sm:text-2xl">{s.value}</div>
+                <div className="text-[0.54rem] uppercase tracking-[0.12em] text-dust sm:text-[0.7rem] sm:tracking-[0.18em]">
                   {s.label}
                 </div>
               </div>
@@ -239,22 +256,22 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center pb-60 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
+          className="relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >
           <motion.div
             style={{
-              rotateX: rx,
-              rotateY: ry,
-              scale: stageScale,
+              rotateX: isDesktop ? rx : 0,
+              rotateY: isDesktop ? ry : 0,
+              scale: isDesktop ? stageScale : 1,
               transformStyle: "preserve-3d",
-              willChange: "transform",
+              willChange: isDesktop ? "transform" : "auto",
             }}
-            className="relative aspect-[0.92] w-full max-w-[26rem] sm:aspect-square lg:max-w-[34rem]"
+            className="relative aspect-[0.88] w-full max-w-[22rem] sm:aspect-square sm:max-w-[26rem] lg:max-w-[34rem]"
           >
             {/* warm halo */}
-            <div className="pointer-events-none absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
+            <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.18),transparent_62%)] blur-xl sm:inset-[-18%] sm:bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] sm:blur-2xl" />
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
             <motion.div
@@ -306,11 +323,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 y: isDesktop ? yVinyl : 0,
                 scale: isDesktop ? vinylScale : 1,
                 translateZ: -40,
-                willChange: "transform",
+                willChange: isDesktop ? "transform" : "auto",
               }}
-              className="absolute right-[-3%] top-[12%] w-[70%] sm:right-[-7%] sm:top-[11%] sm:w-[76%]"
+              className="absolute right-[-1%] top-[17%] w-[66%] sm:right-[-7%] sm:top-[11%] sm:w-[76%]"
             >
-              <div className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
+              <div className="pointer-events-none absolute inset-[6%] hidden rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl sm:block" />
               <div
                 aria-hidden="true"
                 className="pointer-events-none relative block w-full rounded-full"
@@ -334,9 +351,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 y: isDesktop ? yCover : 0,
                 opacity: isDesktop ? coverOpacity : 1,
                 translateZ: 40,
-                willChange: "transform, opacity",
+                willChange: isDesktop ? "transform, opacity" : "auto",
               }}
-              className="pointer-events-none absolute left-[5%] top-[3%] w-[65%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)] sm:left-[3%] sm:top-[2%] sm:w-[70%]"
+              className="pointer-events-none absolute left-[2%] top-[5%] w-[68%] rounded-[4px] shadow-[0_24px_60px_-30px_rgba(0,0,0,0.9)] sm:left-[3%] sm:top-[2%] sm:w-[70%] sm:shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)]"
             >
               {activeTrack?.artwork ? (
                 <div className="relative aspect-square w-full overflow-hidden rounded-[3px] bg-charcoal">
@@ -359,16 +376,16 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               onPointerDown={startScratch}
               onPointerUp={stopScratch}
               onPointerCancel={stopScratch}
-              className="absolute right-[-4%] top-[9%] z-20 h-[67%] w-[51%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%] sm:h-[42%] sm:w-[36%]"
+              className="absolute right-[0%] top-[16%] z-20 h-[56%] w-[47%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%] sm:h-[42%] sm:w-[36%]"
             >
               <span className="sr-only">Drag the vinyl to scratch</span>
             </button>
 
-            <div className="absolute left-[5%] top-[78%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/90 px-1.5 py-1.5 shadow-[0_0_34px_-12px_rgba(216,154,69,1)] backdrop-blur-md sm:left-auto sm:right-[-14%] sm:top-[13%]">
+            <div className="absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
               <button
                 type="button"
                 onClick={toggleDjMode}
-                className={`rounded-full px-3.5 py-2 text-[0.62rem] font-bold uppercase tracking-[0.18em] transition-colors clickable ${
+                  className={`rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
                   djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
                 }`}
               >
@@ -385,10 +402,10 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 x: isDesktop ? xCard : 0,
                 y: isDesktop ? yCard : 0,
                 opacity: isDesktop ? cardOpacity : 1,
-                translateZ: 90,
-                willChange: "transform, opacity",
+                translateZ: isDesktop ? 90 : 0,
+                willChange: isDesktop ? "transform, opacity" : "auto",
               }}
-              className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-14%] lg:right-[38%] lg:w-[55%]"
+              className="absolute left-[3%] top-[82%] w-[94%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-14%] lg:right-[38%] lg:w-[55%]"
             >
               <div className="flex items-center justify-between gap-4">
                 <span className="eyebrow text-[0.6rem]">{stageLabel}</span>
