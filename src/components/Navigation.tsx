@@ -38,7 +38,7 @@ export default function Navigation({
           scrolled || open ? "bg-void/90 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[minmax(14rem,1fr)_auto_minmax(28rem,1fr)] xl:gap-10">
+        <nav className="mx-auto flex max-w-[92rem] items-center justify-between border-b border-edge/60 px-5 py-4 sm:px-8 xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
           {/* wordmark */}
           <a href="#top" className="group flex shrink-0 items-center gap-2.5 sm:gap-3.5 clickable xl:justify-self-start">
             <span className="relative flex h-8 w-8 items-center justify-center">
@@ -56,7 +56,7 @@ export default function Navigation({
           </a>
 
           {/* desktop links */}
-          <div className="hidden shrink-0 items-center gap-7 md:flex">
+          <div className="hidden min-w-0 items-center justify-center gap-5 md:flex 2xl:gap-7">
             {links.map((l) => (
               <a
                 key={l.href}
@@ -69,8 +69,8 @@ export default function Navigation({
             ))}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2.5 md:gap-4 xl:justify-self-end">
-            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1700px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
+          <div className="flex shrink-0 items-center gap-2.5 md:gap-3 xl:justify-self-end">
+            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1800px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
