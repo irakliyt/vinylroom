@@ -76,7 +76,7 @@ export default function Navigation({
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
               </span>
             </div>
-            <span className="fixed left-[9.5rem] top-3.5 z-[60] block xl:static">
+            <span className="fixed left-[10.75rem] top-3.5 z-[60] block xl:static">
               <SoundToggle />
             </span>
             <span className="hidden xl:block">
