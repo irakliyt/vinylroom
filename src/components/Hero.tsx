@@ -51,7 +51,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageLocation = activeTrack?.city ?? featured.city;
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
-  const activeArtwork = artworkVariant(activeTrack?.artwork, 120);
+  const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -409,8 +409,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                   <img
                     src={activeArtwork}
                     alt=""
-                    width={120}
-                    height={120}
+                    width={360}
+                    height={360}
                     draggable={false}
                     decoding="async"
                     fetchPriority="low"
