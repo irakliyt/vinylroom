@@ -149,14 +149,15 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     target: ref,
     offset: ["start start", "end start"],
   });
-  const yVinyl = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 160]);
-  const yCover = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 60]);
-  const yCard = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -24]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-  const stageScale = useTransform(scrollYProgress, [0, 0.75, 1], [1, reduce ? 1 : 0.96, reduce ? 1 : 0.92]);
-  const cueArmRotate = useTransform(scrollYProgress, [0, 0.75, 1], [-8, reduce ? -8 : 4, reduce ? -8 : 8]);
-  const cueArmY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 38]);
-  const signalOpacity = useTransform(scrollYProgress, [0, 0.2, 0.85], [0.45, 1, 0.2]);
+  const yVinyl = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 112, reduce ? 0 : 146]);
+  const yCover = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : -52, reduce ? 0 : -84]);
+  const yCard = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 54, reduce ? 0 : 98]);
+  const copyY = useTransform(scrollYProgress, [0, 0.8, 1], [0, reduce ? 0 : -26, reduce ? 0 : -46]);
+  const opacity = useTransform(scrollYProgress, [0, 0.72, 1], [1, reduce ? 1 : 0.76, reduce ? 1 : 0.08]);
+  const stageScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, reduce ? 1 : 0.98, reduce ? 1 : 0.93]);
+  const cueArmRotate = useTransform(scrollYProgress, [0, 0.72, 1], [-8, reduce ? -8 : 16, reduce ? -8 : 23]);
+  const cueArmY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 74]);
+  const signalOpacity = useTransform(scrollYProgress, [0, 0.16, 0.8, 1], [0.15, 1, 0.7, 0]);
 
   // mouse-driven depth tilt for the whole stage
   const mx = useMotionValue(0);
@@ -176,11 +177,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   };
 
   return (
-    <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden">
+    <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden lg:min-h-[150svh]">
       <audio ref={scratchAudio} preload="auto" src={SCRATCH_SRC} />
-      <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
+      <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:sticky lg:top-0 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
         {/* ── Copy ── */}
-        <motion.div style={{ opacity }} className="relative z-10 max-w-xl">
+        <motion.div style={{ opacity, y: copyY }} className="relative z-10 max-w-xl">
           <motion.div
             initial={reduce ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
