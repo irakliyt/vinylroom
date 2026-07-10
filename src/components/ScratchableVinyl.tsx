@@ -5,10 +5,9 @@ import VinylDisc from "@/components/VinylDisc";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
-function angleFromCenter(e: React.PointerEvent<HTMLButtonElement>) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const x = e.clientX - (rect.left + rect.width / 2);
-  const y = e.clientY - (rect.top + rect.height / 2);
+function angleFromCenter(e: React.PointerEvent<HTMLButtonElement>, center: { x: number; y: number }) {
+  const x = e.clientX - center.x;
+  const y = e.clientY - center.y;
   return Math.atan2(y, x) * (180 / Math.PI);
 }
 
@@ -29,6 +28,7 @@ export default function ScratchableVinyl({
   autoSpin: boolean;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const centerRef = useRef<{ x: number; y: number } | null>(null);
   const lastAngle = useRef(0);
   const lastAt = useRef(0);
   const settleTimer = useRef<number | null>(null);
@@ -76,10 +76,12 @@ export default function ScratchableVinyl({
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    const rect = e.currentTarget.getBoundingClientRect();
+    centerRef.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     djModeRef.current = true;
     setDjMode(true);
     setScratching(true);
-    lastAngle.current = angleFromCenter(e);
+    lastAngle.current = angleFromCenter(e, centerRef.current);
     lastAt.current = performance.now();
 
     const audio = audioRef.current;
@@ -94,7 +96,8 @@ export default function ScratchableVinyl({
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!scratching) return;
 
-    const nextAngle = angleFromCenter(e);
+    if (!centerRef.current) return;
+    const nextAngle = angleFromCenter(e, centerRef.current);
     const now = performance.now();
     const delta = shortestDelta(nextAngle, lastAngle.current);
     const elapsed = Math.max(now - lastAt.current, 16);
@@ -117,6 +120,7 @@ export default function ScratchableVinyl({
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
     setScratching(false);
+    centerRef.current = null;
     pauseScratch();
   };
 

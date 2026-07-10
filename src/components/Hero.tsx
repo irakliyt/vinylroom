@@ -27,6 +27,7 @@ const RITUAL_STEPS = [
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
   const scratchAudio = useRef<HTMLAudioElement | null>(null);
+  const stageRect = useRef<DOMRect | null>(null);
   const lastPointerY = useRef(0);
   const lastAt = useRef(0);
   const djModeRef = useRef(false);
@@ -185,12 +186,16 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-10, 10]), { stiffness: 120, damping: 18 });
 
   const onMove = (e: React.MouseEvent) => {
-    if (reduce) return;
-    const r = e.currentTarget.getBoundingClientRect();
+    if (reduce || !stageRect.current) return;
+    const r = stageRect.current;
     mx.set((e.clientX - r.left) / r.width - 0.5);
     my.set((e.clientY - r.top) / r.height - 0.5);
   };
+  const onEnter = (e: React.MouseEvent) => {
+    stageRect.current = e.currentTarget.getBoundingClientRect();
+  };
   const onLeave = () => {
+    stageRect.current = null;
     mx.set(0);
     my.set(0);
   };
@@ -297,6 +302,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
         {/* ── Visual stage ── */}
         <div
           className="relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
+          onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
         >

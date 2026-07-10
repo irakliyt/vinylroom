@@ -49,6 +49,10 @@ const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
 const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e/events";
 const STUDIO_STEPS = ["Record", "Mood", "Room", "Tickets"];
 
+function smallArtwork(url: string) {
+  return url.replace(/\/300x300bb\.(jpg|png)$/i, "/100x100bb.$1");
+}
+
 function defaultEventDate() {
   const date = new Date();
   date.setDate(date.getDate() + 14);
@@ -387,7 +391,15 @@ export default function CreateRoomPreview() {
                       }`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={a.artwork} alt="" className="h-9 w-9 shrink-0 rounded ring-1 ring-edge" />
+                      <img
+                        src={smallArtwork(a.artwork)}
+                        alt=""
+                        width={36}
+                        height={36}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-9 w-9 shrink-0 rounded ring-1 ring-edge"
+                      />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate text-sm text-cream">{a.album}</span>
                         <span className="block truncate text-xs text-dust">{a.artist}</span>
@@ -474,7 +486,16 @@ export default function CreateRoomPreview() {
                       const a = art(r);
                       return a ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img key={r} src={a} alt="" className="h-6 w-6 rounded ring-1 ring-edge" />
+                        <img
+                          key={r}
+                          src={smallArtwork(a)}
+                          alt=""
+                          width={24}
+                          height={24}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-6 w-6 rounded ring-1 ring-edge"
+                        />
                       ) : (
                         <span key={r} className="h-6 w-6 rounded-full grooves ring-1 ring-edge" />
                       );

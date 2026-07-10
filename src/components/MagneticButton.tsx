@@ -25,6 +25,7 @@ export default function MagneticButton({
   strength = 0.35,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const rect = useRef<{ cx: number; cy: number } | null>(null);
   const reduce = useReducedMotion();
 
   const mx = useMotionValue(0);
@@ -32,13 +33,18 @@ export default function MagneticButton({
   const x = useSpring(mx, { stiffness: 180, damping: 15, mass: 0.3 });
   const y = useSpring(my, { stiffness: 180, damping: 15, mass: 0.3 });
 
-  const handleMove = (e: React.MouseEvent) => {
-    if (reduce || !ref.current) return;
+  const cacheRect = () => {
+    if (!ref.current) return;
     const r = ref.current.getBoundingClientRect();
-    mx.set((e.clientX - (r.left + r.width / 2)) * strength);
-    my.set((e.clientY - (r.top + r.height / 2)) * strength);
+    rect.current = { cx: r.left + r.width / 2, cy: r.top + r.height / 2 };
+  };
+  const handleMove = (e: React.MouseEvent) => {
+    if (reduce || !rect.current) return;
+    mx.set((e.clientX - rect.current.cx) * strength);
+    my.set((e.clientY - rect.current.cy) * strength);
   };
   const reset = () => {
+    rect.current = null;
     mx.set(0);
     my.set(0);
   };
@@ -53,6 +59,7 @@ export default function MagneticButton({
   const inner = (
     <motion.div
       ref={ref}
+      onMouseEnter={cacheRect}
       onMouseMove={handleMove}
       onMouseLeave={reset}
       style={{ x, y }}

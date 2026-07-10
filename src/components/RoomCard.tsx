@@ -18,6 +18,7 @@ function Heart({ filled }: { filled: boolean }) {
 export default function RoomCard({ room, index = 0 }: { room: Room; index?: number }) {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
+  const rect = useRef<DOMRect | null>(null);
   const [saved, setSaved] = useState(false);
   const [handling, setHandling] = useState(false);
   const { open } = useBooking();
@@ -28,12 +29,16 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
   const ry = useSpring(useTransform(mx, [0, 1], [-8, 8]), { stiffness: 150, damping: 18 });
 
   const onMove = (e: React.MouseEvent) => {
-    if (reduce || !ref.current) return;
-    const r = ref.current.getBoundingClientRect();
+    if (reduce || !rect.current) return;
+    const r = rect.current;
     mx.set((e.clientX - r.left) / r.width);
     my.set((e.clientY - r.top) / r.height);
   };
+  const onEnter = () => {
+    rect.current = ref.current?.getBoundingClientRect() ?? null;
+  };
   const onLeave = () => {
+    rect.current = null;
     mx.set(0.5);
     my.set(0.5);
   };
@@ -46,6 +51,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
   return (
     <motion.article
       ref={ref}
+      onMouseEnter={onEnter}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       initial={reduce ? false : { opacity: 0, y: 30 }}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import RoomCard from "./RoomCard";
 import Reveal from "./Reveal";
@@ -140,10 +140,20 @@ export default function FeaturedRooms({
   source?: "wix" | "mock";
 }) {
   const [mode, setMode] = useState<DialMode>("mood");
+  const [showAllMobile, setShowAllMobile] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 640px)");
+    const update = () => setIsDesktop(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
 
   const filtered = useMemo(
-    () => [...rooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, 6),
-    [mode, rooms],
+    () => [...rooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, isDesktop || showAllMobile ? 6 : 3),
+    [isDesktop, mode, rooms, showAllMobile],
   );
 
   return (
@@ -204,6 +214,17 @@ export default function FeaturedRooms({
           ))}
         </AnimatePresence>
       </motion.div>
+      {!isDesktop && !showAllMobile && rooms.length > 3 && (
+        <div className="mt-7 flex justify-center sm:hidden">
+          <button
+            type="button"
+            onClick={() => setShowAllMobile(true)}
+            className="rounded-full border border-edge-strong px-5 py-3 text-sm text-cream clickable"
+          >
+            Show more rooms
+          </button>
+        </div>
+      )}
     </section>
   );
 }
