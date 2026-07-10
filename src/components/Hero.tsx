@@ -147,17 +147,26 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start start", "end start"],
+    // The hero is pinned on desktop. Map the choreography to that pinned
+    // interval, rather than to the point after the section has left view.
+    offset: ["start start", "end end"],
   });
-  const yVinyl = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 112, reduce ? 0 : 146]);
-  const yCover = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : -52, reduce ? 0 : -84]);
-  const yCard = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 54, reduce ? 0 : 98]);
+  const yVinyl = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 76, reduce ? 0 : 122]);
+  const xVinyl = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -18]);
+  const vinylScale = useTransform(scrollYProgress, [0, 0.72, 1], [1, reduce ? 1 : 1.12, reduce ? 1 : 1.22]);
+  const yCover = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : -92, reduce ? 0 : -150]);
+  const xCover = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -78]);
+  const coverOpacity = useTransform(scrollYProgress, [0, 0.66, 1], [1, 1, reduce ? 1 : 0.14]);
+  const yCard = useTransform(scrollYProgress, [0, 0.65, 1], [0, reduce ? 0 : 24, reduce ? 0 : 54]);
+  const xCard = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 84]);
+  const cardOpacity = useTransform(scrollYProgress, [0, 0.78, 1], [1, 1, reduce ? 1 : 0.38]);
   const copyY = useTransform(scrollYProgress, [0, 0.8, 1], [0, reduce ? 0 : -26, reduce ? 0 : -46]);
   const opacity = useTransform(scrollYProgress, [0, 0.72, 1], [1, reduce ? 1 : 0.76, reduce ? 1 : 0.08]);
-  const stageScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, reduce ? 1 : 0.98, reduce ? 1 : 0.93]);
+  const stageScale = useTransform(scrollYProgress, [0, 0.7, 1], [1, reduce ? 1 : 1.02, reduce ? 1 : 1.05]);
   const cueArmRotate = useTransform(scrollYProgress, [0, 0.72, 1], [-8, reduce ? -8 : 16, reduce ? -8 : 23]);
   const cueArmY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 74]);
   const signalOpacity = useTransform(scrollYProgress, [0, 0.16, 0.8, 1], [0.15, 1, 0.7, 0]);
+  const needleCaptionOpacity = useTransform(scrollYProgress, [0, 0.68, 0.9, 1], [0, 0, 1, reduce ? 1 : 0.1]);
 
   // mouse-driven depth tilt for the whole stage
   const mx = useMotionValue(0);
@@ -292,7 +301,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
             {/* vinyl sliding out behind the sleeve */}
             <motion.div
-              style={{ y: isDesktop ? yVinyl : 0, translateZ: -40, willChange: "transform" }}
+              style={{
+                x: isDesktop ? xVinyl : 0,
+                y: isDesktop ? yVinyl : 0,
+                scale: isDesktop ? vinylScale : 1,
+                translateZ: -40,
+                willChange: "transform",
+              }}
               className="absolute right-[-3%] top-[12%] w-[70%] sm:right-[-7%] sm:top-[11%] sm:w-[76%]"
             >
               <div className="pointer-events-none absolute inset-[6%] rounded-full bg-[radial-gradient(circle,rgba(244,232,208,0.2),transparent_65%)] blur-xl" />
@@ -314,7 +329,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
             {/* album sleeve in front */}
             <motion.div
-              style={{ y: isDesktop ? yCover : 0, translateZ: 40, willChange: "transform" }}
+              style={{
+                x: isDesktop ? xCover : 0,
+                y: isDesktop ? yCover : 0,
+                opacity: isDesktop ? coverOpacity : 1,
+                translateZ: 40,
+                willChange: "transform, opacity",
+              }}
               className="pointer-events-none absolute left-[5%] top-[3%] w-[65%] rounded-[4px] shadow-[0_50px_100px_-30px_rgba(0,0,0,0.85)] sm:left-[3%] sm:top-[2%] sm:w-[70%]"
             >
               {activeTrack?.artwork ? (
@@ -360,7 +381,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
             {/* floating booking card */}
             <motion.div
-              style={{ y: isDesktop ? yCard : 0, translateZ: 90, willChange: "transform" }}
+              style={{
+                x: isDesktop ? xCard : 0,
+                y: isDesktop ? yCard : 0,
+                opacity: isDesktop ? cardOpacity : 1,
+                translateZ: 90,
+                willChange: "transform, opacity",
+              }}
               className="absolute left-[5%] top-[97%] w-[90%] max-w-none rounded-2xl p-4 glass glow-warm sm:left-auto sm:bottom-[-9%] sm:right-[1%] sm:top-auto sm:w-[60%] sm:max-w-[14.75rem] lg:bottom-[-14%] lg:right-[38%] lg:w-[55%]"
             >
               <div className="flex items-center justify-between gap-4">
@@ -392,6 +419,14 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                   Reserve
                 </button>
               </div>
+            </motion.div>
+
+            <motion.div
+              style={{ opacity: needleCaptionOpacity, translateZ: 100 }}
+              className="pointer-events-none absolute bottom-[21%] left-[18%] hidden rounded-full border border-amber/45 bg-void/75 px-3 py-1.5 backdrop-blur-md lg:flex lg:items-center lg:gap-2"
+            >
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber shadow-[0_0_12px_rgba(226,165,82,0.9)]" />
+              <span className="text-[0.55rem] uppercase tracking-[0.2em] text-cream">Needle down</span>
             </motion.div>
           </motion.div>
         </div>

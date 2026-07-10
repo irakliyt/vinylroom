@@ -70,7 +70,7 @@ export default function Navigation({
           </div>
 
           <div className="flex shrink-0 items-center gap-2.5 md:gap-4 xl:justify-self-end">
-            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 2xl:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
+            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1700px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
