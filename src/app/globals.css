@@ -159,6 +159,19 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  .scratch-surface,
+  .scratch-surface * {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .scratch-surface {
+    touch-action: none;
+    overscroll-behavior: contain;
+  }
+
   /* custom cursor active → hide the native one (desktop only) */
   .cursor-hidden,
   .cursor-hidden * {

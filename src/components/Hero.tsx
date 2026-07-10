@@ -51,7 +51,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageLocation = activeTrack?.city ?? featured.city;
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
-  const activeArtwork = artworkVariant(activeTrack?.artwork, 220);
+  const activeArtwork = artworkVariant(activeTrack?.artwork, 120);
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -154,7 +154,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   };
 
   const { scrollYProgress } = useScroll({
-    target: ref,
+    target: isDesktop ? ref : undefined,
     // The hero is pinned on desktop. Map the choreography to that pinned
     // interval, rather than to the point after the section has left view.
     offset: ["start start", "end end"],
@@ -316,7 +316,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               transformStyle: "preserve-3d",
               willChange: isDesktop ? "transform" : "auto",
             }}
-            className="relative aspect-[0.88] w-full max-w-[22rem] sm:aspect-square sm:max-w-[26rem] lg:max-w-[34rem]"
+            className="scratch-surface relative aspect-[0.88] w-full max-w-[22rem] sm:aspect-square sm:max-w-[26rem] lg:max-w-[34rem]"
           >
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.18),transparent_62%)] blur-xl sm:inset-[-18%] sm:bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] sm:blur-2xl" />
@@ -409,8 +409,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                   <img
                     src={activeArtwork}
                     alt=""
-                    width={220}
-                    height={220}
+                    width={120}
+                    height={120}
+                    draggable={false}
                     decoding="async"
                     fetchPriority="low"
                     className="h-full w-full object-cover"
@@ -432,6 +433,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               onPointerDown={startScratch}
               onPointerUp={stopScratch}
               onPointerCancel={stopScratch}
+              onContextMenu={(e) => e.preventDefault()}
               className="absolute right-[0%] top-[16%] z-20 h-[56%] w-[47%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%] sm:h-[42%] sm:w-[36%]"
             >
               <span className="sr-only">Drag the vinyl to scratch</span>

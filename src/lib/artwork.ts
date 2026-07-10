@@ -3,7 +3,7 @@ const LOCAL_ARTWORK_SOURCES = [
   "/Features125/v4/bb/a2/f0/bba2f0d7-4d9e-c617-d49e-3ae02fd5d440/dj.xbkfgllk.jpg/",
 ];
 
-const LOCAL_INTRO_ARTWORK = "/artwork/acdc-thunderstruck-220.avif";
+const LOCAL_INTRO_ARTWORK = "/artwork/acdc-thunderstruck-120.avif";
 
 export function artworkVariant(url: string | undefined, size = 100) {
   if (!url) return undefined;
