@@ -1,10 +1,136 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import RoomCard from "./RoomCard";
 import Reveal from "./Reveal";
-import { GENRES, rooms as demoRooms, type Genre, type Room } from "@/data/rooms";
+import { rooms as demoRooms, type Room } from "@/data/rooms";
+
+const DIAL_MODES = [
+  { id: "mood", label: "Mood", hint: "warm rooms" },
+  { id: "city", label: "City", hint: "nearby nights" },
+  { id: "tonight", label: "Tonight", hint: "soonest doors" },
+  { id: "seats", label: "Seats left", hint: "last chairs" },
+] as const;
+
+type DialMode = (typeof DIAL_MODES)[number]["id"];
+
+function roomScore(room: Room, mode: DialMode) {
+  switch (mode) {
+    case "mood":
+      return room.mood.includes("Warm") || room.mood.includes("Intimate") ? 0 : 1;
+    case "city":
+      return ["Warsaw", "Paris", "Amsterdam"].includes(room.city) ? 0 : 1;
+    case "tonight":
+      return ["Fri", "Sat"].includes(room.day) ? 0 : 1;
+    case "seats":
+      return room.seatsLeft;
+  }
+}
+
+function ListeningDial({
+  mode,
+  onChange,
+}: {
+  mode: DialMode;
+  onChange: (mode: DialMode) => void;
+}) {
+  const activeIndex = DIAL_MODES.findIndex((item) => item.id === mode);
+  const rotation = activeIndex * 90;
+
+  return (
+    <div className="relative rounded-3xl border border-edge bg-gradient-to-br from-charcoal/70 to-pitch/80 p-4 glow-warm">
+      <div className="mb-4 flex items-center justify-between">
+        <span className="eyebrow text-[0.58rem]">Find your night</span>
+        <span className="font-mono text-[0.55rem] uppercase tracking-[0.12em] text-dust">
+          tactile selector
+        </span>
+      </div>
+      <div className="grid items-center gap-5 sm:grid-cols-[8.25rem_minmax(0,1fr)]">
+        <div className="relative mx-auto flex h-32 w-32 items-center justify-center rounded-full border border-edge bg-void/45">
+          <div className="absolute inset-3 rounded-full grooves opacity-75" />
+          <motion.div
+            className="absolute inset-0"
+            animate={{ rotate: rotation }}
+            transition={{ type: "spring", stiffness: 170, damping: 20 }}
+          >
+            <span className="absolute left-1/2 top-1.5 h-4 w-4 -translate-x-1/2 rounded-full bg-amber shadow-[0_0_24px_rgba(226,165,82,0.75)]" />
+          </motion.div>
+          <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full border border-amber/45 bg-pitch text-center font-display text-sm leading-none text-cream">
+            {DIAL_MODES[activeIndex].label}
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {DIAL_MODES.map((item, index) => {
+            const on = mode === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onChange(item.id)}
+                className={`rounded-2xl border px-3 py-2 text-left transition-all duration-300 clickable ${
+                  on
+                    ? "border-amber/65 bg-amber/15 text-cream"
+                    : "border-edge bg-void/20 text-parchment hover:border-edge-strong hover:text-cream"
+                }`}
+              >
+                <span className="block text-[0.56rem] uppercase tracking-[0.18em] text-amber">
+                  0{index + 1}
+                </span>
+                <span className="mt-1 block text-sm font-medium">{item.label}</span>
+                <span className="mt-0.5 block text-[0.68rem] text-dust">{item.hint}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LiveSignalBoard({ rooms, source }: { rooms: Room[]; source: "wix" | "mock" }) {
+  const reduce = useReducedMotion();
+  const signals = useMemo(
+    () =>
+      [...rooms]
+        .sort((a, b) => a.seatsLeft - b.seatsLeft)
+        .slice(0, 3)
+        .map((room, index) => ({
+          city: room.city,
+          state: room.seatsLeft <= 0 ? "sold out" : room.seatsLeft <= 3 ? `${room.seatsLeft} seats` : `doors ${index === 0 ? "42m" : "soon"}`,
+          tone: room.seatsLeft <= 3 ? "text-amber" : "text-parchment",
+        })),
+    [rooms],
+  );
+
+  return (
+    <Reveal delay={0.16} className="rounded-3xl border border-edge bg-pitch/45 p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <span className="eyebrow text-[0.58rem]">Live room signal</span>
+        <span className={`rounded-full border px-2 py-1 text-[0.54rem] uppercase tracking-[0.14em] ${source === "wix" ? "border-amber/40 text-amber" : "border-edge text-dust"}`}>
+          {source === "wix" ? "Wix data" : "Preview"}
+        </span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+        {signals.map((signal, index) => (
+          <motion.div
+            key={`${signal.city}-${signal.state}`}
+            initial={reduce ? false : { opacity: 0, x: -12 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.45, delay: index * 0.08 }}
+            className="flex items-center justify-between rounded-2xl border border-edge bg-void/25 px-3 py-2.5"
+          >
+            <span className="text-sm text-cream">{signal.city}</span>
+            <span className={`text-[0.62rem] uppercase tracking-[0.16em] ${signal.tone}`}>
+              {signal.state}
+            </span>
+          </motion.div>
+        ))}
+      </div>
+    </Reveal>
+  );
+}
 
 export default function FeaturedRooms({
   rooms = demoRooms,
@@ -13,11 +139,11 @@ export default function FeaturedRooms({
   rooms?: Room[];
   source?: "wix" | "mock";
 }) {
-  const [active, setActive] = useState<Genre | "All">("All");
+  const [mode, setMode] = useState<DialMode>("mood");
 
   const filtered = useMemo(
-    () => (active === "All" ? rooms : rooms.filter((r) => r.genre === active)),
-    [active, rooms],
+    () => [...rooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, 6),
+    [mode, rooms],
   );
 
   return (
@@ -54,31 +180,12 @@ export default function FeaturedRooms({
         </div>
       </Reveal>
 
-      {/* genre pills */}
-      <Reveal delay={0.1} className="no-scrollbar mt-10 flex gap-2 overflow-x-auto pb-2">
-        {GENRES.map((g) => {
-          const on = active === g;
-          return (
-            <button
-              key={g}
-              type="button"
-              onClick={() => setActive(g)}
-              className={`relative shrink-0 rounded-full border px-4 py-2 text-sm transition-colors duration-300 clickable ${
-                on ? "border-transparent text-void" : "border-edge text-parchment hover:border-edge-strong hover:text-cream"
-              }`}
-            >
-              {on && (
-                <motion.span
-                  layoutId="pill"
-                  className="absolute inset-0 rounded-full bg-cream"
-                  transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                />
-              )}
-              <span className="relative z-10">{g}</span>
-            </button>
-          );
-        })}
-      </Reveal>
+      <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <Reveal delay={0.1}>
+          <ListeningDial mode={mode} onChange={setMode} />
+        </Reveal>
+        <LiveSignalBoard rooms={rooms} source={source} />
+      </div>
 
       {/* grid */}
       <motion.div layout className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

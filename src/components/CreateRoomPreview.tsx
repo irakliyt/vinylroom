@@ -47,6 +47,7 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
 const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
 const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e/events";
+const STUDIO_STEPS = ["Record", "Mood", "Room", "Tickets"];
 
 function defaultEventDate() {
   const date = new Date();
@@ -116,6 +117,12 @@ export default function CreateRoomPreview() {
     setRecords((p) => (p.includes(r) ? p.filter((x) => x !== r) : [...p, r]));
 
   const moodLine = useMemo(() => moods.join(" · ") || "Set a mood", [moods]);
+  const studioProgress = [
+    records.length > 0,
+    moods.length > 0,
+    Boolean(venue.trim() && eventDate && eventTime),
+    capacity > 0 && price >= 0,
+  ];
   const draftSummary = (draft: HostDraft) => [
     `Event title: ${draft.title}`,
     `Genre: ${draft.genre}`,
@@ -196,6 +203,28 @@ export default function CreateRoomPreview() {
             Build the room the way you&apos;d build a mix. Everything you set appears,
             live, in the card your guests will see.
           </p>
+        </Reveal>
+
+        <Reveal delay={0.06} className="mt-8 grid gap-2 sm:grid-cols-4">
+          {STUDIO_STEPS.map((step, index) => {
+            const done = studioProgress[index];
+            return (
+              <div
+                key={step}
+                className={`rounded-2xl border px-4 py-3 transition-colors ${
+                  done ? "border-amber/40 bg-amber/10" : "border-edge bg-pitch/35"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-[0.58rem] uppercase tracking-[0.2em] text-dust">
+                    0{index + 1}
+                  </span>
+                  <span className={`h-2 w-2 rounded-full ${done ? "bg-amber shadow-[0_0_12px_rgba(226,165,82,0.75)]" : "bg-edge-strong"}`} />
+                </div>
+                <div className="mt-2 font-display text-xl leading-none text-cream">{step}</div>
+              </div>
+            );
+          })}
         </Reveal>
 
         <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-[1.15fr_0.85fr]">
@@ -400,6 +429,7 @@ export default function CreateRoomPreview() {
             </div>
             <div className="overflow-hidden rounded-2xl border border-edge bg-gradient-to-b from-charcoal/60 to-pitch/80 p-4 glow-warm">
               <div className="relative">
+                <div className="pointer-events-none absolute -right-[18%] top-[16%] z-0 h-[72%] w-[72%] rounded-full grooves opacity-55 ring-1 ring-edge" />
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={genreIdx}
@@ -408,12 +438,18 @@ export default function CreateRoomPreview() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     transition={{ duration: 0.35 }}
                   >
-                    <AlbumArt sleeve={genre.sleeve} label={title || "Your night"} sub={`${genre.g} · Warsaw`} />
+                    <div className="relative z-10 w-[82%]">
+                      <AlbumArt sleeve={genre.sleeve} label={title || "Your night"} sub={`${genre.g} · Warsaw`} />
+                    </div>
                   </motion.div>
                 </AnimatePresence>
                 <span className={`absolute right-2 top-2 rounded-full px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.16em] backdrop-blur-sm ${isPrivate ? "bg-burnt/80 text-cream" : "bg-void/70 text-cream/80"}`}>
                   {isPrivate ? "Private" : "Public"}
                 </span>
+                <div className="absolute bottom-3 right-3 z-20 rounded-xl border border-edge bg-void/75 px-3 py-2">
+                  <div className="text-[0.52rem] uppercase tracking-[0.18em] text-amber">Guest view</div>
+                  <div className="mt-0.5 text-xs text-parchment">Live sleeve builds here</div>
+                </div>
               </div>
 
               <div className="mt-4">

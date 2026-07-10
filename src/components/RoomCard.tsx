@@ -121,12 +121,20 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             }
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           >
-            <div className="flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full" style={{ background: room.sleeve.accent }} />
-              <span className="truncate text-[0.56rem] uppercase tracking-[0.18em] text-amber">A-side</span>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: room.sleeve.accent }} />
+                <span className="truncate text-[0.56rem] uppercase tracking-[0.18em] text-amber">Tonight</span>
+              </div>
+              <span className="shrink-0 text-[0.58rem] uppercase tracking-[0.12em] text-cream/70">
+                {room.day} · {room.time}
+              </span>
             </div>
             <div className="mt-1 truncate font-display text-base leading-none text-cream">{leadRecord}</div>
-            <div className="mt-1 truncate text-[0.68rem] text-parchment">Next: {nextRecord}</div>
+            <div className="mt-1 flex items-center justify-between gap-3 text-[0.68rem] text-parchment">
+              <span className="min-w-0 truncate">Next: {nextRecord}</span>
+              <span className="shrink-0 text-amber">{room.seatsLeft} seats</span>
+            </div>
           </motion.div>
 
           {room.nowSpinning && (
@@ -217,6 +225,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
           <button
             type="button"
             onClick={() => open(room)}
+            aria-label={`Reserve a seat for ${room.title}`}
             className="group/btn relative overflow-hidden rounded-full border border-edge-strong px-4 py-2 text-sm text-cream transition-colors duration-300 hover:border-amber/50 clickable"
           >
             <span className="relative z-10">Reserve a seat</span>

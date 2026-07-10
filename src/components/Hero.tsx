@@ -18,6 +18,11 @@ import { usePlayer } from "./player/PlayerProvider";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
+const RITUAL_STEPS = [
+  { label: "Sleeve", note: "choose the room" },
+  { label: "Reveal", note: "record slides out" },
+  { label: "Needle", note: "rooms come alive" },
+];
 
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
@@ -167,6 +172,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const cueArmY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 74]);
   const signalOpacity = useTransform(scrollYProgress, [0, 0.16, 0.8, 1], [0.15, 1, 0.7, 0]);
   const needleCaptionOpacity = useTransform(scrollYProgress, [0, 0.68, 0.9, 1], [0, 0, 1, reduce ? 1 : 0.1]);
+  const sleeveStep = useTransform(scrollYProgress, [0, 0.22, 0.34], [1, 1, 0.35]);
+  const revealStep = useTransform(scrollYProgress, [0.18, 0.42, 0.68], [0.35, 1, 0.45]);
+  const needleStep = useTransform(scrollYProgress, [0.58, 0.82, 1], [0.35, 1, reduce ? 1 : 0.45]);
+  const ritualProgress = useTransform(scrollYProgress, [0.05, 0.92], ["6%", "100%"]);
+  const stepOpacities = [sleeveStep, revealStep, needleStep];
 
   // mouse-driven depth tilt for the whole stage
   const mx = useMotionValue(0);
@@ -233,6 +243,36 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             Create intimate vinyl listening sessions, invite real music lovers, and
             turn your collection into a shared evening.
           </p>
+
+          <div className="mt-7 hidden max-w-md rounded-2xl border border-edge bg-pitch/45 p-3 sm:block">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[0.62rem] uppercase tracking-[0.24em] text-amber">
+                Needle-drop journey
+              </span>
+              <span className="font-mono text-[0.58rem] uppercase tracking-[0.14em] text-dust">
+                scroll controls pace
+              </span>
+            </div>
+            <div className="relative mb-3 h-1 overflow-hidden rounded-full bg-edge">
+              <motion.span
+                aria-hidden="true"
+                style={{ width: ritualProgress }}
+                className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-amber via-cream to-burnt"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {RITUAL_STEPS.map((step, i) => (
+                <motion.div
+                  key={step.label}
+                  style={{ opacity: stepOpacities[i] }}
+                  className="rounded-xl border border-edge bg-void/35 px-3 py-2"
+                >
+                  <div className="font-display text-lg leading-none text-cream">{step.label}</div>
+                  <div className="mt-1 text-[0.62rem] text-dust">{step.note}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
           <div className="mt-8 flex flex-col items-start gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
             <MagneticButton href="#host">Create a listening room →</MagneticButton>
@@ -443,7 +483,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               className="pointer-events-none absolute bottom-[21%] left-[18%] hidden rounded-full border border-amber/45 bg-void/75 px-3 py-1.5 backdrop-blur-md lg:flex lg:items-center lg:gap-2"
             >
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber shadow-[0_0_12px_rgba(226,165,82,0.9)]" />
-              <span className="text-[0.55rem] uppercase tracking-[0.2em] text-cream">Needle down</span>
+              <span className="text-[0.55rem] uppercase tracking-[0.2em] text-cream">Needle down · rooms appear</span>
             </motion.div>
           </motion.div>
         </div>

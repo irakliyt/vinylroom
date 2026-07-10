@@ -16,6 +16,40 @@ const nextSteps = [
 ];
 
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
+const dayIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+
+function nextRoomDate(day: string, time: string) {
+  const now = new Date();
+  const date = new Date(now);
+  const target = dayIndex[day] ?? now.getDay();
+  const add = (target - now.getDay() + 7) % 7 || 7;
+  date.setDate(now.getDate() + add);
+  const [hours = "20", minutes = "00"] = time.split(":");
+  date.setHours(Number(hours), Number(minutes), 0, 0);
+  return date;
+}
+
+function calendarHref(room: (typeof demoRooms)[number], orderRef: string) {
+  const starts = nextRoomDate(room.day, room.time);
+  const ends = new Date(starts.getTime() + 2 * 60 * 60 * 1000);
+  const stamp = (date: Date) => date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  const body = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Vinyl Rooms//Listening Session//EN",
+    "BEGIN:VEVENT",
+    `UID:${orderRef || room.id}@vinylroom.online`,
+    `DTSTAMP:${stamp(new Date())}`,
+    `DTSTART:${stamp(starts)}`,
+    `DTEND:${stamp(ends)}`,
+    `SUMMARY:${room.title}`,
+    `LOCATION:${room.venue}, ${room.city}`,
+    `DESCRIPTION:Bring one record. Phones away once the needle drops.`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  return `data:text/calendar;charset=utf-8,${encodeURIComponent(body)}`;
+}
 
 export default function ThankYouContent() {
   const [query, setQuery] = useState<URLSearchParams | null>(null);
@@ -51,6 +85,7 @@ export default function ThankYouContent() {
       demoRooms[0],
     [event],
   );
+  const addToCalendarHref = useMemo(() => calendarHref(room, orderRef), [room, orderRef]);
 
   return (
     <>
@@ -86,38 +121,69 @@ export default function ThankYouContent() {
 
         <MemberBookingNote />
 
-        {/* saved pass */}
-        <div className="relative mt-10 w-full max-w-xl overflow-hidden rounded-3xl border border-edge bg-gradient-to-br from-charcoal/80 via-pitch/90 to-void/90 p-4 text-left glow-warm sm:p-5">
-          <div className="pointer-events-none absolute -right-24 top-1/2 h-52 w-52 -translate-y-1/2 rounded-full grooves opacity-35" />
-          <div className="relative grid gap-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center">
-            <div className="relative h-24 w-24 shrink-0 sm:h-[5.5rem] sm:w-[5.5rem]">
-              <div className="absolute left-8 top-2 h-20 w-20 rounded-full grooves opacity-80 ring-1 ring-edge" />
-              <div className="relative h-20 w-20 overflow-hidden rounded-xl shadow-[0_18px_44px_-24px_rgba(0,0,0,0.95)]">
-                <AlbumArt sleeve={room.sleeve} />
+        {/* collectible ticket sleeve */}
+        <div className="relative mt-10 w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-edge bg-gradient-to-br from-[#2b1a12] via-pitch to-void p-4 text-left glow-warm sm:p-5">
+          <div className="pointer-events-none absolute -right-20 top-8 h-56 w-56 rounded-full grooves opacity-35" />
+          <div className="pointer-events-none absolute inset-y-5 left-1/2 hidden w-px bg-[linear-gradient(to_bottom,transparent,var(--color-edge-strong),transparent)] sm:block" />
+          <div className="relative grid gap-5 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-stretch">
+            <div className="relative min-h-48 overflow-hidden rounded-2xl border border-edge bg-void/35 p-3">
+              <div className="absolute right-[-34%] top-[20%] h-44 w-44 rounded-full grooves opacity-95 ring-1 ring-edge" />
+              <div className="relative h-36 w-36 overflow-hidden rounded-xl shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)]">
+                <AlbumArt sleeve={room.sleeve} label={room.title} sub={room.genre} />
+              </div>
+              <div className="absolute bottom-3 left-3 right-3 rounded-xl border border-edge bg-pitch/75 px-3 py-2">
+                <div className="text-[0.54rem] uppercase tracking-[0.22em] text-amber">
+                  numbered inner sleeve
+                </div>
+                <div className="mt-1 font-mono text-xs text-cream">
+                  #{(orderRef || room.id).slice(0, 10).toUpperCase()}
+                </div>
               </div>
             </div>
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.18em] text-amber">
-                  {confirmed ? "Pass saved" : "Room preview"}
-                </span>
-                {orderRef && (
-                  <span className="max-w-full truncate rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-dust">
-                    Order {orderRef}
+            <div className="flex min-w-0 flex-col justify-between rounded-2xl border border-edge bg-void/25 p-4">
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.18em] text-amber">
+                    {confirmed ? "Digital ticket" : "Room preview"}
                   </span>
-                )}
-              </div>
-              <div className="mt-3 truncate font-display text-2xl leading-tight text-cream">{room.title}</div>
-              <div className="mt-1 text-sm text-parchment">
-                {room.venue} · {room.day} · {room.time}
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs text-dust">
-                {room.records.slice(0, 3).map((record) => (
-                  <span key={record} className="rounded-full border border-edge bg-void/30 px-2.5 py-1">
-                    {record}
+                  <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-dust">
+                    Seat 01
                   </span>
-                ))}
+                </div>
+                <div className="mt-4 font-display text-[clamp(1.65rem,6vw,2.5rem)] leading-[0.95] text-cream">
+                  {room.title}
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Host</span>
+                    <span className="text-parchment">{room.host}</span>
+                  </div>
+                  <div>
+                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Doors</span>
+                    <span className="text-parchment">{room.day} · {room.time}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Room</span>
+                    <span className="text-parchment">{room.venue}, {room.city}</span>
+                  </div>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs text-dust">
+                  {room.records.slice(0, 3).map((record) => (
+                    <span key={record} className="rounded-full border border-edge bg-void/30 px-2.5 py-1">
+                      {record}
+                    </span>
+                  ))}
+                </div>
               </div>
+              <a
+                href={addToCalendarHref}
+                download={`${room.id}-vinyl-room.ics`}
+                className={`mt-5 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-transform clickable sm:w-auto ${
+                  confirmed ? "bg-cream text-void hover:scale-[1.02]" : "pointer-events-none border border-edge text-dust"
+                }`}
+              >
+                Add to calendar
+              </a>
             </div>
           </div>
         </div>
