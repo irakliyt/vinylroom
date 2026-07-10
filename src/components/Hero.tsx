@@ -153,6 +153,10 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const yCover = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 60]);
   const yCard = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : -24]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const stageScale = useTransform(scrollYProgress, [0, 0.75, 1], [1, reduce ? 1 : 0.96, reduce ? 1 : 0.92]);
+  const cueArmRotate = useTransform(scrollYProgress, [0, 0.75, 1], [-8, reduce ? -8 : 4, reduce ? -8 : 8]);
+  const cueArmY = useTransform(scrollYProgress, [0, 1], [0, reduce ? 0 : 38]);
+  const signalOpacity = useTransform(scrollYProgress, [0, 0.2, 0.85], [0.45, 1, 0.2]);
 
   // mouse-driven depth tilt for the whole stage
   const mx = useMotionValue(0);
@@ -230,11 +234,60 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
           onMouseLeave={onLeave}
         >
           <motion.div
-            style={{ rotateX: rx, rotateY: ry, transformStyle: "preserve-3d", willChange: "transform" }}
+            style={{
+              rotateX: rx,
+              rotateY: ry,
+              scale: stageScale,
+              transformStyle: "preserve-3d",
+              willChange: "transform",
+            }}
             className="relative aspect-[0.92] w-full max-w-[26rem] sm:aspect-square lg:max-w-[34rem]"
           >
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] blur-2xl" />
+
+            {/* The scene's quiet technical layer gives the record a sense of place. */}
+            <motion.div
+              style={{ opacity: signalOpacity, translateZ: 10 }}
+              className="pointer-events-none absolute -left-[13%] top-[18%] hidden w-[8.75rem] text-[0.55rem] uppercase tracking-[0.22em] text-beige/75 lg:block"
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_10px_rgba(226,165,82,0.9)]" />
+                <span>Side A / 33 1/3</span>
+              </div>
+              <div className="mt-3 h-px w-full bg-edge" />
+              <div className="mt-2 flex items-center justify-between font-mono text-[0.48rem] tracking-[0.12em] text-dust/65">
+                <span>ROOM 08</span>
+                <span>LIVE</span>
+              </div>
+            </motion.div>
+
+            <motion.div
+              style={{ opacity: signalOpacity, translateZ: 20 }}
+              className="pointer-events-none absolute -right-[12%] bottom-[18%] hidden w-[9.5rem] lg:block"
+            >
+              <div className="flex items-end gap-3 border-b border-edge pb-2">
+                <Waveform bars={8} className="h-4 w-10" color="var(--color-amber)" playing={!reduce} />
+                <span className="pb-0.5 text-[0.5rem] uppercase tracking-[0.22em] text-beige/70">Listening signal</span>
+              </div>
+              <p className="mt-2 font-mono text-[0.48rem] uppercase tracking-[0.12em] text-dust/55">
+                Needle down / room tone
+              </p>
+            </motion.div>
+
+            {/* A small cue arm makes the stage read as a turntable, not a floating card. */}
+            <motion.div
+              style={{ rotate: cueArmRotate, y: cueArmY, translateZ: 60 }}
+              className="pointer-events-none absolute right-[-6%] top-[5%] z-20 hidden h-[42%] w-[20%] origin-[88%_8%] lg:block"
+            >
+              <div className="absolute right-[10%] top-[7%] h-[5px] w-[5px] rounded-full bg-cream shadow-[0_0_12px_rgba(248,240,221,0.65)]" />
+              <div className="absolute right-[11%] top-[9%] h-[2px] w-[84%] origin-right rotate-[128deg] bg-gradient-to-l from-cream/90 via-beige/60 to-transparent shadow-[0_1px_4px_rgba(0,0,0,0.8)]" />
+              <div className="absolute bottom-[8%] left-[1%] h-4 w-7 -rotate-[38deg] rounded-sm border border-beige/50 bg-pitch/90 shadow-[0_5px_12px_rgba(0,0,0,0.45)]" />
+              <div className="absolute bottom-[4%] left-[-2%] h-2 w-2 rounded-full bg-amber shadow-[0_0_16px_rgba(226,165,82,0.9)]" />
+            </motion.div>
+
+            <div className="pointer-events-none absolute left-[20%] top-[14%] hidden h-1.5 w-1.5 animate-pulse rounded-full bg-cream/70 shadow-[0_0_12px_rgba(248,240,221,0.75)] lg:block" />
+            <div className="pointer-events-none absolute bottom-[31%] left-[9%] hidden h-px w-[18%] bg-amber/35 lg:block" />
 
             {/* vinyl sliding out behind the sleeve */}
             <motion.div
