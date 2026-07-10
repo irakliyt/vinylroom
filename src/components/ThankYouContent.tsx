@@ -28,16 +28,19 @@ export default function ThankYouContent() {
   }, []);
 
   const event = query?.get("event") ?? "";
+  const orderRef =
+    query?.get("orderNumber") ||
+    query?.get("orderId") ||
+    query?.get("reservationId") ||
+    query?.get("ticketOrderId") ||
+    "";
 
   // Wix appends an order/reservation identifier on a completed checkout. If
   // it's missing, the visitor likely bounced off checkout (declined card,
   // "unavailable" error, or just navigated back) — don't claim their seat is
   // saved when we have no evidence it is.
   const confirmed = !!(
-    query?.get("orderNumber") ||
-    query?.get("orderId") ||
-    query?.get("reservationId") ||
-    query?.get("ticketOrderId")
+    orderRef
   );
 
   // Resolve the booked room from the baked catalogue by id, slug, or title.
@@ -83,18 +86,38 @@ export default function ThankYouContent() {
 
         <MemberBookingNote />
 
-        {/* event card */}
-        <div className="mt-10 flex w-full max-w-md items-center gap-4 rounded-2xl border border-edge bg-gradient-to-b from-charcoal/60 to-pitch/80 p-4 text-left glow-warm">
-          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg">
-            <AlbumArt sleeve={room.sleeve} />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="text-[0.6rem] uppercase tracking-[0.2em] text-dust">
-              {room.genre} · {room.mood}
+        {/* saved pass */}
+        <div className="relative mt-10 w-full max-w-xl overflow-hidden rounded-3xl border border-edge bg-gradient-to-br from-charcoal/80 via-pitch/90 to-void/90 p-4 text-left glow-warm sm:p-5">
+          <div className="pointer-events-none absolute -right-24 top-1/2 h-52 w-52 -translate-y-1/2 rounded-full grooves opacity-35" />
+          <div className="relative grid gap-4 sm:grid-cols-[5.5rem_minmax(0,1fr)] sm:items-center">
+            <div className="relative h-24 w-24 shrink-0 sm:h-[5.5rem] sm:w-[5.5rem]">
+              <div className="absolute left-8 top-2 h-20 w-20 rounded-full grooves opacity-80 ring-1 ring-edge" />
+              <div className="relative h-20 w-20 overflow-hidden rounded-xl shadow-[0_18px_44px_-24px_rgba(0,0,0,0.95)]">
+                <AlbumArt sleeve={room.sleeve} />
+              </div>
             </div>
-            <div className="truncate font-display text-xl leading-tight text-cream">{room.title}</div>
-            <div className="text-xs text-parchment">
-              {room.venue} · {room.day} · {room.time}
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.18em] text-amber">
+                  {confirmed ? "Pass saved" : "Room preview"}
+                </span>
+                {orderRef && (
+                  <span className="max-w-full truncate rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-dust">
+                    Order {orderRef}
+                  </span>
+                )}
+              </div>
+              <div className="mt-3 truncate font-display text-2xl leading-tight text-cream">{room.title}</div>
+              <div className="mt-1 text-sm text-parchment">
+                {room.venue} · {room.day} · {room.time}
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2 text-xs text-dust">
+                {room.records.slice(0, 3).map((record) => (
+                  <span key={record} className="rounded-full border border-edge bg-void/30 px-2.5 py-1">
+                    {record}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>

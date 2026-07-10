@@ -1,6 +1,7 @@
 "use client";
 
 import { type Room } from "@/data/rooms";
+import { LayoutGroup } from "framer-motion";
 import { MemberProvider } from "@/components/member/MemberProvider";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
 import { BookingProvider } from "@/components/booking/BookingProvider";
@@ -28,25 +29,27 @@ export default function AppShell({
   return (
     <MemberProvider>
       <PlayerProvider>
-        <BookingProvider>
-          <SpotlightBackground />
-          <NoiseOverlay />
-          <CustomCursor />
-          <Navigation source={source} roomCount={rooms.length} />
-          <NowPlayingWidget rooms={rooms} />
+        <LayoutGroup id="vinyl-room-flow">
+          <BookingProvider>
+            <SpotlightBackground />
+            <NoiseOverlay />
+            <CustomCursor />
+            <Navigation source={source} roomCount={rooms.length} />
+            <NowPlayingWidget rooms={rooms} />
 
-          <main className="relative">
-            <Hero rooms={rooms} />
-            <FeaturedRooms rooms={rooms} source={source} />
-            <HowItWorks />
-            <EventDetailPreview event={rooms[0]} />
-            <CreateRoomPreview />
-            <Community />
-            <FinalCTA />
-          </main>
+            <main className="relative">
+              <Hero rooms={rooms} />
+              <FeaturedRooms rooms={rooms} source={source} />
+              <HowItWorks />
+              <EventDetailPreview event={rooms[0]} />
+              <CreateRoomPreview />
+              <Community />
+              <FinalCTA />
+            </main>
 
-          <Footer />
-        </BookingProvider>
+            <Footer />
+          </BookingProvider>
+        </LayoutGroup>
       </PlayerProvider>
     </MemberProvider>
   );

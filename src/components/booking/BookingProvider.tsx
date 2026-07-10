@@ -13,6 +13,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { type Room } from "@/data/rooms";
 import { startEventCheckout } from "@/lib/wix/booking";
 import AlbumArt from "@/components/AlbumArt";
+import VinylDisc from "@/components/VinylDisc";
 
 type BookingCtx = { open: (room: Room) => void };
 const Ctx = createContext<BookingCtx | null>(null);
@@ -101,6 +102,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
   const nameOk = name.trim().length >= 2;
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const detailsValid = nameOk && emailOk;
+  const leadRecord = room?.records[0] ?? room?.title ?? "";
 
   return (
     <Ctx.Provider value={value}>
@@ -133,8 +135,21 @@ export function BookingProvider({ children }: { children: ReactNode }) {
             >
               {/* header */}
               <div className="flex items-center gap-4 border-b border-edge p-5">
-                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg">
-                  <AlbumArt sleeve={room.sleeve} />
+                <div className="relative h-16 w-20 shrink-0">
+                  <motion.div
+                    layoutId={`room-vinyl-${room.id}`}
+                    className="absolute -right-2 top-1 h-14 w-14"
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={false} className="h-full w-full" />
+                  </motion.div>
+                  <motion.div
+                    layoutId={`room-sleeve-${room.id}`}
+                    className="absolute left-0 top-0 h-16 w-16 overflow-hidden rounded-lg shadow-[0_18px_40px_-22px_rgba(0,0,0,0.95)]"
+                    transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <AlbumArt sleeve={room.sleeve} />
+                  </motion.div>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-[0.6rem] uppercase tracking-[0.2em] text-dust">
@@ -180,6 +195,22 @@ export function BookingProvider({ children }: { children: ReactNode }) {
               )}
 
               <div className="p-5">
+                {step !== "result" && (
+                  <motion.div
+                    className="mb-5 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 rounded-2xl border border-edge bg-void/35 px-4 py-3"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, delay: 0.08 }}
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[0.58rem] uppercase tracking-[0.18em] text-amber">A-side queued</div>
+                      <div className="mt-1 truncate text-sm text-cream">{leadRecord}</div>
+                    </div>
+                    <div className="rounded-full border border-edge px-3 py-1 text-xs text-parchment">
+                      {qty} {qty === 1 ? "seat" : "seats"}
+                    </div>
+                  </motion.div>
+                )}
                 <AnimatePresence mode="wait">
                   {/* ── Step 1: seats ── */}
                   {step === "seats" && (

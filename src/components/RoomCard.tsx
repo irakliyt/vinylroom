@@ -19,6 +19,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const [saved, setSaved] = useState(false);
+  const [handling, setHandling] = useState(false);
   const { open } = useBooking();
 
   const mx = useMotionValue(0.5);
@@ -39,6 +40,8 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
 
   const seatPct = Math.round((room.seatsLeft / room.capacity) * 100);
   const scarce = room.seatsLeft <= 3;
+  const leadRecord = room.records[0] ?? room.title;
+  const nextRecord = room.records[1] ?? room.genre;
 
   return (
     <motion.article
@@ -60,16 +63,71 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
       <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ boxShadow: "inset 0 0 60px rgba(216,154,69,0.08), 0 40px 80px -40px rgba(180,95,42,0.5)" }} />
 
       {/* artwork stage */}
-      <div className="relative [transform:translateZ(40px)]" style={{ transformStyle: "preserve-3d" }}>
+      <div
+        className="relative [transform:translateZ(40px)]"
+        onPointerEnter={() => setHandling(true)}
+        onPointerLeave={() => setHandling(false)}
+        onFocusCapture={() => setHandling(true)}
+        onBlurCapture={() => setHandling(false)}
+        style={{ transformStyle: "preserve-3d" }}
+      >
         <div className="relative aspect-square">
           {/* vinyl slides out on hover as a sleeve detail, not a playback control */}
-          <div className="absolute right-0 top-0 aspect-square w-full translate-x-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-[22%]">
-            <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={false} className="w-full" />
-          </div>
+          <motion.div
+            layoutId={`room-vinyl-${room.id}`}
+            className="absolute right-0 top-0 aspect-square w-full"
+            animate={
+              reduce
+                ? false
+                : {
+                    x: handling ? "28%" : "0%",
+                    rotate: handling ? 8 : 0,
+                    scale: handling ? 1.02 : 1,
+                  }
+            }
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={handling && !reduce} className="w-full" />
+          </motion.div>
           {/* sleeve */}
-          <div className="absolute inset-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-1 group-hover:-translate-x-[3%]">
+          <motion.div
+            layoutId={`room-sleeve-${room.id}`}
+            className="absolute inset-0 overflow-hidden rounded-[inherit]"
+            animate={
+              reduce
+                ? false
+                : {
+                    x: handling ? "-5%" : "0%",
+                    rotate: handling ? -1.5 : 0,
+                    scale: handling ? 0.985 : 1,
+                  }
+            }
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          >
             <AlbumArt sleeve={room.sleeve} className="shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]" />
-          </div>
+          </motion.div>
+
+          <motion.div
+            aria-hidden="true"
+            className="pointer-events-none absolute bottom-3 left-3 right-3 z-10 overflow-hidden rounded-xl border border-cream/10 bg-void/55 px-3 py-2 text-left shadow-[0_18px_40px_-28px_rgba(0,0,0,0.9)] backdrop-blur-md"
+            initial={false}
+            animate={
+              reduce
+                ? { opacity: 1 }
+                : {
+                    opacity: handling ? 1 : 0,
+                    y: handling ? 0 : 10,
+                  }
+            }
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full" style={{ background: room.sleeve.accent }} />
+              <span className="truncate text-[0.56rem] uppercase tracking-[0.18em] text-amber">A-side</span>
+            </div>
+            <div className="mt-1 truncate font-display text-base leading-none text-cream">{leadRecord}</div>
+            <div className="mt-1 truncate text-[0.68rem] text-parchment">Next: {nextRecord}</div>
+          </motion.div>
 
           {room.nowSpinning && (
             <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full bg-void/70 px-2.5 py-1 backdrop-blur-sm">
