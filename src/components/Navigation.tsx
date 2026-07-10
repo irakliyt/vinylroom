@@ -120,7 +120,7 @@ export default function Navigation({
                     key={l.href}
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center justify-between border-b border-edge py-4 font-display text-[clamp(1.65rem,8vw,2.25rem)] leading-none text-cream"
+                    className="flex items-center justify-between border-b border-edge py-4 font-display text-[clamp(1.45rem,7vw,2rem)] leading-none text-cream"
                   >
                     <span>{l.label}</span>
                     <span className="text-sm text-amber/70">0{index + 1}</span>

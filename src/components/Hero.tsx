@@ -19,24 +19,14 @@ import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
-function pointerAngle(e: React.PointerEvent<HTMLButtonElement>) {
-  const rect = e.currentTarget.getBoundingClientRect();
-  return Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2)) * (180 / Math.PI);
-}
-
-function angleDelta(next: number, prev: number) {
-  let delta = next - prev;
-  if (delta > 180) delta -= 360;
-  if (delta < -180) delta += 360;
-  return delta;
-}
-
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
   const scratchAudio = useRef<HTMLAudioElement | null>(null);
-  const lastAngle = useRef(0);
+  const lastPointerY = useRef(0);
   const lastAt = useRef(0);
   const djModeRef = useRef(false);
+  const scratchingRef = useRef(false);
+  const scratchCleanup = useRef<(() => void) | null>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
@@ -67,6 +57,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     return () => media.removeEventListener("change", update);
   }, []);
 
+  useEffect(() => () => scratchCleanup.current?.(), []);
+
   const toggleDjMode = () => {
     const next = !djMode;
     djModeRef.current = next;
@@ -80,31 +72,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     }
   };
 
-  const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    djModeRef.current = true;
-    setDjMode(true);
-    setScratching(true);
-    lastAngle.current = pointerAngle(e);
-    lastAt.current = performance.now();
-
-    const audio = scratchAudio.current;
-    if (audio) {
-      audio.loop = true;
-      audio.volume = 0.01;
-      audio.playbackRate = 1;
-      audio.play().catch(() => {});
-    }
-  };
-
-  const moveScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!scratching) return;
-    const next = pointerAngle(e);
+  const scratchAt = (clientY: number) => {
+    if (!scratchingRef.current) return;
     const now = performance.now();
-    const delta = angleDelta(next, lastAngle.current);
-    const speed = Math.min(Math.abs(delta) / Math.max(now - lastAt.current, 16), 1.7);
-    setScratchRotation((r) => r + delta);
-    lastAngle.current = next;
+    const distance = clientY - lastPointerY.current;
+    const speed = Math.min((Math.abs(distance) / Math.max(now - lastAt.current, 16)) * 1.5, 1.7);
+    setScratchRotation((r) => r + distance * 1.8);
+    lastPointerY.current = clientY;
     lastAt.current = now;
 
     const audio = scratchAudio.current;
@@ -116,16 +90,58 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     }
   };
 
-  const stopScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
-      e.currentTarget.releasePointerCapture(e.pointerId);
-    }
+  const stopScratch = () => {
+    scratchingRef.current = false;
+    scratchCleanup.current?.();
+    scratchCleanup.current = null;
     setScratching(false);
     const audio = scratchAudio.current;
     if (audio) {
       audio.pause();
       audio.currentTime = 0;
       audio.playbackRate = 1;
+    }
+  };
+
+  const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Safari can reject pointer capture during a rapid touch transition.
+    }
+    djModeRef.current = true;
+    scratchingRef.current = true;
+    setDjMode(true);
+    setScratching(true);
+    lastPointerY.current = e.clientY;
+    lastAt.current = performance.now();
+
+    const pointerId = e.pointerId;
+    const onMove = (event: PointerEvent) => {
+      if (event.pointerId !== pointerId) return;
+      event.preventDefault();
+      scratchAt(event.clientY);
+    };
+    const onEnd = (event: PointerEvent) => {
+      if (event.pointerId === pointerId) stopScratch();
+    };
+    scratchCleanup.current?.();
+    scratchCleanup.current = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onEnd);
+      window.removeEventListener("pointercancel", onEnd);
+    };
+    window.addEventListener("pointermove", onMove, { passive: false });
+    window.addEventListener("pointerup", onEnd);
+    window.addEventListener("pointercancel", onEnd);
+
+    const audio = scratchAudio.current;
+    if (audio) {
+      audio.loop = true;
+      audio.volume = 0.35;
+      audio.playbackRate = 1;
+      audio.play().catch(() => {});
     }
   };
 
@@ -266,10 +282,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               aria-label="DJ scratch the hero record"
               aria-pressed={scratching}
               onPointerDown={startScratch}
-              onPointerMove={moveScratch}
               onPointerUp={stopScratch}
               onPointerCancel={stopScratch}
-              className="absolute right-[-1%] top-[22%] z-20 h-[42%] w-[36%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%]"
+              className="absolute right-[-4%] top-[9%] z-20 h-[67%] w-[51%] touch-none rounded-full outline-none focus-visible:ring-2 focus-visible:ring-amber/80 clickable sm:right-[0%] sm:top-[23%] sm:h-[42%] sm:w-[36%]"
             >
               <span className="sr-only">Drag the vinyl to scratch</span>
             </button>
