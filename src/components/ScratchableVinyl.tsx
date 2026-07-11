@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import VinylDisc from "@/components/VinylDisc";
+import { playScratchAudio } from "@/lib/scratchAudio";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
@@ -86,10 +87,8 @@ export default function ScratchableVinyl({
 
     const audio = audioRef.current;
     if (audio) {
-      audio.loop = true;
-      audio.volume = 0.01;
       audio.playbackRate = 1;
-      audio.play().catch(() => {});
+      playScratchAudio(audio, 0.18);
     }
   };
 
@@ -111,7 +110,7 @@ export default function ScratchableVinyl({
     if (audio) {
       audio.volume = Math.min(0.35 + speed * 0.55, 0.9);
       audio.playbackRate = Math.min(0.65 + speed * 1.6, 1.9);
-      if (audio.paused) audio.play().catch(() => {});
+      if (audio.paused) playScratchAudio(audio, audio.volume);
     }
   };
 
@@ -126,7 +125,7 @@ export default function ScratchableVinyl({
 
   return (
     <div className="relative mx-auto mb-14 h-36 w-36 sm:mb-16 sm:h-44 sm:w-44">
-      <audio ref={audioRef} preload="none" src={SCRATCH_SRC} />
+      <audio ref={audioRef} preload="auto" src={SCRATCH_SRC} />
       <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(216,154,69,0.16),transparent_62%)] blur-xl sm:inset-[-30%] sm:bg-[radial-gradient(circle,rgba(216,154,69,0.25),transparent_60%)] sm:blur-2xl" />
       <div className="pointer-events-none absolute -inset-4 rounded-full border border-amber/25 shadow-[0_0_38px_-10px_rgba(216,154,69,0.95)]" />
 

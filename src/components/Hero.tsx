@@ -16,6 +16,7 @@ import MagneticButton from "./MagneticButton";
 import { useBooking } from "./booking/BookingProvider";
 import { usePlayer } from "./player/PlayerProvider";
 import { artworkVariant } from "@/lib/artwork";
+import { playScratchAudio } from "@/lib/scratchAudio";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
@@ -94,7 +95,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       audio.loop = true;
       audio.volume = Math.min(0.35 + speed * 0.6, 0.95);
       audio.playbackRate = Math.min(0.7 + speed * 1.7, 2);
-      if (audio.paused) audio.play().catch(() => {});
+      if (audio.paused) playScratchAudio(audio, audio.volume);
     }
   };
 
@@ -124,6 +125,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     setScratching(true);
     lastPointerY.current = e.clientY;
     lastAt.current = performance.now();
+    player.stop();
 
     const pointerId = e.pointerId;
     const onMove = (event: PointerEvent) => {
@@ -146,10 +148,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     const audio = scratchAudio.current;
     if (audio) {
-      audio.loop = true;
-      audio.volume = 0.35;
       audio.playbackRate = 1;
-      audio.play().catch(() => {});
+      playScratchAudio(audio, 0.35);
     }
   };
 
@@ -204,7 +204,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden lg:min-h-[150svh]">
-      <audio ref={scratchAudio} preload="none" src={SCRATCH_SRC} />
+      <audio ref={scratchAudio} preload="auto" src={SCRATCH_SRC} />
       <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-10 px-5 pb-14 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:sticky lg:top-0 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
         {/* ── Copy ── */}
         <motion.div style={{ opacity: isDesktop ? opacity : 1, y: isDesktop ? copyY : 0 }} className="relative z-10 max-w-xl">
