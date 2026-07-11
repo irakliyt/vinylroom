@@ -491,6 +491,39 @@ export default function CreateRoomPreview() {
                 </div>
               </div>
 
+              <div className="mt-4 rounded-2xl border border-amber/20 bg-void/35 p-3">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <span className="text-[0.56rem] uppercase tracking-[0.22em] text-amber">
+                    Collectible ticket sleeve
+                  </span>
+                  <span className="font-mono text-[0.56rem] text-dust">
+                    #{String(capacity).padStart(2, "0")}/{price || 0}
+                  </span>
+                </div>
+                <div className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-3">
+                  <div className="relative aspect-square overflow-hidden rounded-lg border border-edge bg-pitch">
+                    <div className="absolute inset-0 grooves opacity-60" />
+                    <div className="absolute inset-[28%] rounded-full border border-amber/35" />
+                    <div className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate font-display text-lg leading-tight text-cream">
+                      {title || "Your night"}
+                    </div>
+                    <div className="mt-1 truncate text-xs text-parchment">
+                      {scheduleLabel(eventDate, eventTime)} · {venue || "Set a location"}
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {moods.slice(0, 3).map((mood) => (
+                        <span key={mood} className="rounded-full border border-edge px-2 py-0.5 text-[0.58rem] text-dust">
+                          {mood}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="mt-4">
                 <div className="flex items-center gap-2">
                   <span className="rounded-full border border-edge px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.16em]" style={{ color: genre.sleeve.accent }}>
@@ -559,6 +592,17 @@ export default function CreateRoomPreview() {
             >
               {justOpened ? "✓ Wix room brief ready" : "Prepare Wix Events draft"}
             </button>
+            <div className="mt-3 rounded-2xl border border-edge bg-pitch/45 px-3 py-2.5">
+              <div className="flex items-center gap-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_10px_rgba(226,165,82,0.8)]" />
+                <span className="text-[0.58rem] uppercase tracking-[0.2em] text-beige">
+                  Wix Events handoff
+                </span>
+              </div>
+              <p className="mt-1.5 text-[0.72rem] leading-relaxed text-dust">
+                The brief copies title, date, capacity, price, mood, and crate so the ticketed Wix Event can be created without retyping.
+              </p>
+            </div>
             {formError && <p className="mt-3 text-sm text-amber">{formError}</p>}
             {lastDraft && (
               <div className="mt-3 rounded-2xl border border-edge bg-void/50 p-3 text-left">

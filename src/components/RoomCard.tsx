@@ -67,6 +67,14 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
     >
       {/* hover glow */}
       <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ boxShadow: "inset 0 0 60px rgba(216,154,69,0.08), 0 40px 80px -40px rgba(180,95,42,0.5)" }} />
+      <div className="pointer-events-none absolute left-4 right-4 top-3 z-20 flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        <span className="rounded-full border border-amber/35 bg-void/70 px-2 py-1 font-mono text-[0.5rem] uppercase tracking-[0.16em] text-amber">
+          VR-{String(index + 1).padStart(2, "0")}
+        </span>
+        <span className="rounded-full border border-edge bg-void/60 px-2 py-1 text-[0.52rem] uppercase tracking-[0.16em] text-beige">
+          Sleeve pull
+        </span>
+      </div>
 
       {/* artwork stage */}
       <div
@@ -94,6 +102,13 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           >
             <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning={handling && !reduce} className="w-full" />
+            <motion.span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-[8%] rounded-full border opacity-0"
+              animate={reduce ? false : { opacity: handling ? 0.9 : 0 }}
+              transition={{ duration: 0.35 }}
+              style={{ borderColor: room.sleeve.accent, boxShadow: `0 0 34px -12px ${room.sleeve.accent}` }}
+            />
           </motion.div>
           {/* sleeve */}
           <motion.div
@@ -111,6 +126,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
           >
             <AlbumArt sleeve={room.sleeve} className="shadow-[0_20px_50px_-20px_rgba(0,0,0,0.8)]" />
+            <span className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100 sleeve-sheen" />
           </motion.div>
 
           <motion.div
@@ -232,7 +248,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             type="button"
             onClick={() => open(room)}
             aria-label={`Reserve a seat for ${room.title}`}
-            className="group/btn relative overflow-hidden rounded-full border border-edge-strong px-4 py-2 text-sm text-cream transition-colors duration-300 hover:border-amber/50 clickable"
+            className="group/btn relative overflow-hidden rounded-full border border-edge-strong bg-void/40 px-4 py-2 text-sm text-cream transition-colors duration-300 hover:border-amber/50 clickable"
           >
             <span className="relative z-10">Reserve a seat</span>
             <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-amber/20 to-burnt/20 transition-transform duration-500 group-hover/btn:translate-x-0" />

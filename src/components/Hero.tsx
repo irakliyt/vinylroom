@@ -235,6 +235,31 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             turn your collection into a shared evening.
           </p>
 
+          <div className="mt-7 rounded-2xl border border-edge bg-pitch/55 p-3 sm:hidden">
+            <div className="mb-3 flex items-center justify-between">
+              <span className="text-[0.58rem] uppercase tracking-[0.22em] text-amber">
+                Listening ritual
+              </span>
+              <span className="font-mono text-[0.54rem] uppercase tracking-[0.12em] text-dust">
+                3 beats
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {RITUAL_STEPS.map((step, index) => (
+                <motion.div
+                  key={step.label}
+                  initial={reduce ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.55, delay: 0.12 + index * 0.08 }}
+                  className="rounded-xl border border-edge bg-void/40 px-2 py-2"
+                >
+                  <div className="text-[0.54rem] uppercase tracking-[0.18em] text-amber">0{index + 1}</div>
+                  <div className="mt-1 font-display text-base leading-none text-cream">{step.label}</div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+
           <div className="mt-7 hidden max-w-md rounded-2xl border border-edge bg-pitch/45 p-3 sm:block">
             <div className="mb-3 flex items-center justify-between">
               <span className="text-[0.62rem] uppercase tracking-[0.24em] text-amber">
@@ -287,7 +312,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
+          className="ritual-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
           onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
@@ -304,6 +329,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
           >
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.18),transparent_62%)] blur-xl sm:inset-[-18%] sm:bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] sm:blur-2xl" />
+            <div className="pointer-events-none absolute inset-[16%] rounded-full border border-amber/10 opacity-70 [mask-image:linear-gradient(90deg,transparent,black,transparent)] sm:inset-[8%]" />
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
             <motion.div

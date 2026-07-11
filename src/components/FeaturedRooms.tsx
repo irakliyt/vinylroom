@@ -59,6 +59,16 @@ function ListeningDial({
           <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full border border-amber/45 bg-pitch text-center font-display text-sm leading-none text-cream">
             {DIAL_MODES[activeIndex].label}
           </div>
+          <div className="pointer-events-none absolute -bottom-3 left-1/2 flex -translate-x-1/2 gap-1">
+            {[0, 1, 2].map((i) => (
+              <motion.span
+                key={i}
+                className="h-7 w-5 rounded-[3px] border border-edge bg-gradient-to-b from-amber/30 to-pitch shadow-[0_10px_18px_-14px_rgba(0,0,0,0.9)]"
+                animate={{ y: activeIndex === i ? -3 : 0, rotate: (i - 1) * 5 + activeIndex }}
+                transition={{ type: "spring", stiffness: 180, damping: 18 }}
+              />
+            ))}
+          </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
           {DIAL_MODES.map((item, index) => {
@@ -119,12 +129,26 @@ function LiveSignalBoard({ rooms, source }: { rooms: Room[]; source: "wix" | "mo
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: index * 0.08 }}
-            className="flex items-center justify-between rounded-2xl border border-edge bg-void/25 px-3 py-2.5"
+            className="relative overflow-hidden rounded-2xl border border-edge bg-void/25 px-3 py-2.5"
           >
-            <span className="text-sm text-cream">{signal.city}</span>
-            <span className={`text-[0.62rem] uppercase tracking-[0.16em] ${signal.tone}`}>
-              {signal.state}
-            </span>
+            <div className="relative z-10 flex items-center justify-between gap-3">
+              <span className="text-sm text-cream">{signal.city}</span>
+              <span className={`text-[0.62rem] uppercase tracking-[0.16em] ${signal.tone}`}>
+                {signal.state}
+              </span>
+            </div>
+            <div className="pointer-events-none mt-2 flex h-4 items-end gap-1">
+              {[0, 1, 2, 3, 4].map((bar) => (
+                <span
+                  key={bar}
+                  className="signal-dot w-1 rounded-full bg-amber/55"
+                  style={{
+                    height: `${5 + ((bar + index) % 4) * 3}px`,
+                    animationDelay: `${(bar + index) * 0.08}s`,
+                  }}
+                />
+              ))}
+            </div>
           </motion.div>
         ))}
       </div>

@@ -38,7 +38,7 @@ export default function Navigation({
           scrolled || open ? "bg-void/90 backdrop-blur-xl" : ""
         }`}
       >
-        <nav className="relative mx-auto flex max-w-[92rem] items-center justify-between gap-3 border-b border-edge/60 px-4 py-3.5 sm:px-8 sm:py-4 xl:grid xl:grid-cols-[12rem_minmax(0,1fr)_auto] xl:gap-6 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-8">
+        <nav className="relative mx-auto flex max-w-[92rem] items-center justify-between gap-3 border-b border-edge/60 px-4 py-3.5 sm:px-8 sm:py-4 xl:grid xl:grid-cols-[12.5rem_minmax(0,1fr)_auto] xl:gap-5 2xl:grid-cols-[14rem_minmax(0,1fr)_auto] 2xl:gap-7">
           {/* wordmark */}
           <a href="#top" className="group flex min-w-0 max-w-[8.75rem] shrink items-center gap-2.5 sm:max-w-none sm:gap-3.5 clickable xl:justify-self-start">
             <span className="relative flex h-8 w-8 shrink-0 items-center justify-center">
@@ -56,12 +56,12 @@ export default function Navigation({
           </a>
 
           {/* desktop links */}
-          <div className="hidden min-w-0 items-center justify-center gap-5 xl:flex 2xl:gap-7">
+          <div className="hidden min-w-0 items-center justify-center gap-4 xl:flex 2xl:gap-7">
             {links.map((l) => (
               <a
                 key={l.href}
                 href={l.href}
-                className="group relative whitespace-nowrap text-sm text-parchment transition-colors hover:text-cream"
+                className="group relative whitespace-nowrap text-[0.84rem] text-parchment transition-colors hover:text-cream 2xl:text-sm"
               >
                 {l.label}
                 <span className="absolute -bottom-1 left-0 h-px w-0 bg-amber transition-all duration-300 group-hover:w-full" />
@@ -70,10 +70,13 @@ export default function Navigation({
           </div>
 
           <div className="flex min-w-0 shrink-0 items-center justify-end gap-2 md:gap-3 xl:justify-self-end">
-            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge px-3 py-1.5 min-[1800px]:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
+            <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge bg-pitch/40 px-3 py-1.5 xl:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
-              <span className="whitespace-nowrap text-[0.65rem] uppercase tracking-[0.2em] text-dust">
+              <span className="hidden whitespace-nowrap text-[0.58rem] uppercase tracking-[0.18em] text-dust 2xl:inline">
                 {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
+              </span>
+              <span className="whitespace-nowrap text-[0.58rem] uppercase tracking-[0.16em] text-dust 2xl:hidden">
+                {source === "wix" ? `${roomCount} live` : "Demo"}
               </span>
             </div>
             <span className="fixed left-[10.75rem] top-3.5 z-[60] block xl:static">
@@ -116,7 +119,7 @@ export default function Navigation({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto border-b border-edge bg-void/98 xl:hidden"
+              className="fixed inset-x-0 bottom-0 top-[4.25rem] overflow-y-auto border-b border-edge bg-void/98 xl:hidden"
           >
             <div className="mx-auto flex min-h-full max-w-lg flex-col px-5 pb-8 pt-7">
               <div className="mb-5 flex items-center justify-between rounded-2xl border border-edge bg-pitch/70 px-4 py-3">
@@ -129,7 +132,7 @@ export default function Navigation({
                     key={l.href}
                     href={l.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center justify-between border-b border-edge py-3.5 font-display text-[clamp(1.25rem,6vw,1.7rem)] leading-none text-cream"
+                    className="flex items-center justify-between border-b border-edge py-3.5 font-display text-[clamp(1.05rem,5.35vw,1.45rem)] leading-none text-cream"
                   >
                     <span>{l.label}</span>
                     <span className="text-sm text-amber/70">0{index + 1}</span>

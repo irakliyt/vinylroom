@@ -132,6 +132,28 @@
       inset 0 1px 0 rgba(244, 232, 208, 0.06);
   }
 
+  .sleeve-sheen {
+    background:
+      linear-gradient(115deg, transparent 20%, rgba(248, 240, 221, 0.18) 44%, transparent 62%),
+      radial-gradient(circle at 72% 18%, rgba(226, 165, 82, 0.14), transparent 32%);
+    mix-blend-mode: screen;
+  }
+
+  .ritual-stage::before {
+    content: "";
+    position: absolute;
+    inset: 4% 2% 10%;
+    pointer-events: none;
+    background:
+      linear-gradient(90deg, transparent, rgba(226, 165, 82, 0.08), transparent),
+      repeating-linear-gradient(90deg, transparent 0 4.25rem, rgba(248, 240, 221, 0.035) 4.25rem 4.32rem);
+    mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
+  }
+
+  .signal-dot {
+    animation: signal-rise 1.9s var(--ease-drift) infinite;
+  }
+
   .hairline {
     background: linear-gradient(
       90deg,
@@ -284,6 +306,21 @@
   }
   100% {
     box-shadow: 0 0 0 14px rgba(226, 165, 82, 0);
+  }
+}
+
+@keyframes signal-rise {
+  0% {
+    opacity: 0.35;
+    transform: translateY(3px) scaleY(0.65);
+  }
+  48% {
+    opacity: 1;
+    transform: translateY(-2px) scaleY(1.08);
+  }
+  100% {
+    opacity: 0.45;
+    transform: translateY(2px) scaleY(0.8);
   }
 }
 
