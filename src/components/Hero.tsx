@@ -88,7 +88,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   const updateDjHologram = (rotationDegrees: number) => {
     const djVideo = djVideoRef.current;
-    if (reduce || !djVideo?.duration) return;
+    if (reduce || !djModeRef.current || !djVideo?.duration) return;
 
     pendingDjProgress.current = ((rotationDegrees / 360) % 1 + 1) % 1;
     if (djFrameRequest.current !== null) return;
@@ -96,7 +96,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     djFrameRequest.current = window.requestAnimationFrame(() => {
       const video = djVideoRef.current;
       if (video?.duration) {
-        video.pause();
         video.currentTime = pendingDjProgress.current * video.duration;
       }
       djFrameRequest.current = null;
@@ -133,11 +132,46 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     };
   }, [onDjMetadataLoaded]);
 
+  useEffect(() => {
+    const djVideo = djVideoRef.current;
+    if (!djVideo || !djVideoReady || djVideoFailed) return;
+
+    if (!djMode) {
+      djVideo.pause();
+      if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) djVideo.currentTime = 0;
+      return;
+    }
+
+    if (reduce) {
+      djVideo.pause();
+      if (djVideo.duration) djVideo.currentTime = djVideo.duration * 0.16;
+      return;
+    }
+
+    void djVideo.play().catch(() => {
+      // Muted inline playback should be allowed; if a browser declines it,
+      // keep the loaded frame visible and retry on the next mode activation.
+    });
+  }, [djMode, djVideoFailed, djVideoReady, reduce]);
+
   const toggleDjMode = () => {
     const next = !djMode;
+    const djVideo = djVideoRef.current;
     djModeRef.current = next;
     setDjMode(next);
-    if (!next) scratchAudio.stop();
+
+    if (next && djVideoReady && !djVideoFailed && !reduce) {
+      void djVideo?.play().catch(() => {});
+    }
+
+    if (!next) {
+      djVideo?.pause();
+      if (djVideo && djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
+        djVideo.currentTime = 0;
+      }
+      stopScratch();
+      scratchAudio.stop();
+    }
   };
 
   const scratchAt = (clientY: number) => {
@@ -167,15 +201,15 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   };
 
   const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!djModeRef.current) return;
+
     e.preventDefault();
     try {
       e.currentTarget.setPointerCapture(e.pointerId);
     } catch {
       // Safari can reject pointer capture during a rapid touch transition.
     }
-    djModeRef.current = true;
     scratchingRef.current = true;
-    setDjMode(true);
     setScratching(true);
     lastPointerY.current = e.clientY;
     lastAt.current = performance.now();
@@ -376,7 +410,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
+          className={`ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px] ${djMode ? "dj-active" : ""}`}
           onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
@@ -398,9 +432,10 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             <video
               ref={djVideoRef}
               id="djHologram"
-              className={`dj-hologram ${djVideoReady && !djVideoFailed ? "is-ready" : ""}`}
+              className={`dj-hologram ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
               muted
               playsInline
+              loop
               preload="auto"
               aria-hidden="true"
               tabIndex={-1}
@@ -530,14 +565,15 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <button
                 type="button"
                 onClick={toggleDjMode}
-                  className={`rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
+                aria-pressed={djMode}
+                className={`rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
                   djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
                 }`}
               >
                 DJ mode
               </button>
               <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
-                {scratching ? "Scratching" : "Press + drag disc"}
+                {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Turn on to scratch"}
               </span>
             </div>
 

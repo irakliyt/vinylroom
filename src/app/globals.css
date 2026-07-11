@@ -160,14 +160,19 @@
     object-fit: contain;
     pointer-events: none;
     opacity: 0;
+    visibility: hidden;
     mix-blend-mode: screen;
     filter: drop-shadow(0 0 12px rgba(226, 165, 82, 0.24));
-    transition: opacity 450ms var(--ease-drift);
+    transition:
+      opacity 450ms var(--ease-drift),
+      visibility 0s linear 450ms;
     will-change: opacity;
   }
 
-  .dj-hologram.is-ready {
+  .dj-hologram.is-active {
     opacity: 0.86;
+    visibility: visible;
+    transition-delay: 0s;
   }
 
   .signal-dot {
@@ -284,7 +289,7 @@
 
 /* Dedicated phone layout: reserve a safe slot above the player artwork. */
 @media (max-width: 767px) {
-  .ritual-stage {
+  .ritual-stage.dj-active {
     padding-top: clamp(120px, 40vw, 172px);
   }
 
@@ -296,7 +301,7 @@
     filter: drop-shadow(0 0 9px rgba(226, 165, 82, 0.2));
   }
 
-  .dj-hologram.is-ready {
+  .dj-hologram.is-active {
     opacity: 0.72;
   }
 }
@@ -321,7 +326,7 @@
 }
 
 @media (min-width: 1360px) {
-  .hologram-stage {
+  .hologram-stage.dj-active {
     translate: 2rem 0;
   }
 
