@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   motion,
   useScroll,
@@ -16,7 +16,7 @@ import MagneticButton from "./MagneticButton";
 import { useBooking } from "./booking/BookingProvider";
 import { usePlayer } from "./player/PlayerProvider";
 import { artworkVariant } from "@/lib/artwork";
-import { playScratchAudio } from "@/lib/scratchAudio";
+import { ScratchAudioEngine } from "@/lib/scratchAudio";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
@@ -28,7 +28,7 @@ const RITUAL_STEPS = [
 
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
-  const scratchAudio = useRef<HTMLAudioElement | null>(null);
+  const scratchAudio = useMemo(() => new ScratchAudioEngine(SCRATCH_SRC), []);
   const stageRect = useRef<DOMRect | null>(null);
   const lastPointerY = useRef(0);
   const lastAt = useRef(0);
@@ -59,6 +59,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   }, [djMode]);
 
   useEffect(() => {
+    scratchAudio.preload();
+    return () => scratchAudio.stop();
+  }, [scratchAudio]);
+
+  useEffect(() => {
     const media = window.matchMedia("(min-width: 640px)");
     const update = () => setIsDesktop(media.matches);
     update();
@@ -72,31 +77,21 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     const next = !djMode;
     djModeRef.current = next;
     setDjMode(next);
-    const audio = scratchAudio.current;
-    if (!audio) return;
-    if (!next) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.playbackRate = 1;
-    }
+    if (!next) scratchAudio.stop();
   };
 
   const scratchAt = (clientY: number) => {
     if (!scratchingRef.current) return;
     const now = performance.now();
     const distance = clientY - lastPointerY.current;
-    const speed = Math.min((Math.abs(distance) / Math.max(now - lastAt.current, 16)) * 1.5, 1.7);
+    const elapsed = Math.max(now - lastAt.current, 16);
+    const speed = Math.min((Math.abs(distance) / elapsed) * 1.5, 1.7);
     setScratchRotation((r) => r + distance * 1.8);
     lastPointerY.current = clientY;
     lastAt.current = now;
 
-    const audio = scratchAudio.current;
-    if (audio) {
-      audio.loop = true;
-      audio.volume = Math.min(0.35 + speed * 0.6, 0.95);
-      audio.playbackRate = Math.min(0.7 + speed * 1.7, 2);
-      if (audio.paused) playScratchAudio(audio, audio.volume);
-    }
+    if (Math.abs(distance) < 1.8) return;
+    void scratchAudio.play(distance, elapsed, Math.min(0.3 + speed * 0.55, 0.9));
   };
 
   const stopScratch = () => {
@@ -104,12 +99,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     scratchCleanup.current?.();
     scratchCleanup.current = null;
     setScratching(false);
-    const audio = scratchAudio.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-      audio.playbackRate = 1;
-    }
+    scratchAudio.stop();
   };
 
   const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -126,6 +116,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     lastPointerY.current = e.clientY;
     lastAt.current = performance.now();
     player.stop();
+    void scratchAudio.arm();
 
     const pointerId = e.pointerId;
     const onMove = (event: PointerEvent) => {
@@ -145,12 +136,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     window.addEventListener("pointermove", onMove, { passive: false });
     window.addEventListener("pointerup", onEnd);
     window.addEventListener("pointercancel", onEnd);
-
-    const audio = scratchAudio.current;
-    if (audio) {
-      audio.playbackRate = 1;
-      playScratchAudio(audio, 0.35);
-    }
   };
 
   const { scrollYProgress } = useScroll({
@@ -204,7 +189,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] overflow-hidden lg:min-h-[150svh]">
-      <audio ref={scratchAudio} preload="auto" src={SCRATCH_SRC} />
       <div className="mx-auto grid min-h-[100svh] max-w-[100rem] grid-cols-1 items-center gap-10 px-5 pb-14 pt-28 sm:gap-12 sm:px-8 sm:pb-16 sm:pt-32 lg:sticky lg:top-0 lg:grid-cols-[0.9fr_1.1fr] lg:gap-6 lg:pt-28">
         {/* ── Copy ── */}
         <motion.div style={{ opacity: isDesktop ? opacity : 1, y: isDesktop ? copyY : 0 }} className="relative z-10 max-w-xl">

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import VinylDisc from "@/components/VinylDisc";
-import { playScratchAudio } from "@/lib/scratchAudio";
+import { ScratchAudioEngine } from "@/lib/scratchAudio";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 
@@ -28,12 +28,13 @@ export default function ScratchableVinyl({
   label: string;
   autoSpin: boolean;
 }) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const scratchAudio = useMemo(() => new ScratchAudioEngine(SCRATCH_SRC), []);
   const centerRef = useRef<{ x: number; y: number } | null>(null);
   const lastAngle = useRef(0);
   const lastAt = useRef(0);
   const settleTimer = useRef<number | null>(null);
   const djModeRef = useRef(false);
+  const scratchingRef = useRef(false);
   const [djMode, setDjMode] = useState(false);
   const [scratching, setScratching] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -41,8 +42,13 @@ export default function ScratchableVinyl({
   useEffect(() => {
     return () => {
       if (settleTimer.current) window.clearTimeout(settleTimer.current);
+      scratchAudio.stop();
     };
-  }, []);
+  }, [scratchAudio]);
+
+  useEffect(() => {
+    scratchAudio.preload();
+  }, [scratchAudio]);
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -51,11 +57,8 @@ export default function ScratchableVinyl({
   const pauseScratch = () => {
     if (settleTimer.current) window.clearTimeout(settleTimer.current);
     settleTimer.current = window.setTimeout(() => {
-      const audio = audioRef.current;
-      if (!audio || scratching) return;
-      audio.pause();
-      audio.currentTime = 0;
-      audio.playbackRate = 1;
+      if (scratchingRef.current) return;
+      scratchAudio.stop();
     }, 160);
   };
 
@@ -64,36 +67,31 @@ export default function ScratchableVinyl({
     djModeRef.current = next;
     setDjMode(next);
 
-    const audio = audioRef.current;
-    if (!audio) return;
-
     if (!next) {
       if (settleTimer.current) window.clearTimeout(settleTimer.current);
-      audio.pause();
-      audio.currentTime = 0;
-      audio.playbackRate = 1;
+      scratchAudio.stop();
     }
   };
 
   const onPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Some mobile Safari builds reject capture during fast touch handoff.
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     centerRef.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
     djModeRef.current = true;
+    scratchingRef.current = true;
     setDjMode(true);
     setScratching(true);
     lastAngle.current = angleFromCenter(e, centerRef.current);
     lastAt.current = performance.now();
-
-    const audio = audioRef.current;
-    if (audio) {
-      audio.playbackRate = 1;
-      playScratchAudio(audio, 0.18);
-    }
+    void scratchAudio.arm();
   };
 
   const onPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!scratching) return;
+    if (!scratchingRef.current) return;
 
     if (!centerRef.current) return;
     const nextAngle = angleFromCenter(e, centerRef.current);
@@ -106,18 +104,15 @@ export default function ScratchableVinyl({
     lastAngle.current = nextAngle;
     lastAt.current = now;
 
-    const audio = audioRef.current;
-    if (audio) {
-      audio.volume = Math.min(0.35 + speed * 0.55, 0.9);
-      audio.playbackRate = Math.min(0.65 + speed * 1.6, 1.9);
-      if (audio.paused) playScratchAudio(audio, audio.volume);
-    }
+    if (Math.abs(delta) < 1.5) return;
+    void scratchAudio.play(delta, elapsed, Math.min(0.28 + speed * 0.55, 0.86));
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (e.currentTarget.hasPointerCapture(e.pointerId)) {
       e.currentTarget.releasePointerCapture(e.pointerId);
     }
+    scratchingRef.current = false;
     setScratching(false);
     centerRef.current = null;
     pauseScratch();
@@ -125,7 +120,6 @@ export default function ScratchableVinyl({
 
   return (
     <div className="relative mx-auto mb-14 h-36 w-36 sm:mb-16 sm:h-44 sm:w-44">
-      <audio ref={audioRef} preload="auto" src={SCRATCH_SRC} />
       <div className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(216,154,69,0.16),transparent_62%)] blur-xl sm:inset-[-30%] sm:bg-[radial-gradient(circle,rgba(216,154,69,0.25),transparent_60%)] sm:blur-2xl" />
       <div className="pointer-events-none absolute -inset-4 rounded-full border border-amber/25 shadow-[0_0_38px_-10px_rgba(216,154,69,0.95)]" />
 
