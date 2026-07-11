@@ -263,11 +263,6 @@
     user-select: none;
   }
 
-  .scratch-surface {
-    touch-action: none;
-    overscroll-behavior: contain;
-  }
-
   /* custom cursor active → hide the native one (desktop only) */
   .cursor-hidden,
   .cursor-hidden * {
@@ -338,8 +333,13 @@
 
 /* Dedicated phone layout: reserve a safe slot above the player artwork. */
 @media (max-width: 767px) {
-  .ritual-stage.dj-active {
+  .ritual-stage {
     padding-top: clamp(155px, 51vw, 225px);
+  }
+
+  .ritual-stage .dj-mode-control {
+    top: clamp(-201px, -45vw, -131px);
+    right: 2%;
   }
 
   .dj-hologram-projector {
