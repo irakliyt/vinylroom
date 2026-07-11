@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   motion,
   useScroll,
@@ -35,6 +35,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const djModeRef = useRef(false);
   const scratchingRef = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
+  const djVideoRef = useRef<HTMLVideoElement>(null);
+  const pendingDjProgress = useRef(0);
+  const djFrameRequest = useRef<number | null>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
@@ -42,6 +45,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [scratching, setScratching] = useState(false);
   const [scratchRotation, setScratchRotation] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [djVideoReady, setDjVideoReady] = useState(false);
+  const [djVideoFailed, setDjVideoFailed] = useState(false);
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
   // checkout — the static `featuredEvent` import never has a wixEventId.
@@ -71,7 +76,62 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     return () => media.removeEventListener("change", update);
   }, []);
 
-  useEffect(() => () => scratchCleanup.current?.(), []);
+  useEffect(
+    () => () => {
+      scratchCleanup.current?.();
+      if (djFrameRequest.current !== null) {
+        window.cancelAnimationFrame(djFrameRequest.current);
+      }
+    },
+    [],
+  );
+
+  const updateDjHologram = (rotationDegrees: number) => {
+    const djVideo = djVideoRef.current;
+    if (reduce || !djVideo?.duration) return;
+
+    pendingDjProgress.current = ((rotationDegrees / 360) % 1 + 1) % 1;
+    if (djFrameRequest.current !== null) return;
+
+    djFrameRequest.current = window.requestAnimationFrame(() => {
+      const video = djVideoRef.current;
+      if (video?.duration) {
+        video.pause();
+        video.currentTime = pendingDjProgress.current * video.duration;
+      }
+      djFrameRequest.current = null;
+    });
+  };
+
+  const onDjMetadataLoaded = useCallback(() => {
+    const djVideo = djVideoRef.current;
+    if (!djVideo) return;
+
+    djVideo.pause();
+    // Reduced-motion users see one representative frame, without scrubbing.
+    if (reduce && djVideo.duration) djVideo.currentTime = djVideo.duration * 0.16;
+    setDjVideoReady(true);
+  }, [reduce]);
+
+  useEffect(() => {
+    const djVideo = djVideoRef.current;
+    if (!djVideo) return;
+
+    const handleError = () => {
+      setDjVideoReady(false);
+      setDjVideoFailed(true);
+    };
+
+    djVideo.addEventListener("loadedmetadata", onDjMetadataLoaded);
+    djVideo.addEventListener("error", handleError);
+    // A preloaded asset can finish before React hydrates and attaches handlers.
+    if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) onDjMetadataLoaded();
+
+    return () => {
+      djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
+      djVideo.removeEventListener("error", handleError);
+    };
+  }, [onDjMetadataLoaded]);
 
   const toggleDjMode = () => {
     const next = !djMode;
@@ -86,7 +146,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     const distance = clientY - lastPointerY.current;
     const elapsed = Math.max(now - lastAt.current, 16);
     const speed = Math.min((Math.abs(distance) / elapsed) * 1.5, 1.7);
-    setScratchRotation((r) => r + distance * 1.8);
+    setScratchRotation((rotationDegrees) => {
+      const nextRotation = rotationDegrees + distance * 1.8;
+      updateDjHologram(nextRotation);
+      return nextRotation;
+    });
     lastPointerY.current = clientY;
     lastAt.current = now;
 
@@ -312,7 +376,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className="ritual-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
+          className="ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px]"
           onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
@@ -330,6 +394,19 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             {/* warm halo */}
             <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.18),transparent_62%)] blur-xl sm:inset-[-18%] sm:bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] sm:blur-2xl" />
             <div className="pointer-events-none absolute inset-[16%] rounded-full border border-amber/10 opacity-70 [mask-image:linear-gradient(90deg,transparent,black,transparent)] sm:inset-[8%]" />
+
+            <video
+              ref={djVideoRef}
+              id="djHologram"
+              className={`dj-hologram ${djVideoReady && !djVideoFailed ? "is-ready" : ""}`}
+              muted
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+              tabIndex={-1}
+            >
+              <source src="/assets/video/dj-hologram.webm" type="video/webm" />
+            </video>
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
             <motion.div

@@ -86,6 +86,8 @@ export default function ThankYouContent() {
     [event],
   );
   const addToCalendarHref = useMemo(() => calendarHref(room, orderRef), [room, orderRef]);
+  const ticketNumber = (orderRef || `${room.id}-preview`).slice(0, 12).toUpperCase();
+  const seatLabel = confirmed ? `A-${String((ticketNumber.charCodeAt(0) % 12) + 1).padStart(2, "0")}` : "pending";
 
   return (
     <>
@@ -122,68 +124,102 @@ export default function ThankYouContent() {
         <MemberBookingNote />
 
         {/* collectible ticket sleeve */}
-        <div className="relative mt-10 w-full max-w-2xl overflow-hidden rounded-[1.75rem] border border-edge bg-gradient-to-br from-[#2b1a12] via-pitch to-void p-4 text-left glow-warm sm:p-5">
-          <div className="pointer-events-none absolute -right-20 top-8 h-56 w-56 rounded-full grooves opacity-35" />
-          <div className="pointer-events-none absolute inset-y-5 left-1/2 hidden w-px bg-[linear-gradient(to_bottom,transparent,var(--color-edge-strong),transparent)] sm:block" />
-          <div className="relative grid gap-5 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-stretch">
-            <div className="relative min-h-48 overflow-hidden rounded-2xl border border-edge bg-void/35 p-3">
-              <div className="absolute right-[-34%] top-[20%] h-44 w-44 rounded-full grooves opacity-95 ring-1 ring-edge" />
-              <div className="relative h-36 w-36 overflow-hidden rounded-xl shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)]">
-                <AlbumArt sleeve={room.sleeve} label={room.title} sub={room.genre} />
+        <div className="relative mt-10 w-full max-w-3xl overflow-hidden rounded-[1.75rem] border border-edge bg-gradient-to-br from-[#2b1a12] via-pitch to-void p-4 text-left glow-warm sm:p-5">
+          <div className="pointer-events-none absolute -right-20 top-8 h-64 w-64 rounded-full grooves opacity-35" />
+          <div className="pointer-events-none absolute left-0 right-0 top-0 h-px bg-gradient-to-r from-transparent via-amber/45 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-5 left-[58%] hidden w-px bg-[repeating-linear-gradient(to_bottom,var(--color-edge-strong)_0_8px,transparent_8px_16px)] sm:block" />
+          <div className="relative grid gap-5 sm:grid-cols-[minmax(0,1fr)_15rem] sm:items-stretch">
+            <div className="grid gap-4 sm:grid-cols-[12rem_minmax(0,1fr)]">
+              <div className="relative min-h-48 overflow-hidden rounded-2xl border border-edge bg-void/35 p-3">
+                <div className="absolute right-[-34%] top-[20%] h-44 w-44 rounded-full grooves opacity-95 ring-1 ring-edge" />
+                <div className="relative h-36 w-36 overflow-hidden rounded-xl shadow-[0_24px_60px_-28px_rgba(0,0,0,0.95)]">
+                  <AlbumArt sleeve={room.sleeve} label={room.title} sub={room.genre} />
+                </div>
+                <div className="absolute bottom-3 left-3 right-3 rounded-xl border border-edge bg-pitch/75 px-3 py-2">
+                  <div className="text-[0.54rem] uppercase tracking-[0.22em] text-amber">
+                    numbered inner sleeve
+                  </div>
+                  <div className="mt-1 font-mono text-xs text-cream">
+                    #{ticketNumber}
+                  </div>
+                </div>
               </div>
-              <div className="absolute bottom-3 left-3 right-3 rounded-xl border border-edge bg-pitch/75 px-3 py-2">
-                <div className="text-[0.54rem] uppercase tracking-[0.22em] text-amber">
-                  numbered inner sleeve
+              <div className="flex min-w-0 flex-col justify-between rounded-2xl border border-edge bg-void/25 p-4">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.18em] text-amber">
+                      {confirmed ? "Digital ticket" : "Room preview"}
+                    </span>
+                    <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-dust">
+                      Seat {seatLabel}
+                    </span>
+                  </div>
+                  <div className="mt-4 font-display text-[clamp(1.65rem,6vw,2.5rem)] leading-[0.95] text-cream">
+                    {room.title}
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Host</span>
+                      <span className="text-parchment">{room.host}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Doors</span>
+                      <span className="text-parchment">{room.day} · {room.time}</span>
+                    </div>
+                    <div className="col-span-2">
+                      <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Room</span>
+                      <span className="text-parchment">{room.venue}, {room.city}</span>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2 text-xs text-dust">
+                    {room.records.slice(0, 3).map((record) => (
+                      <span key={record} className="rounded-full border border-edge bg-void/30 px-2.5 py-1">
+                        {record}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-1 font-mono text-xs text-cream">
-                  #{(orderRef || room.id).slice(0, 10).toUpperCase()}
-                </div>
+                <a
+                  href={addToCalendarHref}
+                  download={`${room.id}-vinyl-room.ics`}
+                  className={`mt-5 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-transform clickable sm:w-auto ${
+                    confirmed ? "bg-cream text-void hover:scale-[1.02]" : "pointer-events-none border border-edge text-dust"
+                  }`}
+                >
+                  Add to calendar
+                </a>
               </div>
             </div>
-            <div className="flex min-w-0 flex-col justify-between rounded-2xl border border-edge bg-void/25 p-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.18em] text-amber">
-                    {confirmed ? "Digital ticket" : "Room preview"}
-                  </span>
-                  <span className="rounded-full border border-edge bg-void/40 px-2.5 py-1 text-[0.56rem] uppercase tracking-[0.14em] text-dust">
-                    Seat 01
-                  </span>
+            <div className="relative overflow-hidden rounded-2xl border border-edge bg-cream/[0.04] p-4">
+              <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-void" />
+              <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-void" />
+              <div className="text-[0.54rem] uppercase tracking-[0.24em] text-amber">Entry stub</div>
+              <div className="mt-4 space-y-3 text-sm">
+                <div>
+                  <span className="block text-[0.56rem] uppercase tracking-[0.18em] text-dust">Order</span>
+                  <span className="font-mono text-cream">{ticketNumber}</span>
                 </div>
-                <div className="mt-4 font-display text-[clamp(1.65rem,6vw,2.5rem)] leading-[0.95] text-cream">
-                  {room.title}
+                <div>
+                  <span className="block text-[0.56rem] uppercase tracking-[0.18em] text-dust">Seat</span>
+                  <span className="font-display text-2xl text-cream">{seatLabel}</span>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Host</span>
-                    <span className="text-parchment">{room.host}</span>
-                  </div>
-                  <div>
-                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Doors</span>
-                    <span className="text-parchment">{room.day} · {room.time}</span>
-                  </div>
-                  <div className="col-span-2">
-                    <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Room</span>
-                    <span className="text-parchment">{room.venue}, {room.city}</span>
-                  </div>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-dust">
-                  {room.records.slice(0, 3).map((record) => (
-                    <span key={record} className="rounded-full border border-edge bg-void/30 px-2.5 py-1">
-                      {record}
-                    </span>
-                  ))}
+                <div>
+                  <span className="block text-[0.56rem] uppercase tracking-[0.18em] text-dust">Status</span>
+                  <span className={confirmed ? "text-amber" : "text-dust"}>{confirmed ? "Confirmed" : "Not confirmed"}</span>
                 </div>
               </div>
-              <a
-                href={addToCalendarHref}
-                download={`${room.id}-vinyl-room.ics`}
-                className={`mt-5 inline-flex w-full items-center justify-center rounded-full px-5 py-3 text-sm font-medium transition-transform clickable sm:w-auto ${
-                  confirmed ? "bg-cream text-void hover:scale-[1.02]" : "pointer-events-none border border-edge text-dust"
-                }`}
-              >
-                Add to calendar
-              </a>
+              <div className="mt-6 flex h-14 items-end gap-1 border-t border-edge pt-4" aria-hidden="true">
+                {Array.from({ length: 18 }).map((_, i) => (
+                  <span
+                    key={i}
+                    className="w-1 bg-cream/75"
+                    style={{ height: `${14 + ((ticketNumber.charCodeAt(i % ticketNumber.length) + i) % 30)}px` }}
+                  />
+                ))}
+              </div>
+              <p className="mt-4 text-xs leading-relaxed text-dust">
+                Show this confirmation at the door. Bring curiosity, one record if you like, and keep phones away once the needle drops.
+              </p>
             </div>
           </div>
         </div>

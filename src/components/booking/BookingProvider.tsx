@@ -133,6 +133,41 @@ export function BookingProvider({ children }: { children: ReactNode }) {
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
               className="relative z-10 w-full max-w-lg overflow-hidden rounded-t-3xl border border-edge bg-gradient-to-b from-charcoal/95 to-pitch/95 shadow-[0_-20px_80px_-20px_rgba(0,0,0,0.9)] backdrop-blur-2xl sm:rounded-3xl"
             >
+              <AnimatePresence>
+                {status === "loading" && (
+                  <motion.div
+                    className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-void/88 px-6 text-center backdrop-blur-md"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    <div className="relative h-32 w-40">
+                      <motion.div
+                        className="absolute right-2 top-5 h-24 w-24"
+                        animate={{ x: [0, 10, 18], rotate: [0, 12, 24] }}
+                        transition={{ duration: 1.1, repeat: Infinity, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <VinylDisc label={room.genre} accent={room.sleeve.accent} spinning className="h-full w-full" />
+                      </motion.div>
+                      <motion.div
+                        className="absolute left-3 top-3 h-28 w-28 overflow-hidden rounded-xl border border-edge shadow-[0_28px_70px_-34px_rgba(0,0,0,1)]"
+                        animate={{ x: [0, -4, 0], rotate: [0, -1.5, 0] }}
+                        transition={{ duration: 1.1, repeat: Infinity, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        <AlbumArt sleeve={room.sleeve} />
+                      </motion.div>
+                    </div>
+                    <div className="mt-5 text-[0.62rem] uppercase tracking-[0.24em] text-amber">
+                      Sending sleeve to Wix checkout
+                    </div>
+                    <p className="mt-2 max-w-xs text-sm text-parchment">
+                      Holding {qty} {qty === 1 ? "seat" : "seats"} for {room.title}.
+                    </p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               {/* header */}
               <div className="flex items-center gap-4 border-b border-edge p-5">
                 <div className="relative h-16 w-20 shrink-0">

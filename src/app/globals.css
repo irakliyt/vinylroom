@@ -150,6 +150,26 @@
     mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
   }
 
+  .dj-hologram {
+    position: absolute;
+    z-index: 5;
+    top: -29%;
+    left: 4%;
+    width: clamp(160px, 15vw, 200px);
+    aspect-ratio: 500 / 506;
+    object-fit: contain;
+    pointer-events: none;
+    opacity: 0;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 12px rgba(226, 165, 82, 0.24));
+    transition: opacity 450ms var(--ease-drift);
+    will-change: opacity;
+  }
+
+  .dj-hologram.is-ready {
+    opacity: 0.86;
+  }
+
   .signal-dot {
     animation: signal-rise 1.9s var(--ease-drift) infinite;
   }
@@ -259,6 +279,64 @@
   .glass {
     background: linear-gradient(160deg, rgba(46, 28, 19, 0.82), rgba(14, 11, 9, 0.94));
     backdrop-filter: none;
+  }
+}
+
+/* Dedicated phone layout: reserve a safe slot above the player artwork. */
+@media (max-width: 767px) {
+  .ritual-stage {
+    padding-top: clamp(120px, 40vw, 172px);
+  }
+
+  .dj-hologram {
+    top: clamp(-174px, -40.5vw, -122px);
+    right: auto;
+    left: clamp(0px, 3vw, 12px);
+    width: clamp(120px, 40vw, 172px);
+    filter: drop-shadow(0 0 9px rgba(226, 165, 82, 0.2));
+  }
+
+  .dj-hologram.is-ready {
+    opacity: 0.72;
+  }
+}
+
+/* The single-column tablet stage has enough room for a true left-side layout. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dj-hologram {
+    top: 12%;
+    right: 100%;
+    left: auto;
+    width: clamp(160px, 22vw, 180px);
+  }
+}
+
+/* Keep the hologram above the stage while the desktop grid is still narrow. */
+@media (min-width: 1024px) and (max-width: 1359px) {
+  .dj-hologram {
+    top: -29%;
+    right: auto;
+    left: 4%;
+  }
+}
+
+@media (min-width: 1360px) {
+  .hologram-stage {
+    translate: 2rem 0;
+  }
+
+  .dj-hologram {
+    top: 10%;
+    right: 100%;
+    left: auto;
+    width: clamp(170px, 12vw, 220px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dj-hologram {
+    transition-duration: 0.01ms;
+    will-change: auto;
   }
 }
 

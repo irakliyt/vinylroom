@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import RoomCard from "./RoomCard";
 import Reveal from "./Reveal";
@@ -14,6 +14,15 @@ const DIAL_MODES = [
 ] as const;
 
 type DialMode = (typeof DIAL_MODES)[number]["id"];
+
+function modeFromPointer(e: React.PointerEvent<HTMLElement>) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - (rect.left + rect.width / 2);
+  const y = e.clientY - (rect.top + rect.height / 2);
+  const angle = (Math.atan2(y, x) * 180) / Math.PI + 90;
+  const normalized = (angle + 360) % 360;
+  return DIAL_MODES[Math.round(normalized / 90) % DIAL_MODES.length].id;
+}
 
 function roomScore(room: Room, mode: DialMode) {
   switch (mode) {
@@ -35,8 +44,12 @@ function ListeningDial({
   mode: DialMode;
   onChange: (mode: DialMode) => void;
 }) {
+  const dragging = useRef(false);
   const activeIndex = DIAL_MODES.findIndex((item) => item.id === mode);
   const rotation = activeIndex * 90;
+  const updateFromPointer = (e: React.PointerEvent<HTMLButtonElement>) => {
+    onChange(modeFromPointer(e));
+  };
 
   return (
     <div className="relative rounded-3xl border border-edge bg-gradient-to-br from-charcoal/70 to-pitch/80 p-4 glow-warm">
@@ -47,7 +60,27 @@ function ListeningDial({
         </span>
       </div>
       <div className="grid items-center gap-5 sm:grid-cols-[8.25rem_minmax(0,1fr)]">
-        <div className="relative mx-auto flex h-32 w-32 items-center justify-center rounded-full border border-edge bg-void/45">
+        <button
+          type="button"
+          aria-label={`Drag to filter listening rooms, currently ${DIAL_MODES[activeIndex].label}`}
+          onPointerDown={(e) => {
+            dragging.current = true;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            updateFromPointer(e);
+          }}
+          onPointerMove={(e) => {
+            if (!dragging.current) return;
+            updateFromPointer(e);
+          }}
+          onPointerUp={(e) => {
+            dragging.current = false;
+            if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+          }}
+          onPointerCancel={() => {
+            dragging.current = false;
+          }}
+          className="relative mx-auto flex h-32 w-32 touch-none items-center justify-center rounded-full border border-edge bg-void/45 outline-none transition-colors focus-visible:border-amber/70 clickable"
+        >
           <div className="absolute inset-3 rounded-full grooves opacity-75" />
           <motion.div
             className="absolute inset-0"
@@ -59,6 +92,9 @@ function ListeningDial({
           <div className="relative z-10 flex h-16 w-16 items-center justify-center rounded-full border border-amber/45 bg-pitch text-center font-display text-sm leading-none text-cream">
             {DIAL_MODES[activeIndex].label}
           </div>
+          <span className="pointer-events-none absolute bottom-4 left-1/2 -translate-x-1/2 text-[0.48rem] uppercase tracking-[0.16em] text-dust">
+            drag
+          </span>
           <div className="pointer-events-none absolute -bottom-3 left-1/2 flex -translate-x-1/2 gap-1">
             {[0, 1, 2].map((i) => (
               <motion.span
@@ -69,7 +105,7 @@ function ListeningDial({
               />
             ))}
           </div>
-        </div>
+        </button>
         <div className="grid grid-cols-2 gap-2">
           {DIAL_MODES.map((item, index) => {
             const on = mode === item.id;
