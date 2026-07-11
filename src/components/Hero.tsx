@@ -201,7 +201,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   };
 
   const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
-    if (!djModeRef.current) return;
+    if (!djModeRef.current) {
+      djModeRef.current = true;
+      setDjMode(true);
+      if (djVideoReady && !djVideoFailed && !reduce) {
+        void djVideoRef.current?.play().catch(() => {});
+      }
+    }
 
     e.preventDefault();
     try {
@@ -429,19 +435,23 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             <div className="pointer-events-none absolute inset-[-10%] rounded-full bg-[radial-gradient(circle,rgba(226,165,82,0.18),transparent_62%)] blur-xl sm:inset-[-18%] sm:bg-[radial-gradient(circle,rgba(226,165,82,0.3),transparent_60%)] sm:blur-2xl" />
             <div className="pointer-events-none absolute inset-[16%] rounded-full border border-amber/10 opacity-70 [mask-image:linear-gradient(90deg,transparent,black,transparent)] sm:inset-[8%]" />
 
-            <video
-              ref={djVideoRef}
-              id="djHologram"
-              className={`dj-hologram ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
-              muted
-              playsInline
-              loop
-              preload="auto"
+            <div
+              className={`dj-hologram-projector ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
               aria-hidden="true"
-              tabIndex={-1}
             >
-              <source src="/assets/video/dj-hologram.webm" type="video/webm" />
-            </video>
+              <video
+                ref={djVideoRef}
+                id="djHologram"
+                className="dj-hologram"
+                muted
+                playsInline
+                loop
+                preload="auto"
+                tabIndex={-1}
+              >
+                <source src="/assets/video/dj-hologram.webm" type="video/webm" />
+              </video>
+            </div>
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
             <motion.div
@@ -561,7 +571,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <span className="sr-only">Press and drag the disc to scratch</span>
             </button>
 
-            <div className="absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
+            <div className="dj-mode-control absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
               <button
                 type="button"
                 onClick={toggleDjMode}
@@ -573,7 +583,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 DJ mode
               </button>
               <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
-                {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Turn on to scratch"}
+                {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Drag disc or turn on"}
               </span>
             </div>
 

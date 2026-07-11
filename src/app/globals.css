@@ -150,29 +150,78 @@
     mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
   }
 
-  .dj-hologram {
+  .dj-hologram-projector {
     position: absolute;
     z-index: 5;
     top: -29%;
     left: 4%;
-    width: clamp(160px, 15vw, 200px);
+    width: clamp(220px, 18vw, 260px);
     aspect-ratio: 500 / 506;
-    object-fit: contain;
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
-    mix-blend-mode: screen;
-    filter: drop-shadow(0 0 12px rgba(226, 165, 82, 0.24));
+    isolation: isolate;
     transition:
       opacity 450ms var(--ease-drift),
       visibility 0s linear 450ms;
     will-change: opacity;
   }
 
-  .dj-hologram.is-active {
-    opacity: 0.86;
+  .dj-hologram-projector::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 4% 2% 2%;
+    clip-path: polygon(8% 0, 92% 0, 60% 100%, 40% 100%);
+    background: linear-gradient(
+      to top,
+      rgba(226, 165, 82, 0.26),
+      rgba(226, 165, 82, 0.08) 42%,
+      transparent 82%
+    );
+    filter: blur(9px);
+    opacity: 0.72;
+  }
+
+  .dj-hologram-projector::after {
+    content: "";
+    position: absolute;
+    z-index: 2;
+    left: 24%;
+    bottom: 0;
+    width: 52%;
+    height: 7%;
+    border: 1px solid rgba(248, 240, 221, 0.42);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(226, 165, 82, 0.3), transparent 68%);
+    box-shadow:
+      0 0 12px rgba(248, 240, 221, 0.3),
+      0 0 30px rgba(226, 165, 82, 0.42),
+      0 -18px 42px rgba(226, 165, 82, 0.14);
+  }
+
+  .dj-hologram {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    filter:
+      saturate(1.22)
+      contrast(1.08)
+      drop-shadow(0 0 8px rgba(248, 240, 221, 0.24))
+      drop-shadow(0 0 18px rgba(226, 165, 82, 0.36));
+  }
+
+  .dj-hologram-projector.is-active {
+    opacity: 0.94;
     visibility: visible;
     transition-delay: 0s;
+  }
+
+  .dj-hologram-projector.is-active .dj-hologram {
+    animation: hologram-flicker 3.6s steps(1, end) infinite;
   }
 
   .signal-dot {
@@ -290,58 +339,86 @@
 /* Dedicated phone layout: reserve a safe slot above the player artwork. */
 @media (max-width: 767px) {
   .ritual-stage.dj-active {
-    padding-top: clamp(120px, 40vw, 172px);
+    padding-top: clamp(155px, 51vw, 225px);
   }
 
-  .dj-hologram {
-    top: clamp(-174px, -40.5vw, -122px);
+  .dj-hologram-projector {
+    top: clamp(-227px, -51.5vw, -157px);
     right: auto;
     left: clamp(0px, 3vw, 12px);
-    width: clamp(120px, 40vw, 172px);
-    filter: drop-shadow(0 0 9px rgba(226, 165, 82, 0.2));
+    width: clamp(150px, 50vw, 220px);
   }
 
-  .dj-hologram.is-active {
-    opacity: 0.72;
+  .dj-hologram-projector.is-active {
+    opacity: 0.84;
   }
 }
 
 /* The single-column tablet stage has enough room for a true left-side layout. */
 @media (min-width: 768px) and (max-width: 1023px) {
-  .dj-hologram {
+  .dj-hologram-projector {
     top: 12%;
     right: 100%;
     left: auto;
-    width: clamp(160px, 22vw, 180px);
+    width: clamp(190px, 25vw, 230px);
   }
 }
 
 /* Keep the hologram above the stage while the desktop grid is still narrow. */
 @media (min-width: 1024px) and (max-width: 1359px) {
-  .dj-hologram {
+  .dj-hologram-projector {
     top: -29%;
     right: auto;
     left: 4%;
+    width: clamp(220px, 19vw, 260px);
   }
 }
 
 @media (min-width: 1360px) {
   .hologram-stage.dj-active {
-    translate: 2rem 0;
+    translate: 6rem 0;
   }
 
-  .dj-hologram {
+  .hologram-stage.dj-active .dj-mode-control {
+    right: -6%;
+  }
+
+  .dj-hologram-projector {
     top: 10%;
     right: 100%;
     left: auto;
-    width: clamp(170px, 12vw, 220px);
+    width: clamp(230px, 16vw, 280px);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dj-hologram {
+  .dj-hologram-projector {
     transition-duration: 0.01ms;
     will-change: auto;
+  }
+
+  .dj-hologram-projector.is-active .dj-hologram {
+    animation: none;
+  }
+}
+
+@keyframes hologram-flicker {
+  0%,
+  44%,
+  46%,
+  73%,
+  75%,
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  45% {
+    opacity: 0.76;
+    transform: translateY(0.5px);
+  }
+  74% {
+    opacity: 0.86;
+    transform: translateY(-0.5px);
   }
 }
 
