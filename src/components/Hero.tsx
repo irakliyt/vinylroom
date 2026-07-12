@@ -109,6 +109,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     djVideo.pause();
     // Reduced-motion users see one representative frame, without scrubbing.
     if (reduce && djVideo.duration) djVideo.currentTime = djVideo.duration * 0.16;
+    setDjVideoFailed(false);
     setDjVideoReady(true);
   }, [reduce]);
 
@@ -416,7 +417,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className={`ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px] ${djMode ? "dj-active" : ""}`}
+          className={`ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px] ${djMode ? "dj-active" : ""} ${djMode && djVideoReady && !djVideoFailed ? "dj-rendering" : ""}`}
           onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
@@ -450,6 +451,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 tabIndex={-1}
               >
                 <source src="/assets/video/dj-hologram.webm" type="video/webm" />
+                <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
               </video>
             </div>
 

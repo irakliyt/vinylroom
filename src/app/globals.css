@@ -477,6 +477,10 @@
 /* Dedicated phone layout: reserve a safe slot above the player artwork. */
 @media (max-width: 767px) {
   .ritual-stage {
+    padding-top: 0;
+  }
+
+  .ritual-stage.dj-rendering {
     padding-top: clamp(250px, 74vw, 330px);
   }
 
@@ -519,6 +523,10 @@
 /* The single-column tablet stage has enough room for a true left-side layout. */
 @media (min-width: 768px) and (max-width: 1023px) {
   .ritual-stage {
+    padding-top: 0;
+  }
+
+  .ritual-stage.dj-rendering {
     padding-top: clamp(330px, 46vw, 400px);
   }
 
