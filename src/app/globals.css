@@ -319,6 +319,24 @@
     display: none;
   }
 
+  .dj-hologram-mobile-animation {
+    display: none;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    opacity: 0.86;
+    filter:
+      brightness(0.9)
+      contrast(0.98)
+      saturate(0.72)
+      drop-shadow(0 0 10px rgba(226, 165, 82, 0.14));
+  }
+
+  .dj-hologram-projector.is-static-mobile.is-active .dj-hologram-mobile-animation {
+    display: block;
+  }
+
   .dj-hologram-projector.is-active {
     opacity: 0.96;
     visibility: visible;
@@ -334,7 +352,7 @@
     z-index: 15;
     left: 84%;
     top: 49%;
-    width: 105%;
+    width: 150%;
     height: 45%;
     pointer-events: none;
     opacity: 0;
@@ -388,8 +406,9 @@
     background: linear-gradient(
       to right,
       transparent 0%,
-      rgba(197, 108, 52, 0.2) 24%,
-      rgba(226, 165, 82, 0.62) 72%,
+      rgba(197, 108, 52, 0.26) 8%,
+      rgba(226, 165, 82, 0.48) 38%,
+      rgba(226, 165, 82, 0.68) 72%,
       rgba(248, 240, 221, 0.98) 100%
     );
     animation: projection-ray-breathe 2.2s ease-in-out infinite;
@@ -412,7 +431,7 @@
   }
 
   .dj-projection-rays.is-active {
-    opacity: 0.9;
+    opacity: 1;
     visibility: visible;
     transition-delay: 0s;
   }
@@ -663,7 +682,7 @@
 
   .dj-projection-rays {
     top: 50%;
-    width: 78%;
+    width: 115%;
   }
 
   .dj-projection-rays span:nth-child(1) {
@@ -714,6 +733,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .dj-hologram-mobile-animation {
+    display: none !important;
+  }
+
   .dj-hologram-projector {
     transition-duration: 0.01ms;
     will-change: auto;
@@ -780,10 +803,10 @@
 @keyframes projection-ray-breathe {
   0%,
   100% {
-    opacity: 0.36;
+    opacity: 0.68;
   }
   50% {
-    opacity: 0.9;
+    opacity: 1;
   }
 }
 

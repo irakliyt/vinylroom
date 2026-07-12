@@ -91,7 +91,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   const updateDjHologram = (rotationDegrees: number) => {
     const djVideo = djVideoRef.current;
-    if (reduce || !djModeRef.current || !djVideo?.duration) return;
+    if (staticMobileDj || reduce || !djModeRef.current || !djVideo?.duration) return;
 
     pendingDjProgress.current = ((rotationDegrees / 360) % 1 + 1) % 1;
     if (djFrameRequest.current !== null) return;
@@ -476,6 +476,17 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 <source src="/assets/video/dj-hologram.webm" type="video/webm" />
                 <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
               </video>
+              {/* Image animation avoids the unstable mobile video compositor. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/video/dj-hologram-mobile.webp"
+                alt=""
+                width={320}
+                height={480}
+                draggable={false}
+                decoding="async"
+                className="dj-hologram-mobile-animation"
+              />
             </div>
 
             <div className={`dj-projection-rays ${djVisualActive ? "is-active" : ""}`} aria-hidden="true">
