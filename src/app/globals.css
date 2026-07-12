@@ -267,7 +267,7 @@
       drop-shadow(0 0 10px rgba(226, 165, 82, 0.16))
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
     -webkit-mask-image: radial-gradient(
-      ellipse 58% 58% at 48% 42%,
+      ellipse 70% 58% at 48% 42%,
       black 26%,
       rgba(0, 0, 0, 0.9) 38%,
       rgba(0, 0, 0, 0.5) 52%,
@@ -278,7 +278,7 @@
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-image: radial-gradient(
-      ellipse 58% 58% at 48% 42%,
+      ellipse 70% 58% at 48% 42%,
       black 26%,
       rgba(0, 0, 0, 0.9) 38%,
       rgba(0, 0, 0, 0.5) 52%,
@@ -294,7 +294,7 @@
     isolation: auto;
     background: url("/assets/video/dj-hologram-poster.jpg") center / contain no-repeat;
     -webkit-mask-image: radial-gradient(
-      ellipse 58% 58% at 48% 42%,
+      ellipse 70% 58% at 48% 42%,
       black 26%,
       rgba(0, 0, 0, 0.9) 38%,
       rgba(0, 0, 0, 0.5) 52%,
@@ -304,7 +304,7 @@
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-image: radial-gradient(
-      ellipse 58% 58% at 48% 42%,
+      ellipse 70% 58% at 48% 42%,
       black 26%,
       rgba(0, 0, 0, 0.9) 38%,
       rgba(0, 0, 0, 0.5) 52%,
