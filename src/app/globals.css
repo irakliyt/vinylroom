@@ -155,8 +155,8 @@
     z-index: 5;
     top: -29%;
     left: 4%;
-    width: clamp(220px, 18vw, 260px);
-    aspect-ratio: 500 / 506;
+    width: clamp(340px, 25vw, 390px);
+    aspect-ratio: 5 / 4;
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
@@ -171,33 +171,33 @@
     content: "";
     position: absolute;
     z-index: -1;
-    inset: 4% 2% 2%;
+    inset: 2% 2% -2%;
     clip-path: polygon(8% 0, 92% 0, 60% 100%, 40% 100%);
     background: linear-gradient(
       to top,
-      rgba(226, 165, 82, 0.26),
-      rgba(226, 165, 82, 0.08) 42%,
+      rgba(226, 165, 82, 0.18),
+      rgba(226, 165, 82, 0.05) 42%,
       transparent 82%
     );
-    filter: blur(9px);
-    opacity: 0.72;
+    filter: blur(10px);
+    opacity: 0.28;
   }
 
   .dj-hologram-projector::after {
     content: "";
     position: absolute;
     z-index: 2;
-    left: 24%;
-    bottom: 0;
-    width: 52%;
-    height: 7%;
+    left: 22%;
+    bottom: -2%;
+    width: 56%;
+    height: 9%;
     border: 1px solid rgba(248, 240, 221, 0.42);
     border-radius: 50%;
-    background: radial-gradient(ellipse, rgba(226, 165, 82, 0.3), transparent 68%);
+    background: radial-gradient(ellipse, rgba(248, 240, 221, 0.4), rgba(226, 165, 82, 0.2) 42%, transparent 72%);
     box-shadow:
-      0 0 12px rgba(248, 240, 221, 0.3),
-      0 0 30px rgba(226, 165, 82, 0.42),
-      0 -18px 42px rgba(226, 165, 82, 0.14);
+      0 0 14px rgba(248, 240, 221, 0.44),
+      0 0 38px rgba(226, 165, 82, 0.56),
+      0 -24px 54px rgba(226, 165, 82, 0.2);
   }
 
   .dj-hologram {
@@ -208,10 +208,11 @@
     pointer-events: none;
     mix-blend-mode: screen;
     filter:
-      saturate(1.22)
-      contrast(1.08)
+      saturate(1.38)
+      contrast(1.12)
       drop-shadow(0 0 8px rgba(248, 240, 221, 0.24))
-      drop-shadow(0 0 18px rgba(226, 165, 82, 0.36));
+      drop-shadow(0 0 18px rgba(226, 165, 82, 0.4))
+      drop-shadow(0 0 22px rgba(81, 153, 255, 0.16));
   }
 
   .dj-hologram-projector.is-active {
@@ -222,6 +223,79 @@
 
   .dj-hologram-projector.is-active .dj-hologram {
     animation: hologram-flicker 3.6s steps(1, end) infinite;
+  }
+
+  .dj-hologram-projector.is-active::before {
+    animation: projection-pulse 2.8s ease-in-out infinite;
+  }
+
+  .dj-projection-beam {
+    position: absolute;
+    z-index: 15;
+    left: 84%;
+    top: 49%;
+    width: 105%;
+    height: 45%;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-100%, -100%);
+    transform-origin: 100% 100%;
+    clip-path: polygon(100% 100%, 0 12%, 12% 0);
+    background:
+      linear-gradient(to top left, rgba(248, 240, 221, 0.44), rgba(226, 165, 82, 0.14) 34%, transparent 78%),
+      linear-gradient(to top left, rgba(81, 153, 255, 0.2), transparent 64%);
+    filter: blur(5px);
+    mix-blend-mode: screen;
+    transition:
+      opacity 380ms var(--ease-drift),
+      visibility 0s linear 380ms;
+  }
+
+  .dj-projection-beam.is-active {
+    opacity: 0.46;
+    visibility: visible;
+    transition-delay: 0s;
+    animation: beam-shimmer 2.4s ease-in-out infinite;
+  }
+
+  .dj-projection-emitter {
+    position: absolute;
+    z-index: 25;
+    left: 84%;
+    top: 49%;
+    width: clamp(32px, 4vw, 48px);
+    aspect-ratio: 1.8 / 1;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    border: 1px solid rgba(248, 240, 221, 0.52);
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(248, 240, 221, 0.8), rgba(226, 165, 82, 0.34) 30%, transparent 68%);
+    box-shadow:
+      0 0 10px rgba(248, 240, 221, 0.7),
+      0 0 28px rgba(226, 165, 82, 0.82),
+      0 0 54px rgba(81, 153, 255, 0.24);
+    transition:
+      opacity 240ms ease-out,
+      visibility 0s linear 240ms;
+  }
+
+  .dj-projection-emitter::after {
+    content: "";
+    position: absolute;
+    inset: 28%;
+    border-radius: 50%;
+    background: var(--color-cream);
+    box-shadow: 0 0 12px rgba(248, 240, 221, 0.96);
+  }
+
+  .dj-projection-emitter.is-active {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+    animation: emitter-pulse 1.8s ease-in-out infinite;
   }
 
   .signal-dot {
@@ -334,23 +408,28 @@
 /* Dedicated phone layout: reserve a safe slot above the player artwork. */
 @media (max-width: 767px) {
   .ritual-stage {
-    padding-top: clamp(155px, 51vw, 225px);
+    padding-top: clamp(175px, 56vw, 240px);
   }
 
   .ritual-stage .dj-mode-control {
     top: clamp(-201px, -45vw, -131px);
-    right: 2%;
+    right: -2%;
   }
 
   .dj-hologram-projector {
-    top: clamp(-227px, -51.5vw, -157px);
+    top: clamp(-220px, -52vw, -175px);
     right: auto;
-    left: clamp(0px, 3vw, 12px);
-    width: clamp(150px, 50vw, 220px);
+    left: -10%;
+    width: clamp(210px, 66vw, 290px);
   }
 
   .dj-hologram-projector.is-active {
     opacity: 0.84;
+  }
+
+  .dj-projection-beam {
+    width: 74%;
+    height: 80%;
   }
 }
 
@@ -360,7 +439,12 @@
     top: 12%;
     right: 100%;
     left: auto;
-    width: clamp(190px, 25vw, 230px);
+    width: clamp(280px, 36vw, 340px);
+  }
+
+  .dj-projection-beam {
+    width: 95%;
+    height: 30%;
   }
 }
 
@@ -370,24 +454,29 @@
     top: -29%;
     right: auto;
     left: 4%;
-    width: clamp(220px, 19vw, 260px);
+    width: clamp(340px, 28vw, 380px);
+  }
+
+  .dj-projection-beam {
+    width: 65%;
+    height: 72%;
   }
 }
 
 @media (min-width: 1360px) {
   .hologram-stage.dj-active {
-    translate: 6rem 0;
+    translate: 7rem 0;
   }
 
   .hologram-stage.dj-active .dj-mode-control {
-    right: -6%;
+    right: -3%;
   }
 
   .dj-hologram-projector {
     top: 10%;
     right: 100%;
     left: auto;
-    width: clamp(230px, 16vw, 280px);
+    width: clamp(360px, 26vw, 420px);
   }
 }
 
@@ -398,6 +487,12 @@
   }
 
   .dj-hologram-projector.is-active .dj-hologram {
+    animation: none;
+  }
+
+  .dj-hologram-projector.is-active::before,
+  .dj-projection-beam.is-active,
+  .dj-projection-emitter.is-active {
     animation: none;
   }
 }
@@ -419,6 +514,40 @@
   74% {
     opacity: 0.86;
     transform: translateY(-0.5px);
+  }
+}
+
+@keyframes projection-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    filter: blur(10px);
+  }
+  50% {
+    opacity: 0.34;
+    filter: blur(13px);
+  }
+}
+
+@keyframes beam-shimmer {
+  0%,
+  100% {
+    opacity: 0.56;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes emitter-pulse {
+  0%,
+  100% {
+    filter: brightness(0.9);
+    transform: translate(-50%, -50%) rotate(-12deg) scale(0.94);
+  }
+  50% {
+    filter: brightness(1.2);
+    transform: translate(-50%, -50%) rotate(-12deg) scale(1.06);
   }
 }
 

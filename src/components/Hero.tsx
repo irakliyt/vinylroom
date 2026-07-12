@@ -558,6 +558,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               )}
             </motion.div>
 
+            <div
+              className={`dj-projection-beam ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
+              aria-hidden="true"
+            />
+
             <button
               type="button"
               aria-label="DJ scratch the hero record"
@@ -570,6 +575,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             >
               <span className="sr-only">Press and drag the disc to scratch</span>
             </button>
+
+            <div
+              className={`dj-projection-emitter ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
+              aria-hidden="true"
+            />
 
             <div className="dj-mode-control absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
               <button
