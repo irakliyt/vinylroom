@@ -170,17 +170,57 @@
     transform: scale(0.96);
   }
 
+  .dj-mode-control::after {
+    content: "";
+    position: absolute;
+    z-index: -2;
+    inset: -22px;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(ellipse, rgba(226, 165, 82, 0.42), rgba(197, 108, 52, 0.16) 42%, transparent 72%);
+    filter: blur(8px);
+    opacity: 0;
+  }
+
   .dj-mode-control.is-idle {
-    border-color: rgba(226, 165, 82, 0.78);
+    border-color: rgba(248, 240, 221, 0.9);
     box-shadow:
-      0 0 0 1px rgba(226, 165, 82, 0.12),
-      0 0 24px rgba(226, 165, 82, 0.34),
-      0 0 52px rgba(197, 108, 52, 0.16);
-    animation: dj-mode-glow 2.8s ease-in-out infinite;
+      0 0 0 2px rgba(226, 165, 82, 0.2),
+      0 0 24px rgba(248, 240, 221, 0.38),
+      0 0 48px rgba(226, 165, 82, 0.72),
+      0 0 86px rgba(197, 108, 52, 0.34);
+    animation: dj-mode-glow 1.9s ease-in-out infinite;
   }
 
   .dj-mode-control.is-idle::before {
-    animation: dj-mode-halo 2.8s ease-out infinite;
+    inset: -10px;
+    border-width: 2px;
+    animation: dj-mode-halo 1.9s ease-out infinite;
+  }
+
+  .dj-mode-control.is-idle::after {
+    animation: dj-mode-aura 1.9s ease-in-out infinite;
+  }
+
+  .dj-mode-control.is-idle > button {
+    color: var(--color-cream);
+    background: linear-gradient(135deg, rgba(226, 165, 82, 0.48), rgba(197, 108, 52, 0.22) 46%, rgba(12, 10, 8, 0.96) 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(248, 240, 221, 0.44),
+      inset 0 0 18px rgba(226, 165, 82, 0.18);
+    animation: dj-mode-button-breathe 1.9s ease-in-out infinite;
+  }
+
+  .dj-mode-spark {
+    width: 0.42rem;
+    height: 0.42rem;
+    flex: none;
+    border-radius: 50%;
+    background: var(--color-cream);
+    box-shadow:
+      0 0 7px rgba(248, 240, 221, 1),
+      0 0 14px rgba(226, 165, 82, 0.95);
+    animation: dj-mode-spark 950ms ease-in-out infinite alternate;
   }
 
   .dj-mode-control.is-active {
@@ -538,7 +578,10 @@
   .dj-projection-beam.is-active,
   .dj-projection-emitter.is-active,
   .dj-mode-control.is-idle,
-  .dj-mode-control.is-idle::before {
+  .dj-mode-control.is-idle::before,
+  .dj-mode-control.is-idle::after,
+  .dj-mode-control.is-idle > button,
+  .dj-mode-spark {
     animation: none;
   }
 }
@@ -601,15 +644,17 @@
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgba(226, 165, 82, 0.12),
-      0 0 18px rgba(226, 165, 82, 0.26),
-      0 0 42px rgba(197, 108, 52, 0.12);
+      0 0 0 2px rgba(226, 165, 82, 0.18),
+      0 0 18px rgba(248, 240, 221, 0.3),
+      0 0 36px rgba(226, 165, 82, 0.56),
+      0 0 70px rgba(197, 108, 52, 0.26);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(248, 240, 221, 0.24),
-      0 0 32px rgba(226, 165, 82, 0.52),
-      0 0 66px rgba(197, 108, 52, 0.22);
+      0 0 0 3px rgba(248, 240, 221, 0.34),
+      0 0 30px rgba(248, 240, 221, 0.52),
+      0 0 62px rgba(226, 165, 82, 0.9),
+      0 0 104px rgba(197, 108, 52, 0.46);
   }
 }
 
@@ -621,7 +666,42 @@
   72%,
   100% {
     opacity: 0;
-    transform: scale(1.14);
+    transform: scale(1.24);
+  }
+}
+
+@keyframes dj-mode-aura {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: scale(0.94);
+  }
+  50% {
+    opacity: 0.86;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes dj-mode-button-breathe {
+  0%,
+  100% {
+    filter: brightness(0.94);
+    transform: scale(0.99);
+  }
+  50% {
+    filter: brightness(1.2);
+    transform: scale(1.03);
+  }
+}
+
+@keyframes dj-mode-spark {
+  from {
+    opacity: 0.7;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.22);
   }
 }
 

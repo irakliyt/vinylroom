@@ -588,11 +588,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 type="button"
                 onClick={toggleDjMode}
                 aria-pressed={djMode}
-                className={`rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
+                aria-label={djMode ? "Turn DJ mode off" : "Try DJ mode"}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
                   djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
                 }`}
               >
-                DJ mode
+                {!djMode && <span className="dj-mode-spark" aria-hidden="true" />}
+                {djMode ? "DJ mode" : "Try DJ mode"}
               </button>
               <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
                 {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Drag disc or turn on"}
