@@ -45,6 +45,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [scratching, setScratching] = useState(false);
   const [scratchRotation, setScratchRotation] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [staticMobileDj, setStaticMobileDj] = useState(false);
   const [djVideoReady, setDjVideoReady] = useState(false);
   const [djVideoFailed, setDjVideoFailed] = useState(false);
 
@@ -58,6 +59,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
   const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
+  const djVisualAvailable = (djVideoReady && !djVideoFailed) || staticMobileDj;
+  const djVisualActive = djMode && djVisualAvailable;
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -124,8 +127,21 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     djVideo.addEventListener("loadedmetadata", onDjMetadataLoaded);
     djVideo.addEventListener("error", handleError);
-    // A preloaded asset can finish before React hydrates and attaches handlers.
-    if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) onDjMetadataLoaded();
+
+    const appleMobileWebKit =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    const useStaticMobileDj = window.matchMedia("(max-width: 767px)").matches || appleMobileWebKit;
+    setStaticMobileDj(useStaticMobileDj);
+
+    if (useStaticMobileDj) {
+      // Phone video compositing has been unreliable. Keep the stable poster-
+      // based hologram and projection treatment instead of the animated layer.
+      djVideo.pause();
+    } else if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      // A preloaded asset can finish before React hydrates and attaches handlers.
+      onDjMetadataLoaded();
+    }
 
     return () => {
       djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
@@ -417,7 +433,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
         {/* ── Visual stage ── */}
         <div
-          className={`ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px] ${djMode ? "dj-active" : ""} ${djMode && djVideoReady && !djVideoFailed ? "dj-rendering" : ""}`}
+          className={`ritual-stage hologram-stage relative flex items-center justify-center pb-28 sm:pb-0 lg:-translate-x-8 lg:pb-32 [perspective:1400px] ${djMode ? "dj-active" : ""} ${djVisualActive ? "dj-rendering" : ""}`}
           onMouseEnter={onEnter}
           onMouseMove={onMove}
           onMouseLeave={onLeave}
@@ -437,22 +453,30 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             <div className="pointer-events-none absolute inset-[16%] rounded-full border border-amber/10 opacity-70 [mask-image:linear-gradient(90deg,transparent,black,transparent)] sm:inset-[8%]" />
 
             <div
-              className={`dj-hologram-projector ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
+              className={`dj-hologram-projector ${djVisualActive ? "is-active" : ""} ${staticMobileDj ? "is-static-mobile" : ""}`}
               aria-hidden="true"
             >
               <video
                 ref={djVideoRef}
                 id="djHologram"
                 className="dj-hologram"
+                autoPlay
                 muted
                 playsInline
                 loop
                 preload="auto"
+                poster="/assets/video/dj-hologram-poster.jpg"
                 tabIndex={-1}
               >
                 <source src="/assets/video/dj-hologram.webm" type="video/webm" />
                 <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
               </video>
+            </div>
+
+            <div className={`dj-projection-rays ${djVisualActive ? "is-active" : ""}`} aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </div>
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
@@ -561,7 +585,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             </motion.div>
 
             <div
-              className={`dj-projection-beam ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
+              className={`dj-projection-beam ${djVisualActive ? "is-active" : ""}`}
               aria-hidden="true"
             />
 
@@ -579,7 +603,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             </button>
 
             <div
-              className={`dj-projection-emitter ${djMode && djVideoReady && !djVideoFailed ? "is-active" : ""}`}
+              className={`dj-projection-emitter ${djVisualActive ? "is-active" : ""}`}
               aria-hidden="true"
             />
 

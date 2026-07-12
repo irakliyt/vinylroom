@@ -250,6 +250,8 @@
   }
 
   .dj-hologram {
+    position: relative;
+    z-index: 1;
     display: block;
     width: 100%;
     height: 100%;
@@ -265,27 +267,56 @@
       drop-shadow(0 0 10px rgba(226, 165, 82, 0.16))
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
     -webkit-mask-image: radial-gradient(
-      ellipse 52% 78% at 50% 38%,
-      black 24%,
-      rgba(0, 0, 0, 0.82) 42%,
-      rgba(0, 0, 0, 0.3) 58%,
-      rgba(0, 0, 0, 0.08) 70%,
-      transparent 82%
+      ellipse 58% 58% at 48% 42%,
+      black 26%,
+      rgba(0, 0, 0, 0.9) 38%,
+      rgba(0, 0, 0, 0.5) 52%,
+      rgba(0, 0, 0, 0.1) 62%,
+      transparent 72%
     );
     -webkit-mask-composite: source-over;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
     mask-image: radial-gradient(
-      ellipse 52% 78% at 50% 38%,
-      black 24%,
-      rgba(0, 0, 0, 0.82) 42%,
-      rgba(0, 0, 0, 0.3) 58%,
-      rgba(0, 0, 0, 0.08) 70%,
-      transparent 82%
+      ellipse 58% 58% at 48% 42%,
+      black 26%,
+      rgba(0, 0, 0, 0.9) 38%,
+      rgba(0, 0, 0, 0.5) 52%,
+      rgba(0, 0, 0, 0.1) 62%,
+      transparent 72%
     );
     mask-composite: add;
     mask-repeat: no-repeat;
     mask-size: 100% 100%;
+  }
+
+  .dj-hologram-projector.is-static-mobile {
+    isolation: auto;
+    background: url("/assets/video/dj-hologram-poster.jpg") center / contain no-repeat;
+    -webkit-mask-image: radial-gradient(
+      ellipse 58% 58% at 48% 42%,
+      black 26%,
+      rgba(0, 0, 0, 0.9) 38%,
+      rgba(0, 0, 0, 0.5) 52%,
+      rgba(0, 0, 0, 0.1) 62%,
+      transparent 72%
+    );
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-image: radial-gradient(
+      ellipse 58% 58% at 48% 42%,
+      black 26%,
+      rgba(0, 0, 0, 0.9) 38%,
+      rgba(0, 0, 0, 0.5) 52%,
+      rgba(0, 0, 0, 0.1) 62%,
+      transparent 72%
+    );
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
+  }
+
+  .dj-hologram-projector.is-static-mobile .dj-hologram {
+    display: none;
   }
 
   .dj-hologram-projector.is-active {
@@ -326,6 +357,64 @@
     visibility: visible;
     transition-delay: 0s;
     animation: beam-shimmer 2.4s ease-in-out infinite;
+  }
+
+  .dj-projection-rays {
+    position: absolute;
+    z-index: 16;
+    left: 84%;
+    top: 49%;
+    width: 105%;
+    height: 1px;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate(-100%, -50%);
+    transform-origin: 100% 50%;
+    filter: drop-shadow(0 0 7px rgba(226, 165, 82, 0.62));
+    transition:
+      opacity 360ms var(--ease-drift),
+      visibility 0s linear 360ms;
+  }
+
+  .dj-projection-rays span {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    transform-origin: 100% 50%;
+    background: linear-gradient(
+      to right,
+      transparent 0%,
+      rgba(197, 108, 52, 0.2) 24%,
+      rgba(226, 165, 82, 0.62) 72%,
+      rgba(248, 240, 221, 0.98) 100%
+    );
+    animation: projection-ray-breathe 2.2s ease-in-out infinite;
+  }
+
+  .dj-projection-rays span:nth-child(1) {
+    transform: rotate(4deg);
+  }
+
+  .dj-projection-rays span:nth-child(2) {
+    width: 88%;
+    transform: rotate(12deg);
+    animation-delay: -0.7s;
+  }
+
+  .dj-projection-rays span:nth-child(3) {
+    width: 72%;
+    transform: rotate(21deg);
+    animation-delay: -1.4s;
+  }
+
+  .dj-projection-rays.is-active {
+    opacity: 0.9;
+    visibility: visible;
+    transition-delay: 0s;
   }
 
   .dj-projection-emitter {
@@ -571,6 +660,25 @@
     );
     mask-composite: add;
   }
+
+  .dj-projection-rays {
+    top: 50%;
+    width: 78%;
+  }
+
+  .dj-projection-rays span:nth-child(1) {
+    transform: rotate(38deg);
+  }
+
+  .dj-projection-rays span:nth-child(2) {
+    width: 92%;
+    transform: rotate(48deg);
+  }
+
+  .dj-projection-rays span:nth-child(3) {
+    width: 78%;
+    transform: rotate(58deg);
+  }
 }
 
 /* Keep the hologram above the stage while the desktop grid is still narrow. */
@@ -616,6 +724,7 @@
   }
 
   .dj-projection-beam.is-active,
+  .dj-projection-rays span,
   .dj-projection-emitter.is-active,
   .dj-mode-control.is-idle,
   .dj-mode-control.is-idle::before,
@@ -665,6 +774,16 @@
   50% {
     filter: brightness(1.2);
     transform: translate(-50%, -50%) rotate(-12deg) scale(1.06);
+  }
+}
+
+@keyframes projection-ray-breathe {
+  0%,
+  100% {
+    opacity: 0.36;
+  }
+  50% {
+    opacity: 0.9;
   }
 }
 
