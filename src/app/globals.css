@@ -151,6 +151,8 @@
   }
 
   .dj-mode-control {
+    top: -3.25rem;
+    right: 0;
     isolation: isolate;
     touch-action: manipulation;
     transition:
@@ -203,11 +205,11 @@
   }
 
   .dj-mode-control.is-idle > button {
-    color: var(--color-cream);
-    background: linear-gradient(135deg, rgba(226, 165, 82, 0.48), rgba(197, 108, 52, 0.22) 46%, rgba(12, 10, 8, 0.96) 100%);
+    color: var(--color-void);
+    background: linear-gradient(135deg, var(--color-cream), var(--color-amber) 48%, var(--color-burnt));
     box-shadow:
-      inset 0 1px 0 rgba(248, 240, 221, 0.44),
-      inset 0 0 18px rgba(226, 165, 82, 0.18);
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 0 18px rgba(226, 165, 82, 0.5);
     animation: dj-mode-button-breathe 1.9s ease-in-out infinite;
   }
 
@@ -216,10 +218,10 @@
     height: 0.42rem;
     flex: none;
     border-radius: 50%;
-    background: var(--color-cream);
+    background: var(--color-void);
     box-shadow:
-      0 0 7px rgba(248, 240, 221, 1),
-      0 0 14px rgba(226, 165, 82, 0.95);
+      0 0 0 2px rgba(248, 240, 221, 0.5),
+      0 0 10px rgba(248, 240, 221, 0.95);
     animation: dj-mode-spark 950ms ease-in-out infinite alternate;
   }
 
@@ -492,7 +494,7 @@
   }
 
   .ritual-stage .dj-mode-control {
-    top: clamp(-201px, -45vw, -131px);
+    top: 0;
     right: -2%;
   }
 
@@ -519,6 +521,11 @@
 
 /* The single-column tablet stage has enough room for a true left-side layout. */
 @media (min-width: 768px) and (max-width: 1023px) {
+  .ritual-stage .dj-mode-control {
+    top: 8%;
+    right: 2%;
+  }
+
   .dj-hologram-projector {
     top: 12%;
     right: 100%;
@@ -552,8 +559,8 @@
     translate: 7rem 0;
   }
 
-  .hologram-stage.dj-active .dj-mode-control {
-    right: -3%;
+  .hologram-stage.dj-active > .dj-mode-control {
+    translate: -7rem 0;
   }
 
   .dj-hologram-projector {

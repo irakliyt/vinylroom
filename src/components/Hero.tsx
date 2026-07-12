@@ -32,7 +32,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageRect = useRef<DOMRect | null>(null);
   const lastPointerY = useRef(0);
   const lastAt = useRef(0);
-  const djModeRef = useRef(false);
+  const djModeRef = useRef(true);
   const scratchingRef = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
@@ -41,7 +41,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
-  const [djMode, setDjMode] = useState(false);
+  const [djMode, setDjMode] = useState(true);
   const [scratching, setScratching] = useState(false);
   const [scratchRotation, setScratchRotation] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -581,26 +581,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               aria-hidden="true"
             />
 
-            <div
-              className={`dj-mode-control ${djMode ? "is-active" : "is-idle"} absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 sm:right-[-14%] sm:top-[13%] sm:backdrop-blur-md`}
-            >
-              <button
-                type="button"
-                onClick={toggleDjMode}
-                aria-pressed={djMode}
-                aria-label={djMode ? "Turn DJ mode off" : "Try DJ mode"}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
-                  djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
-                }`}
-              >
-                {!djMode && <span className="dj-mode-spark" aria-hidden="true" />}
-                {djMode ? "DJ mode" : "Try DJ mode"}
-              </button>
-              <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
-                {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Drag disc or turn on"}
-              </span>
-            </div>
-
             {/* floating booking card */}
             <motion.div
               style={{
@@ -651,6 +631,26 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <span className="text-[0.55rem] uppercase tracking-[0.2em] text-cream">Needle down · rooms appear</span>
             </motion.div>
           </motion.div>
+
+          <div
+            className={`dj-mode-control ${djMode ? "is-active" : "is-idle"} absolute z-[60] flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 backdrop-blur-md`}
+          >
+            <button
+              type="button"
+              onClick={toggleDjMode}
+              aria-pressed={djMode}
+              aria-label={djMode ? "Turn DJ mode off" : "Try DJ mode"}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${
+                djMode ? "bg-amber text-void" : "text-amber hover:bg-amber/10"
+              }`}
+            >
+              {!djMode && <span className="dj-mode-spark" aria-hidden="true" />}
+              {djMode ? "DJ mode" : "Try DJ mode"}
+            </button>
+            <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
+              {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Drag disc or turn on"}
+            </span>
+          </div>
         </div>
       </div>
 
