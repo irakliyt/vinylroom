@@ -292,27 +292,10 @@
 
   .dj-hologram-projector.is-static-mobile {
     isolation: auto;
-    background: url("/assets/video/dj-hologram-poster.jpg") center / contain no-repeat;
-    -webkit-mask-image: radial-gradient(
-      ellipse 78% 58% at 48% 42%,
-      black 26%,
-      rgba(0, 0, 0, 0.9) 38%,
-      rgba(0, 0, 0, 0.5) 52%,
-      rgba(0, 0, 0, 0.1) 62%,
-      transparent 72%
-    );
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-size: 100% 100%;
-    mask-image: radial-gradient(
-      ellipse 78% 58% at 48% 42%,
-      black 26%,
-      rgba(0, 0, 0, 0.9) 38%,
-      rgba(0, 0, 0, 0.5) 52%,
-      rgba(0, 0, 0, 0.1) 62%,
-      transparent 72%
-    );
-    mask-repeat: no-repeat;
-    mask-size: 100% 100%;
+    background: url("/assets/video/dj-hologram-poster.png") center / contain no-repeat;
+    mix-blend-mode: screen;
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .dj-hologram-projector.is-static-mobile .dj-hologram {
@@ -659,28 +642,9 @@
   }
 }
 
-/* A single mask keeps the accelerated video layer stable on mobile WebKit.
-   The upward focal point makes the bottom dissolve earlier than the top. */
+/* The mobile animation carries its own feathered alpha channel. Keeping the
+   wrapper unmasked avoids a WebKit compositor flash when DJ mode activates. */
 @media (max-width: 1023px) {
-  .dj-hologram-projector.is-static-mobile {
-    -webkit-mask-image: radial-gradient(
-      ellipse 78% 62% at 48% 38%,
-      black 26%,
-      rgba(0, 0, 0, 0.9) 38%,
-      rgba(0, 0, 0, 0.5) 52%,
-      rgba(0, 0, 0, 0.1) 62%,
-      transparent 72%
-    );
-    mask-image: radial-gradient(
-      ellipse 78% 62% at 48% 38%,
-      black 26%,
-      rgba(0, 0, 0, 0.9) 38%,
-      rgba(0, 0, 0, 0.5) 52%,
-      rgba(0, 0, 0, 0.1) 62%,
-      transparent 72%
-    );
-  }
-
   .dj-hologram {
     -webkit-mask-image: radial-gradient(
       ellipse 68% 82% at 50% 38%,
@@ -719,6 +683,64 @@
   .dj-projection-rays span:nth-child(3) {
     width: 78%;
     transform: rotate(63deg);
+  }
+}
+
+/* Desktop uses separate horizontal and vertical feathers. This keeps the
+   shoulders intact while guaranteeing fully transparent outer pixels and a
+   stronger dissolve beneath the hands. */
+@media (min-width: 1024px) {
+  .dj-hologram {
+    -webkit-mask-image:
+      linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(0, 0, 0, 0.16) 3%,
+        rgba(0, 0, 0, 0.72) 8%,
+        black 14%,
+        black 86%,
+        rgba(0, 0, 0, 0.72) 92%,
+        rgba(0, 0, 0, 0.16) 97%,
+        transparent 100%
+      ),
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.42) 6%,
+        black 15%,
+        black 60%,
+        rgba(0, 0, 0, 0.7) 72%,
+        rgba(0, 0, 0, 0.24) 84%,
+        transparent 96%
+      );
+    -webkit-mask-composite: source-in;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
+    mask-image:
+      linear-gradient(
+        to right,
+        transparent 0%,
+        rgba(0, 0, 0, 0.16) 3%,
+        rgba(0, 0, 0, 0.72) 8%,
+        black 14%,
+        black 86%,
+        rgba(0, 0, 0, 0.72) 92%,
+        rgba(0, 0, 0, 0.16) 97%,
+        transparent 100%
+      ),
+      linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(0, 0, 0, 0.42) 6%,
+        black 15%,
+        black 60%,
+        rgba(0, 0, 0, 0.7) 72%,
+        rgba(0, 0, 0, 0.24) 84%,
+        transparent 96%
+      );
+    mask-composite: intersect;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
   }
 }
 
