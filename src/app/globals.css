@@ -264,48 +264,26 @@
       saturate(0.7)
       drop-shadow(0 0 10px rgba(226, 165, 82, 0.16))
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
-    -webkit-mask-image:
-      radial-gradient(
-        ellipse 54% 86% at 50% 44%,
-        black 28%,
-        rgba(0, 0, 0, 0.78) 45%,
-        rgba(0, 0, 0, 0.28) 60%,
-        rgba(0, 0, 0, 0.06) 72%,
-        transparent 84%
-      ),
-      linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(0, 0, 0, 0.55) 10%,
-        black 20%,
-        black 56%,
-        rgba(0, 0, 0, 0.35) 68%,
-        rgba(0, 0, 0, 0.06) 78%,
-        transparent 86%
-      );
-    -webkit-mask-composite: source-in;
+    -webkit-mask-image: radial-gradient(
+      ellipse 52% 78% at 50% 38%,
+      black 24%,
+      rgba(0, 0, 0, 0.82) 42%,
+      rgba(0, 0, 0, 0.3) 58%,
+      rgba(0, 0, 0, 0.08) 70%,
+      transparent 82%
+    );
+    -webkit-mask-composite: source-over;
     -webkit-mask-repeat: no-repeat;
     -webkit-mask-size: 100% 100%;
-    mask-image:
-      radial-gradient(
-        ellipse 54% 86% at 50% 44%,
-        black 28%,
-        rgba(0, 0, 0, 0.78) 45%,
-        rgba(0, 0, 0, 0.28) 60%,
-        rgba(0, 0, 0, 0.06) 72%,
-        transparent 84%
-      ),
-      linear-gradient(
-        to bottom,
-        transparent 0%,
-        rgba(0, 0, 0, 0.55) 10%,
-        black 20%,
-        black 56%,
-        rgba(0, 0, 0, 0.35) 68%,
-        rgba(0, 0, 0, 0.06) 78%,
-        transparent 86%
-      );
-    mask-composite: intersect;
+    mask-image: radial-gradient(
+      ellipse 52% 78% at 50% 38%,
+      black 24%,
+      rgba(0, 0, 0, 0.82) 42%,
+      rgba(0, 0, 0, 0.3) 58%,
+      rgba(0, 0, 0, 0.08) 70%,
+      transparent 82%
+    );
+    mask-composite: add;
     mask-repeat: no-repeat;
     mask-size: 100% 100%;
   }
@@ -613,7 +591,7 @@
 
   .dj-hologram-projector {
     top: -8%;
-    right: 100%;
+    right: calc(100% + clamp(0px, calc(13.2vw - 190px), 84px));
     left: auto;
     width: clamp(300px, 22vw, 340px);
   }
