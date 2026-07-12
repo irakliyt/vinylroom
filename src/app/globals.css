@@ -266,44 +266,48 @@
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
     -webkit-mask-image:
       radial-gradient(
-        ellipse 60% 90% at 50% 44%,
-        black 30%,
-        rgba(0, 0, 0, 0.86) 50%,
-        rgba(0, 0, 0, 0.38) 68%,
-        rgba(0, 0, 0, 0.08) 82%,
-        transparent 96%
+        ellipse 54% 86% at 50% 44%,
+        black 28%,
+        rgba(0, 0, 0, 0.78) 45%,
+        rgba(0, 0, 0, 0.28) 60%,
+        rgba(0, 0, 0, 0.06) 72%,
+        transparent 84%
       ),
       linear-gradient(
         to bottom,
         transparent 0%,
-        rgba(0, 0, 0, 0.72) 8%,
-        black 16%,
-        black 60%,
-        rgba(0, 0, 0, 0.5) 74%,
-        rgba(0, 0, 0, 0.12) 86%,
-        transparent 94%
+        rgba(0, 0, 0, 0.55) 10%,
+        black 20%,
+        black 56%,
+        rgba(0, 0, 0, 0.35) 68%,
+        rgba(0, 0, 0, 0.06) 78%,
+        transparent 86%
       );
     -webkit-mask-composite: source-in;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-size: 100% 100%;
     mask-image:
       radial-gradient(
-        ellipse 60% 90% at 50% 44%,
-        black 30%,
-        rgba(0, 0, 0, 0.86) 50%,
-        rgba(0, 0, 0, 0.38) 68%,
-        rgba(0, 0, 0, 0.08) 82%,
-        transparent 96%
+        ellipse 54% 86% at 50% 44%,
+        black 28%,
+        rgba(0, 0, 0, 0.78) 45%,
+        rgba(0, 0, 0, 0.28) 60%,
+        rgba(0, 0, 0, 0.06) 72%,
+        transparent 84%
       ),
       linear-gradient(
         to bottom,
         transparent 0%,
-        rgba(0, 0, 0, 0.72) 8%,
-        black 16%,
-        black 60%,
-        rgba(0, 0, 0, 0.5) 74%,
-        rgba(0, 0, 0, 0.12) 86%,
-        transparent 94%
+        rgba(0, 0, 0, 0.55) 10%,
+        black 20%,
+        black 56%,
+        rgba(0, 0, 0, 0.35) 68%,
+        rgba(0, 0, 0, 0.06) 78%,
+        transparent 86%
       );
     mask-composite: intersect;
+    mask-repeat: no-repeat;
+    mask-size: 100% 100%;
   }
 
   .dj-hologram-projector.is-active {
@@ -558,6 +562,31 @@
   }
 }
 
+/* A single mask keeps the accelerated video layer stable on mobile WebKit.
+   The upward focal point makes the bottom dissolve earlier than the top. */
+@media (max-width: 1023px) {
+  .dj-hologram {
+    -webkit-mask-image: radial-gradient(
+      ellipse 68% 82% at 50% 38%,
+      black 26%,
+      rgba(0, 0, 0, 0.88) 48%,
+      rgba(0, 0, 0, 0.4) 65%,
+      rgba(0, 0, 0, 0.1) 80%,
+      transparent 95%
+    );
+    -webkit-mask-composite: source-over;
+    mask-image: radial-gradient(
+      ellipse 68% 82% at 50% 38%,
+      black 26%,
+      rgba(0, 0, 0, 0.88) 48%,
+      rgba(0, 0, 0, 0.4) 65%,
+      rgba(0, 0, 0, 0.1) 80%,
+      transparent 95%
+    );
+    mask-composite: add;
+  }
+}
+
 /* Keep the hologram above the stage while the desktop grid is still narrow. */
 @media (min-width: 1024px) and (max-width: 1359px) {
   .dj-hologram-projector {
@@ -575,18 +604,18 @@
 
 @media (min-width: 1360px) {
   .hologram-stage.dj-active {
-    translate: 7rem 0;
+    translate: 11rem 0;
   }
 
   .hologram-stage.dj-active > .dj-mode-control {
-    translate: -7rem 0;
+    translate: -11rem 0;
   }
 
   .dj-hologram-projector {
-    top: -4%;
+    top: -8%;
     right: 100%;
     left: auto;
-    width: clamp(240px, 18vw, 300px);
+    width: clamp(300px, 22vw, 340px);
   }
 }
 
