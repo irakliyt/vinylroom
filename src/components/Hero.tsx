@@ -581,7 +581,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               aria-hidden="true"
             />
 
-            <div className="dj-mode-control absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 shadow-[0_0_20px_-12px_rgba(216,154,69,1)] sm:right-[-14%] sm:top-[13%] sm:shadow-[0_0_34px_-12px_rgba(216,154,69,1)] sm:backdrop-blur-md">
+            <div
+              className={`dj-mode-control ${djMode ? "is-active" : "is-idle"} absolute right-[2%] top-[2%] z-30 flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 sm:right-[-14%] sm:top-[13%] sm:backdrop-blur-md`}
+            >
               <button
                 type="button"
                 onClick={toggleDjMode}

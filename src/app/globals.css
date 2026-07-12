@@ -150,6 +150,46 @@
     mask-image: linear-gradient(90deg, transparent, black 18%, black 82%, transparent);
   }
 
+  .dj-mode-control {
+    isolation: isolate;
+    touch-action: manipulation;
+    transition:
+      border-color 240ms ease,
+      box-shadow 240ms ease;
+  }
+
+  .dj-mode-control::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: -6px;
+    pointer-events: none;
+    border: 1px solid rgba(226, 165, 82, 0.58);
+    border-radius: inherit;
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  .dj-mode-control.is-idle {
+    border-color: rgba(226, 165, 82, 0.78);
+    box-shadow:
+      0 0 0 1px rgba(226, 165, 82, 0.12),
+      0 0 24px rgba(226, 165, 82, 0.34),
+      0 0 52px rgba(197, 108, 52, 0.16);
+    animation: dj-mode-glow 2.8s ease-in-out infinite;
+  }
+
+  .dj-mode-control.is-idle::before {
+    animation: dj-mode-halo 2.8s ease-out infinite;
+  }
+
+  .dj-mode-control.is-active {
+    border-color: rgba(248, 240, 221, 0.72);
+    box-shadow:
+      0 0 18px rgba(226, 165, 82, 0.32),
+      inset 0 0 14px rgba(226, 165, 82, 0.08);
+  }
+
   .dj-hologram-projector {
     position: absolute;
     z-index: 5;
@@ -416,6 +456,10 @@
     right: -2%;
   }
 
+  .ritual-stage .dj-mode-control > button {
+    min-height: 40px;
+  }
+
   .dj-hologram-projector {
     top: clamp(-220px, -52vw, -175px);
     right: auto;
@@ -492,7 +536,9 @@
 
   .dj-hologram-projector.is-active::before,
   .dj-projection-beam.is-active,
-  .dj-projection-emitter.is-active {
+  .dj-projection-emitter.is-active,
+  .dj-mode-control.is-idle,
+  .dj-mode-control.is-idle::before {
     animation: none;
   }
 }
@@ -548,6 +594,34 @@
   50% {
     filter: brightness(1.2);
     transform: translate(-50%, -50%) rotate(-12deg) scale(1.06);
+  }
+}
+
+@keyframes dj-mode-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(226, 165, 82, 0.12),
+      0 0 18px rgba(226, 165, 82, 0.26),
+      0 0 42px rgba(197, 108, 52, 0.12);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(248, 240, 221, 0.24),
+      0 0 32px rgba(226, 165, 82, 0.52),
+      0 0 66px rgba(197, 108, 52, 0.22);
+  }
+}
+
+@keyframes dj-mode-halo {
+  0% {
+    opacity: 0.68;
+    transform: scale(0.96);
+  }
+  72%,
+  100% {
+    opacity: 0;
+    transform: scale(1.14);
   }
 }
 
