@@ -364,6 +364,19 @@
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
   }
 
+  .dj-hologram-startup {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    filter:
+      brightness(0.88)
+      contrast(0.96)
+      saturate(0.66)
+      blur(0.25px)
+      drop-shadow(0 0 10px rgba(226, 165, 82, 0.16))
+      drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
+  }
+
   .dj-hologram-projector.is-static-mobile {
     isolation: auto;
     background: none;

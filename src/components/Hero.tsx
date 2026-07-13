@@ -23,6 +23,8 @@ import { featuredEvent, stats, type Room } from "@/data/rooms";
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 const DJ_VIDEO_WEBM_SRC = "/assets/video/dj-hologram.webm";
 const DJ_VIDEO_MP4_SRC = "/assets/video/dj-hologram.mp4";
+const DJ_STARTUP_WEBM_SRC = "/assets/video/dj-hologram-startup.webm";
+const DJ_STARTUP_MP4_SRC = "/assets/video/dj-hologram-startup.mp4";
 const RITUAL_STEPS = [
   { label: "Sleeve", note: "choose the room" },
   { label: "Reveal", note: "record slides out" },
@@ -88,11 +90,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
   const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
-  // The desktop poster is preloaded in the document head, so reveal the
-  // projector as soon as device media has been resolved instead of leaving an
-  // empty space while the video waits for metadata. The video replaces the
-  // poster naturally once it has decoded; phones keep their existing animated
-  // WebP path.
+  // Reveal the projector as soon as device media has been resolved. Desktop
+  // uses a tiny animated startup layer until the full-quality video is
+  // actually playing; phones keep their existing animated WebP path.
   const djVisualAvailable = djMediaResolved || staticMobileDj;
   const djVisualActive = djMode && djVisualAvailable;
 
@@ -177,11 +177,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     const djVideo = djVideoRef.current;
     if (!djVideo) return;
 
-    djVideo.pause();
+    if (!djModeRef.current || reduce) djVideo.pause();
     // Reduced-motion users see one representative frame, without scrubbing.
-    if (reduce && djVideo.duration) djVideo.currentTime = djVideo.duration * 0.16;
+    if (reduce && djVideo.duration) {
+      djVideo.currentTime = djVideo.duration * 0.16;
+      setDjVideoReady(true);
+    }
     setDjVideoFailed(false);
-    setDjVideoReady(true);
   }, [reduce]);
 
   const prepareDjVideo = useCallback(() => {
@@ -190,6 +192,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     const supportsWebm = djVideo.canPlayType('video/webm; codecs="vp9"') !== "";
     djVideoFallbackTried.current = !supportsWebm;
+    setDjVideoReady(false);
+    setDjVideoFailed(false);
     djVideo.src = supportsWebm ? DJ_VIDEO_WEBM_SRC : DJ_VIDEO_MP4_SRC;
     djVideo.preload = "auto";
     djMediaPrepared.current = true;
@@ -206,14 +210,30 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
         djVideo.currentSrc.endsWith(DJ_VIDEO_WEBM_SRC)
       ) {
         djVideoFallbackTried.current = true;
+        setDjVideoReady(false);
         djVideo.src = DJ_VIDEO_MP4_SRC;
+        djVideo.load();
         return;
       }
       setDjVideoReady(false);
       setDjVideoFailed(true);
     };
 
+    const handleCanPlay = () => {
+      setDjVideoFailed(false);
+      if (djModeRef.current && !reduce && !staticMobileDjRef.current) {
+        void djVideo.play().catch(() => {});
+      }
+    };
+
+    const handlePlaying = () => {
+      setDjVideoReady(true);
+      setDjVideoFailed(false);
+    };
+
     djVideo.addEventListener("loadedmetadata", onDjMetadataLoaded);
+    djVideo.addEventListener("canplay", handleCanPlay);
+    djVideo.addEventListener("playing", handlePlaying);
     djVideo.addEventListener("error", handleError);
 
     const appleMobileWebKit =
@@ -232,13 +252,36 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     return () => {
       djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
+      djVideo.removeEventListener("canplay", handleCanPlay);
+      djVideo.removeEventListener("playing", handlePlaying);
       djVideo.removeEventListener("error", handleError);
     };
-  }, [onDjMetadataLoaded, prepareDjVideo]);
+  }, [onDjMetadataLoaded, reduce]);
+
+  // Keep DJ mode off on first paint, then warm the full-quality video only
+  // after the document has finished loading. This does not hold Chrome's page
+  // loading indicator open, but makes the video ready before most visitors
+  // discover the DJ control.
+  useEffect(() => {
+    if (!djMediaResolved || staticMobileDj) return;
+
+    let warmTimer = 0;
+    const warm = () => {
+      warmTimer = window.setTimeout(prepareDjVideo, 900);
+    };
+
+    if (document.readyState === "complete") warm();
+    else window.addEventListener("load", warm, { once: true });
+
+    return () => {
+      window.removeEventListener("load", warm);
+      window.clearTimeout(warmTimer);
+    };
+  }, [djMediaResolved, prepareDjVideo, staticMobileDj]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
-    if (!djVideo || !djVideoReady || djVideoFailed) return;
+    if (!djVideo || djVideoFailed) return;
 
     if (staticMobileDj) {
       djVideo.pause();
@@ -257,7 +300,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       return;
     }
 
-    void djVideo.play().catch(() => {
+    if (djVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) void djVideo.play().catch(() => {
       // Muted inline playback should be allowed; if a browser declines it,
       // keep the loaded frame visible and retry on the next mode activation.
     });
@@ -270,7 +313,14 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     djModeRef.current = next;
     setDjMode(next);
 
-    if (next && djVideoReady && !djVideoFailed && !reduce && !staticMobileDj) {
+    if (
+      next &&
+      djVideo &&
+      djVideo.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+      !djVideoFailed &&
+      !reduce &&
+      !staticMobileDj
+    ) {
       void djVideo?.play().catch(() => {});
     }
 
@@ -317,7 +367,13 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       prepareDjVideo();
       djModeRef.current = true;
       setDjMode(true);
-      if (djVideoReady && !djVideoFailed && !reduce && !staticMobileDj) {
+      if (
+        djVideoRef.current &&
+        djVideoRef.current.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA &&
+        !djVideoFailed &&
+        !reduce &&
+        !staticMobileDj
+      ) {
         void djVideoRef.current?.play().catch(() => {});
       }
     }
@@ -566,6 +622,20 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 poster={djMode && djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               />
+              {djVisualActive && !staticMobileDj && !reduce && !djVideoReady && !djVideoFailed ? (
+                <video
+                  className="dj-hologram dj-hologram-startup"
+                  muted
+                  playsInline
+                  autoPlay
+                  loop
+                  preload="auto"
+                  tabIndex={-1}
+                >
+                  <source src={DJ_STARTUP_WEBM_SRC} type="video/webm" />
+                  <source src={DJ_STARTUP_MP4_SRC} type="video/mp4" />
+                </video>
+              ) : null}
               {/* Image animation avoids the unstable mobile video compositor. */}
               {djVisualActive && staticMobileDj ? (
                 <>
