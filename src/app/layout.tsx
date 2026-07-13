@@ -37,15 +37,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full`}>
-      <head>
-        <link
-          rel="preload"
-          as="image"
-          href="/assets/video/dj-hologram-poster.webp"
-          media="(min-width: 768px)"
-          fetchPriority="high"
-        />
-      </head>
       <body className="min-h-full antialiased">{children}</body>
     </html>
   );

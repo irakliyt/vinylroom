@@ -60,6 +60,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
   const djVideoFallbackTried = useRef(false);
+  const djMediaPrepared = useRef(false);
+  const staticMobileDjRef = useRef(false);
   const scratchSurfaceRef = useRef<HTMLDivElement>(null);
   const djProjectorRef = useRef<HTMLDivElement>(null);
   const projectionEmitterRef = useRef<HTMLDivElement>(null);
@@ -182,6 +184,18 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     setDjVideoReady(true);
   }, [reduce]);
 
+  const prepareDjVideo = useCallback(() => {
+    const djVideo = djVideoRef.current;
+    if (!djVideo || staticMobileDjRef.current || djMediaPrepared.current) return;
+
+    const supportsWebm = djVideo.canPlayType('video/webm; codecs="vp9"') !== "";
+    djVideoFallbackTried.current = !supportsWebm;
+    djVideo.src = supportsWebm ? DJ_VIDEO_WEBM_SRC : DJ_VIDEO_MP4_SRC;
+    djVideo.preload = "auto";
+    djMediaPrepared.current = true;
+    djVideo.load();
+  }, []);
+
   useEffect(() => {
     const djVideo = djVideoRef.current;
     if (!djVideo) return;
@@ -206,28 +220,49 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       /iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const useStaticMobileDj = window.matchMedia("(max-width: 767px)").matches || appleMobileWebKit;
+    staticMobileDjRef.current = useStaticMobileDj;
     setStaticMobileDj(useStaticMobileDj);
-    if (!useStaticMobileDj) {
-      const supportsWebm = djVideo.canPlayType('video/webm; codecs="vp9"') !== "";
-      djVideoFallbackTried.current = !supportsWebm;
-      djVideo.src = supportsWebm ? DJ_VIDEO_WEBM_SRC : DJ_VIDEO_MP4_SRC;
-    }
     setDjMediaResolved(true);
 
     if (useStaticMobileDj) {
       // Phone video compositing has been unreliable. Use the lighter animated
       // WebP hologram and projection treatment instead of decoding the video.
       djVideo.pause();
-    } else if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      // A preloaded asset can finish before React hydrates and attaches handlers.
-      onDjMetadataLoaded();
+    } else {
+      // DJ mode starts off. Let the critical page, artwork, and interaction code
+      // finish first, then warm the video while the visitor reads the hero.
+      // Activating DJ mode calls the same preparation immediately.
+      let idleRequest: number | null = null;
+      let fallbackTimer: number | null = null;
+      const scheduleWarmup = () => {
+        const idleWindow = window as typeof window & {
+          requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+          cancelIdleCallback?: (handle: number) => void;
+        };
+        if (typeof idleWindow.requestIdleCallback === "function") {
+          idleRequest = idleWindow.requestIdleCallback(prepareDjVideo, { timeout: 3000 });
+        } else {
+          fallbackTimer = window.setTimeout(prepareDjVideo, 1200);
+        }
+      };
+
+      if (document.readyState === "complete") scheduleWarmup();
+      else window.addEventListener("load", scheduleWarmup, { once: true });
+
+      return () => {
+        window.removeEventListener("load", scheduleWarmup);
+        if (idleRequest !== null) window.cancelIdleCallback?.(idleRequest);
+        if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
+        djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
+        djVideo.removeEventListener("error", handleError);
+      };
     }
 
     return () => {
       djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
       djVideo.removeEventListener("error", handleError);
     };
-  }, [onDjMetadataLoaded]);
+  }, [onDjMetadataLoaded, prepareDjVideo]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -259,6 +294,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const toggleDjMode = () => {
     const next = !djMode;
     const djVideo = djVideoRef.current;
+    if (next) prepareDjVideo();
     djModeRef.current = next;
     setDjMode(next);
 
@@ -306,6 +342,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
     if (!djModeRef.current) {
+      prepareDjVideo();
       djModeRef.current = true;
       setDjMode(true);
       if (djVideoReady && !djVideoFailed && !reduce && !staticMobileDj) {
@@ -553,7 +590,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 muted
                 playsInline
                 loop
-                preload="auto"
+                preload="none"
                 poster={djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               />
