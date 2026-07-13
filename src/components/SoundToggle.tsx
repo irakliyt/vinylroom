@@ -28,10 +28,7 @@ export default function SoundToggle() {
       }`}
     >
       {needsHint && (
-        <>
-          <span className="sound-attention-halo absolute inset-[-5px] rounded-full border border-amber/70 sm:inset-[-8px]" />
-          <span className="sound-attention-dot absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber shadow-[0_0_12px_rgba(216,154,69,1)] sm:-right-1 sm:-top-1 sm:h-3 sm:w-3" />
-        </>
+        <span className="sound-attention-halo absolute inset-[-5px] rounded-full border border-amber/70 sm:inset-[-8px]" />
       )}
       {playing ? (
         // speaker with sound waves

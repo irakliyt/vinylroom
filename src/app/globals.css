@@ -249,7 +249,7 @@
   }
 
   .sound-attention > svg,
-  .sound-attention > span:not(.sound-attention-halo):not(.sound-attention-dot) {
+  .sound-attention > span:not(.sound-attention-halo) {
     position: relative;
     z-index: 1;
   }
@@ -258,11 +258,6 @@
     z-index: -1 !important;
     pointer-events: none;
     animation: attention-halo 1.8s ease-out infinite;
-  }
-
-  .sound-attention-dot {
-    z-index: 2;
-    animation: attention-dot 900ms ease-in-out infinite alternate;
   }
 
   .dj-mode-spark {
@@ -821,8 +816,7 @@
   .dj-mode-control.is-idle > button::after,
   .dj-mode-spark,
   .sound-attention::after,
-  .sound-attention-halo,
-  .sound-attention-dot {
+  .sound-attention-halo {
     animation: none;
   }
 }
@@ -908,17 +902,6 @@
   100% {
     opacity: 0;
     transform: scale(1.22);
-  }
-}
-
-@keyframes attention-dot {
-  from {
-    opacity: 0.72;
-    transform: scale(0.78);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1.28);
   }
 }
 
