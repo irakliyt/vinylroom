@@ -1,11 +1,11 @@
 {
   "production": {
-    "id": "f5b13e78-2312-4646-96d0-9b822396c6a3",
+    "id": "bf1171f3-f207-4eac-8d48-bfe52a2444f3",
     "site": {
-      "main": "https://ktk8s7-vinyl-list-7876da37-irakliyt.wix-site-host.com"
+      "main": "https://5b2a9t-vinyl-list-7876da37-irakliyt.wix-site-host.com"
     },
     "dashboard": {
-      "main": "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e?apps-override=f5b13e78-2312-4646-96d0-9b822396c6a3"
+      "main": "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e?apps-override=bf1171f3-f207-4eac-8d48-bfe52a2444f3"
     }
   }
 }
