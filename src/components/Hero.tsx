@@ -34,10 +34,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const lastAt = useRef(0);
   const djModeRef = useRef(true);
   const scratchingRef = useRef(false);
+  const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
-  const pendingDjProgress = useRef(0);
-  const djFrameRequest = useRef<number | null>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
@@ -79,31 +78,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     return () => media.removeEventListener("change", update);
   }, []);
 
-  useEffect(
-    () => () => {
-      scratchCleanup.current?.();
-      if (djFrameRequest.current !== null) {
-        window.cancelAnimationFrame(djFrameRequest.current);
-      }
-    },
-    [],
-  );
-
-  const updateDjHologram = (rotationDegrees: number) => {
-    const djVideo = djVideoRef.current;
-    if (staticMobileDj || reduce || !djModeRef.current || !djVideo?.duration) return;
-
-    pendingDjProgress.current = ((rotationDegrees / 360) % 1 + 1) % 1;
-    if (djFrameRequest.current !== null) return;
-
-    djFrameRequest.current = window.requestAnimationFrame(() => {
-      const video = djVideoRef.current;
-      if (video?.duration) {
-        video.currentTime = pendingDjProgress.current * video.duration;
-      }
-      djFrameRequest.current = null;
-    });
-  };
+  useEffect(() => () => scratchCleanup.current?.(), []);
 
   const onDjMetadataLoaded = useCallback(() => {
     const djVideo = djVideoRef.current;
@@ -202,24 +177,26 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     const distance = clientY - lastPointerY.current;
     const elapsed = Math.max(now - lastAt.current, 16);
     const speed = Math.min((Math.abs(distance) / elapsed) * 1.5, 1.7);
-    setScratchRotation((rotationDegrees) => {
-      const nextRotation = rotationDegrees + distance * 1.8;
-      updateDjHologram(nextRotation);
-      return nextRotation;
-    });
+    setScratchRotation((rotationDegrees) => rotationDegrees + distance * 1.8);
     lastPointerY.current = clientY;
     lastAt.current = now;
 
-    if (Math.abs(distance) < 1.8) return;
-    void scratchAudio.play(distance, elapsed, Math.min(0.3 + speed * 0.55, 0.9));
+    if (Math.abs(distance) < 0.85) return;
+    void scratchAudio.play(distance, elapsed, Math.min(0.24 + speed * 0.46, 0.8));
   };
 
   const stopScratch = () => {
+    const wasScratching = scratchingRef.current;
     scratchingRef.current = false;
     scratchCleanup.current?.();
     scratchCleanup.current = null;
     setScratching(false);
     scratchAudio.stop();
+
+    if (wasScratching && resumePlayerAfterScratch.current) {
+      player.resume();
+    }
+    resumePlayerAfterScratch.current = false;
   };
 
   const startScratch = (e: React.PointerEvent<HTMLButtonElement>) => {
@@ -241,7 +218,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     setScratching(true);
     lastPointerY.current = e.clientY;
     lastAt.current = performance.now();
-    player.stop();
+    resumePlayerAfterScratch.current = player.playing;
+    if (player.playing) player.stop();
     void scratchAudio.arm();
 
     const pointerId = e.pointerId;
@@ -560,8 +538,15 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               >
                 <VinylDisc label={activeTrack ? activeTrack.track : "Kind of Blue"} accent={stageAccent} spinning={false} className="w-full" />
                 <span
-                  className={`pointer-events-none absolute inset-[-5%] rounded-full border transition-opacity ${djMode ? "opacity-100" : "opacity-0"}`}
-                  style={{ borderColor: stageAccent, boxShadow: `0 0 36px -8px ${stageAccent}` }}
+                  className={`pointer-events-none absolute inset-[-5%] rounded-full border transition-[opacity,transform,box-shadow] duration-200 ${
+                    scratching ? "scale-[1.035] opacity-100" : djMode ? "opacity-70" : "opacity-0"
+                  }`}
+                  style={{
+                    borderColor: stageAccent,
+                    boxShadow: scratching
+                      ? `0 0 52px -5px ${stageAccent}, inset 0 0 24px -12px ${stageAccent}`
+                      : `0 0 36px -8px ${stageAccent}`,
+                  }}
                 />
               </div>
             </motion.div>
@@ -690,7 +675,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               {djMode ? "DJ mode" : "Try DJ mode"}
             </button>
             <span className="hidden whitespace-nowrap pr-2 text-[0.6rem] text-parchment md:inline">
-              {scratching ? "Scratching" : djMode ? "Press + drag disc" : "Drag disc or turn on"}
+              {scratching ? "Scratch audio live" : djMode ? "Drag disc · DJ keeps moving" : "Drag disc or turn on"}
             </span>
           </div>
         </div>

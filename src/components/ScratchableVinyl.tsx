@@ -104,8 +104,8 @@ export default function ScratchableVinyl({
     lastAngle.current = nextAngle;
     lastAt.current = now;
 
-    if (Math.abs(delta) < 1.5) return;
-    void scratchAudio.play(delta, elapsed, Math.min(0.28 + speed * 0.55, 0.86));
+    if (Math.abs(delta) < 0.75) return;
+    void scratchAudio.play(delta, elapsed, Math.min(0.24 + speed * 0.46, 0.78));
   };
 
   const onPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
