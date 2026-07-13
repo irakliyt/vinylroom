@@ -54,7 +54,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageRect = useRef<DOMRect | null>(null);
   const lastPointerY = useRef(0);
   const lastAt = useRef(0);
-  const djModeRef = useRef(true);
+  const djModeRef = useRef(false);
   const scratchingRef = useRef(false);
   const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
@@ -66,7 +66,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
-  const [djMode, setDjMode] = useState(true);
+  const [djMode, setDjMode] = useState(false);
   const [scratching, setScratching] = useState(false);
   const [scratchRotation, setScratchRotation] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -86,7 +86,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
   const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
-  const djVisualAvailable = (djVideoReady && !djVideoFailed) || staticMobileDj;
+  // The desktop poster is preloaded in the document head, so reveal the
+  // projector as soon as device media has been resolved instead of leaving an
+  // empty space while the video waits for metadata. The video replaces the
+  // poster naturally once it has decoded; phones keep their existing animated
+  // WebP path.
+  const djVisualAvailable = djMediaResolved || staticMobileDj;
   const djVisualActive = djMode && djVisualAvailable;
 
   useLayoutEffect(() => {
@@ -548,7 +553,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 muted
                 playsInline
                 loop
-                preload="metadata"
+                preload="auto"
                 poster={djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               />
@@ -563,7 +568,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                     height={324}
                     draggable={false}
                     decoding="async"
-                    loading="lazy"
+                    loading="eager"
                     fetchPriority="low"
                     className="dj-hologram-mobile-animation"
                   />

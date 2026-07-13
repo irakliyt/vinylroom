@@ -191,7 +191,6 @@
       0 0 24px rgba(248, 240, 221, 0.38),
       0 0 48px rgba(226, 165, 82, 0.72),
       0 0 86px rgba(197, 108, 52, 0.34);
-    animation: dj-mode-glow 1.9s ease-in-out infinite;
   }
 
   .dj-mode-control.is-idle::before {
@@ -205,12 +204,65 @@
   }
 
   .dj-mode-control.is-idle > button {
+    position: relative;
+    overflow: hidden;
     color: var(--color-void);
     background: linear-gradient(135deg, var(--color-cream), var(--color-amber) 48%, var(--color-burnt));
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.72),
       0 0 18px rgba(226, 165, 82, 0.5);
     animation: dj-mode-button-breathe 1.9s ease-in-out infinite;
+  }
+
+  .dj-mode-control.is-idle > button::after {
+    content: "";
+    position: absolute;
+    inset: -50% auto -50% -38%;
+    width: 24%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), transparent);
+    transform: translateX(-180%) rotate(14deg);
+    animation: attention-sheen 2.4s ease-in-out infinite;
+  }
+
+  .sound-attention {
+    isolation: isolate;
+    color: var(--color-void);
+    background: linear-gradient(135deg, var(--color-cream), var(--color-amber) 52%, var(--color-burnt));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 0 0 2px rgba(226, 165, 82, 0.22),
+      0 0 28px rgba(226, 165, 82, 0.72),
+      0 0 58px rgba(197, 108, 52, 0.38);
+  }
+
+  .sound-attention::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset: -50% auto -50% -38%;
+    width: 24%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), transparent);
+    transform: translateX(-180%) rotate(14deg);
+    animation: attention-sheen 2.4s ease-in-out infinite 280ms;
+  }
+
+  .sound-attention > svg,
+  .sound-attention > span:not(.sound-attention-halo):not(.sound-attention-dot) {
+    position: relative;
+    z-index: 1;
+  }
+
+  .sound-attention-halo {
+    z-index: -1 !important;
+    pointer-events: none;
+    animation: attention-halo 1.8s ease-out infinite;
+  }
+
+  .sound-attention-dot {
+    z-index: 2;
+    animation: attention-dot 900ms ease-in-out infinite alternate;
   }
 
   .dj-mode-spark {
@@ -766,7 +818,11 @@
   .dj-mode-control.is-idle::before,
   .dj-mode-control.is-idle::after,
   .dj-mode-control.is-idle > button,
-  .dj-mode-spark {
+  .dj-mode-control.is-idle > button::after,
+  .dj-mode-spark,
+  .sound-attention::after,
+  .sound-attention-halo,
+  .sound-attention-dot {
     animation: none;
   }
 }
@@ -827,21 +883,42 @@
   }
 }
 
-@keyframes dj-mode-glow {
+@keyframes attention-sheen {
   0%,
-  100% {
-    box-shadow:
-      0 0 0 2px rgba(226, 165, 82, 0.18),
-      0 0 18px rgba(248, 240, 221, 0.3),
-      0 0 36px rgba(226, 165, 82, 0.56),
-      0 0 70px rgba(197, 108, 52, 0.26);
+  58% {
+    opacity: 0;
+    transform: translateX(-180%) rotate(14deg);
   }
-  50% {
-    box-shadow:
-      0 0 0 3px rgba(248, 240, 221, 0.34),
-      0 0 30px rgba(248, 240, 221, 0.52),
-      0 0 62px rgba(226, 165, 82, 0.9),
-      0 0 104px rgba(197, 108, 52, 0.46);
+  66% {
+    opacity: 0.88;
+  }
+  88%,
+  100% {
+    opacity: 0;
+    transform: translateX(650%) rotate(14deg);
+  }
+}
+
+@keyframes attention-halo {
+  0% {
+    opacity: 0.8;
+    transform: scale(0.94);
+  }
+  76%,
+  100% {
+    opacity: 0;
+    transform: scale(1.22);
+  }
+}
+
+@keyframes attention-dot {
+  from {
+    opacity: 0.72;
+    transform: scale(0.78);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.28);
   }
 }
 

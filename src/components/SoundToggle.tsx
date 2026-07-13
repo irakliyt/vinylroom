@@ -21,17 +21,16 @@ export default function SoundToggle() {
       onClick={resume}
       aria-label={label}
       title={label}
-      className={`relative flex h-10 shrink-0 items-center justify-center gap-1.5 overflow-hidden rounded-full border text-cream transition-colors hover:border-amber/80 clickable sm:gap-2 sm:overflow-visible ${
+      className={`relative flex h-10 shrink-0 items-center justify-center gap-1.5 overflow-visible rounded-full border text-cream transition-colors hover:border-amber/80 clickable sm:gap-2 ${
         needsHint
-          ? "h-9 w-[5.75rem] border-amber bg-amber/15 px-2 shadow-[0_0_18px_-8px_rgba(216,154,69,1)] sm:h-10 sm:w-auto sm:max-w-none sm:px-4 sm:shadow-[0_0_34px_-8px_rgba(216,154,69,1)]"
+          ? "sound-attention h-9 w-[5.75rem] border-amber px-2 sm:h-10 sm:w-auto sm:max-w-none sm:px-4"
           : "h-9 w-9 border-edge-strong sm:h-10 sm:w-10"
       }`}
-      style={needsHint ? ({ "--pulse-color": "rgba(216,154,69,0.62)", animation: "ring-pulse 1.45s ease-out infinite" } as React.CSSProperties) : undefined}
     >
       {needsHint && (
         <>
-          <span className="absolute inset-[-3px] rounded-full border border-amber/30 sm:inset-[-6px]" style={{ animation: "ring-pulse 1.75s ease-out infinite" }} />
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber shadow-[0_0_12px_rgba(216,154,69,1)] sm:-right-1 sm:-top-1 sm:h-3 sm:w-3" />
+          <span className="sound-attention-halo absolute inset-[-5px] rounded-full border border-amber/70 sm:inset-[-8px]" />
+          <span className="sound-attention-dot absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber shadow-[0_0_12px_rgba(216,154,69,1)] sm:-right-1 sm:-top-1 sm:h-3 sm:w-3" />
         </>
       )}
       {playing ? (
@@ -48,7 +47,7 @@ export default function SoundToggle() {
           <path d="M16 9l5 6M21 9l-5 6" />
         </svg>
       )}
-      {needsHint && <span className="truncate whitespace-nowrap text-[0.52rem] font-bold uppercase tracking-[0.08em] text-amber sm:text-[0.72rem] sm:tracking-[0.2em]">Sound on</span>}
+      {needsHint && <span className="truncate whitespace-nowrap text-[0.52rem] font-bold uppercase tracking-[0.08em] text-void sm:text-[0.72rem] sm:tracking-[0.2em]">Sound on</span>}
     </button>
   );
 }
