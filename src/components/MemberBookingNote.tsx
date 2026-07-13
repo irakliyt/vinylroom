@@ -35,7 +35,7 @@ export default function MemberBookingNote() {
 
   return (
     <button
-      onClick={() => login("/thank-you")}
+      onClick={() => login("/thank-you.html")}
       className="mt-5 rounded-full border border-edge-strong px-4 py-2 text-sm text-parchment transition-colors hover:text-cream clickable"
     >
       Sign in to keep your bookings →

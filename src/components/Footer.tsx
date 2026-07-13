@@ -64,9 +64,9 @@ export default function Footer() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-edge pt-6 text-xs text-dust sm:flex-row sm:items-center">
           <span>© 2026 Vinyl Listening Rooms — a concept, pressed with care.</span>
           <span className="flex gap-6">
-            <a href="#" className="transition-colors hover:text-cream">Privacy</a>
-            <a href="#" className="transition-colors hover:text-cream">Terms</a>
-            <a href="#" className="transition-colors hover:text-cream">Instagram</a>
+            <a href="/privacy.html" className="transition-colors hover:text-cream">Privacy</a>
+            <a href="/terms.html" className="transition-colors hover:text-cream">Terms</a>
+            <span className="text-ghost" aria-label="Instagram profile coming soon">Instagram</span>
           </span>
         </div>
       </div>
