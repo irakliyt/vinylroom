@@ -559,8 +559,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                   <img
                     src="/assets/video/dj-hologram-mobile.webp"
                     alt=""
-                    width={288}
-                    height={432}
+                    width={216}
+                    height={324}
                     draggable={false}
                     decoding="async"
                     loading="lazy"
