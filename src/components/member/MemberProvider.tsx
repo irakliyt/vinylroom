@@ -10,15 +10,10 @@ import {
   type FormEvent,
   type ReactNode,
 } from "react";
-import {
-  getCurrentMember,
-  loginWithPassword,
-  logout as doLogout,
-  registerMember,
-  verifyMemberEmail,
-  type Member,
-} from "@/lib/wix/auth";
+import type { Member } from "@/lib/wix/auth";
 import { isWixConfigured } from "@/lib/wix/config";
+
+const MEMBER_TOKENS_KEY = "wix:member-tokens";
 
 type MemberCtx = {
   member: Member;
@@ -55,7 +50,18 @@ export function MemberProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let alive = true;
-    getCurrentMember()
+    let hasSavedSession = false;
+    try {
+      hasSavedSession = !!localStorage.getItem(MEMBER_TOKENS_KEY);
+    } catch {
+      /* storage unavailable — treat this visit as signed out */
+    }
+
+    const memberPromise = hasSavedSession
+      ? import("@/lib/wix/auth").then(({ getCurrentMember }) => getCurrentMember())
+      : Promise.resolve<Member>(null);
+
+    memberPromise
       .then((m) => alive && setMember(m))
       .finally(() => alive && setLoading(false));
     return () => {
@@ -81,6 +87,7 @@ export function MemberProvider({ children }: { children: ReactNode }) {
       setLoginBusy(true);
       setLoginError("");
       try {
+        const { loginWithPassword, registerMember, verifyMemberEmail } = await import("@/lib/wix/auth");
         let nextMember: Member;
         if (authMode === "verify") {
           nextMember = await verifyMemberEmail(verificationToken, verificationCode.trim());
@@ -123,6 +130,7 @@ export function MemberProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     setMember(null);
+    const { logout: doLogout } = await import("@/lib/wix/auth");
     await doLogout();
   }, []);
 

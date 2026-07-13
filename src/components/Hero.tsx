@@ -68,6 +68,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [scratchRotation, setScratchRotation] = useState(0);
   const [isDesktop, setIsDesktop] = useState(false);
   const [staticMobileDj, setStaticMobileDj] = useState(false);
+  const [djMediaResolved, setDjMediaResolved] = useState(false);
   const [djVideoReady, setDjVideoReady] = useState(false);
   const [djVideoFailed, setDjVideoFailed] = useState(false);
   const [projectionGeometry, setProjectionGeometry] = useState<ProjectionGeometry | null>(null);
@@ -150,10 +151,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     djModeRef.current = djMode;
   }, [djMode]);
 
-  useEffect(() => {
-    scratchAudio.preload();
-    return () => scratchAudio.stop();
-  }, [scratchAudio]);
+  useEffect(() => () => scratchAudio.stop(), [scratchAudio]);
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 640px)");
@@ -193,10 +191,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const useStaticMobileDj = window.matchMedia("(max-width: 767px)").matches || appleMobileWebKit;
     setStaticMobileDj(useStaticMobileDj);
+    setDjMediaResolved(true);
 
     if (useStaticMobileDj) {
-      // Phone video compositing has been unreliable. Keep the stable poster-
-      // based hologram and projection treatment instead of the animated layer.
+      // Phone video compositing has been unreliable. Use the lighter animated
+      // WebP hologram and projection treatment instead of decoding the video.
       djVideo.pause();
     } else if (djVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
       // A preloaded asset can finish before React hydrates and attaches handlers.
@@ -208,6 +207,16 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       djVideo.removeEventListener("error", handleError);
     };
   }, [onDjMetadataLoaded]);
+
+  useEffect(() => {
+    const djVideo = djVideoRef.current;
+    if (!djMediaResolved || staticMobileDj || !djVideo) return;
+
+    // React adds the desktop <source> elements after device detection. Some
+    // browsers do not restart resource selection automatically when sources
+    // are inserted, so explicitly begin metadata loading as soon as they exist.
+    djVideo.load();
+  }, [djMediaResolved, staticMobileDj]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -530,28 +539,37 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 ref={djVideoRef}
                 id="djHologram"
                 className="dj-hologram"
-                autoPlay
                 muted
                 playsInline
                 loop
-                preload="auto"
-                poster="/assets/video/dj-hologram-poster.jpg"
+                preload="metadata"
+                poster={djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               >
-                <source src="/assets/video/dj-hologram.webm" type="video/webm" />
-                <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
+                {djMediaResolved && !staticMobileDj ? (
+                  <>
+                    <source src="/assets/video/dj-hologram.webm" type="video/webm" />
+                    <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
+                  </>
+                ) : null}
               </video>
               {/* Image animation avoids the unstable mobile video compositor. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/video/dj-hologram-mobile.webp"
-                alt=""
-                width={320}
-                height={480}
-                draggable={false}
-                decoding="async"
-                className="dj-hologram-mobile-animation"
-              />
+              {djMediaResolved && staticMobileDj ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src="/assets/video/dj-hologram-mobile.webp"
+                    alt=""
+                    width={288}
+                    height={432}
+                    draggable={false}
+                    decoding="async"
+                    loading="lazy"
+                    fetchPriority="low"
+                    className="dj-hologram-mobile-animation"
+                  />
+                </>
+              ) : null}
             </div>
 
             <div
@@ -672,7 +690,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                     height={360}
                     draggable={false}
                     decoding="async"
-                    fetchPriority="low"
+                    loading="eager"
+                    fetchPriority="high"
                     className="h-full w-full object-cover"
                   />
                 </div>

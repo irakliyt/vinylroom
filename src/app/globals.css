@@ -304,7 +304,7 @@
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: url("/assets/video/dj-hologram-poster.png") center / contain no-repeat;
+    background: url("/assets/video/dj-hologram-poster-alpha.webp") center / contain no-repeat;
     mix-blend-mode: screen;
   }
 
@@ -626,6 +626,36 @@
 
   .dj-hologram-projector.is-active {
     opacity: 0.94;
+  }
+
+  /* Phones use one decoded animated asset. Avoid per-frame filter and blend
+     passes, and keep the lightweight projection treatment static. */
+  .dj-hologram-mobile-animation {
+    mix-blend-mode: normal;
+    filter: none;
+  }
+
+  .dj-projection-rays {
+    filter: drop-shadow(0 0 4px rgba(226, 165, 82, 0.48));
+  }
+
+  .dj-projection-rays span {
+    animation: none;
+    background-size: 100% 100%;
+    opacity: 0.82;
+  }
+
+  .dj-projection-beam {
+    filter: blur(4px);
+  }
+
+  .dj-projection-beam.is-active {
+    animation: none;
+    opacity: 0.38;
+  }
+
+  .dj-projection-emitter.is-active {
+    animation: none;
   }
 
 }

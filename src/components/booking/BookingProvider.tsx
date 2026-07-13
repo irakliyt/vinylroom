@@ -11,7 +11,6 @@ import {
 } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { type Room } from "@/data/rooms";
-import { startEventCheckout } from "@/lib/wix/booking";
 import AlbumArt from "@/components/AlbumArt";
 import VinylDisc from "@/components/VinylDisc";
 
@@ -81,6 +80,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
     if (!room || !validName || !validEmail) return;
     setStatus("loading");
     try {
+      const { startEventCheckout } = await import("@/lib/wix/booking");
       const res = await withTimeout(startEventCheckout(room, qty), 20000);
       if (res.status === "redirect") {
         window.location.href = res.url; // → Wix-hosted checkout + payment
@@ -120,7 +120,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
             <button
               aria-label="Close"
               onClick={close}
-              className="absolute inset-0 bg-void/80 backdrop-blur-md clickable"
+              className="absolute inset-0 bg-void/95 sm:bg-void/80 sm:backdrop-blur-md clickable"
             />
 
             <motion.div
@@ -131,7 +131,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 40, opacity: 0, scale: 0.98 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="relative z-10 w-full max-w-lg overflow-hidden rounded-t-3xl border border-edge bg-gradient-to-b from-charcoal/95 to-pitch/95 shadow-[0_-20px_80px_-20px_rgba(0,0,0,0.9)] backdrop-blur-2xl sm:rounded-3xl"
+              className="relative z-10 max-h-[calc(100dvh-0.75rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-t-3xl border border-edge bg-[#120f0d] shadow-[0_-20px_80px_-20px_rgba(0,0,0,0.9)] sm:max-h-[calc(100dvh-2rem)] sm:rounded-3xl sm:bg-gradient-to-b sm:from-charcoal/95 sm:to-pitch/95 sm:backdrop-blur-2xl"
             >
               <AnimatePresence>
                 {status === "loading" && (
