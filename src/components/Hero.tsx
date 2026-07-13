@@ -228,34 +228,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       // Phone video compositing has been unreliable. Use the lighter animated
       // WebP hologram and projection treatment instead of decoding the video.
       djVideo.pause();
-    } else {
-      // DJ mode starts off. Let the critical page, artwork, and interaction code
-      // finish first, then warm the video while the visitor reads the hero.
-      // Activating DJ mode calls the same preparation immediately.
-      let idleRequest: number | null = null;
-      let fallbackTimer: number | null = null;
-      const scheduleWarmup = () => {
-        const idleWindow = window as typeof window & {
-          requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
-          cancelIdleCallback?: (handle: number) => void;
-        };
-        if (typeof idleWindow.requestIdleCallback === "function") {
-          idleRequest = idleWindow.requestIdleCallback(prepareDjVideo, { timeout: 3000 });
-        } else {
-          fallbackTimer = window.setTimeout(prepareDjVideo, 1200);
-        }
-      };
-
-      if (document.readyState === "complete") scheduleWarmup();
-      else window.addEventListener("load", scheduleWarmup, { once: true });
-
-      return () => {
-        window.removeEventListener("load", scheduleWarmup);
-        if (idleRequest !== null) window.cancelIdleCallback?.(idleRequest);
-        if (fallbackTimer !== null) window.clearTimeout(fallbackTimer);
-        djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
-        djVideo.removeEventListener("error", handleError);
-      };
     }
 
     return () => {
@@ -591,11 +563,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 playsInline
                 loop
                 preload="none"
-                poster={djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
+                poster={djMode && djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               />
               {/* Image animation avoids the unstable mobile video compositor. */}
-              {djMediaResolved && staticMobileDj ? (
+              {djVisualActive && staticMobileDj ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
