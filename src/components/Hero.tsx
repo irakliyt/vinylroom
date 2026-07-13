@@ -21,6 +21,8 @@ import { ScratchAudioEngine } from "@/lib/scratchAudio";
 import { featuredEvent, stats, type Room } from "@/data/rooms";
 
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
+const DJ_VIDEO_WEBM_SRC = "/assets/video/dj-hologram.webm";
+const DJ_VIDEO_MP4_SRC = "/assets/video/dj-hologram.mp4";
 const RITUAL_STEPS = [
   { label: "Sleeve", note: "choose the room" },
   { label: "Reveal", note: "record slides out" },
@@ -57,6 +59,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
+  const djVideoFallbackTried = useRef(false);
   const scratchSurfaceRef = useRef<HTMLDivElement>(null);
   const djProjectorRef = useRef<HTMLDivElement>(null);
   const projectionEmitterRef = useRef<HTMLDivElement>(null);
@@ -179,6 +182,14 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     if (!djVideo) return;
 
     const handleError = () => {
+      if (
+        !djVideoFallbackTried.current &&
+        djVideo.currentSrc.endsWith(DJ_VIDEO_WEBM_SRC)
+      ) {
+        djVideoFallbackTried.current = true;
+        djVideo.src = DJ_VIDEO_MP4_SRC;
+        return;
+      }
       setDjVideoReady(false);
       setDjVideoFailed(true);
     };
@@ -191,6 +202,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
     const useStaticMobileDj = window.matchMedia("(max-width: 767px)").matches || appleMobileWebKit;
     setStaticMobileDj(useStaticMobileDj);
+    if (!useStaticMobileDj) {
+      const supportsWebm = djVideo.canPlayType('video/webm; codecs="vp9"') !== "";
+      djVideoFallbackTried.current = !supportsWebm;
+      djVideo.src = supportsWebm ? DJ_VIDEO_WEBM_SRC : DJ_VIDEO_MP4_SRC;
+    }
     setDjMediaResolved(true);
 
     if (useStaticMobileDj) {
@@ -207,16 +223,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       djVideo.removeEventListener("error", handleError);
     };
   }, [onDjMetadataLoaded]);
-
-  useEffect(() => {
-    const djVideo = djVideoRef.current;
-    if (!djMediaResolved || staticMobileDj || !djVideo) return;
-
-    // React adds the desktop <source> elements after device detection. Some
-    // browsers do not restart resource selection automatically when sources
-    // are inserted, so explicitly begin metadata loading as soon as they exist.
-    djVideo.load();
-  }, [djMediaResolved, staticMobileDj]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -545,14 +551,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 preload="metadata"
                 poster={djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
-              >
-                {djMediaResolved && !staticMobileDj ? (
-                  <>
-                    <source src="/assets/video/dj-hologram.webm" type="video/webm" />
-                    <source src="/assets/video/dj-hologram.mp4" type="video/mp4" />
-                  </>
-                ) : null}
-              </video>
+              />
               {/* Image animation avoids the unstable mobile video compositor. */}
               {djMediaResolved && staticMobileDj ? (
                 <>
