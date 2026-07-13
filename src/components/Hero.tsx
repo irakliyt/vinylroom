@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
   motion,
   useScroll,
@@ -26,6 +27,25 @@ const RITUAL_STEPS = [
   { label: "Needle", note: "rooms come alive" },
 ];
 
+const PROJECTION_TARGETS = [
+  [0.51, 0.1],
+  [0.65, 0.18],
+  [0.79, 0.34],
+  [0.85, 0.52],
+  [0.75, 0.68],
+  [0.9, 0.82],
+  [0.64, 0.9],
+] as const;
+
+type ProjectionGeometry = {
+  sourceX: number;
+  sourceY: number;
+  beamLength: number;
+  beamAngle: number;
+  beamSpread: number;
+  rays: Array<{ length: number; angle: number }>;
+};
+
 export default function Hero({ rooms }: { rooms?: Room[] }) {
   const ref = useRef<HTMLElement>(null);
   const scratchAudio = useMemo(() => new ScratchAudioEngine(SCRATCH_SRC), []);
@@ -37,6 +57,9 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
+  const scratchSurfaceRef = useRef<HTMLDivElement>(null);
+  const djProjectorRef = useRef<HTMLDivElement>(null);
+  const projectionEmitterRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const { open } = useBooking();
   const player = usePlayer();
@@ -47,6 +70,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [staticMobileDj, setStaticMobileDj] = useState(false);
   const [djVideoReady, setDjVideoReady] = useState(false);
   const [djVideoFailed, setDjVideoFailed] = useState(false);
+  const [projectionGeometry, setProjectionGeometry] = useState<ProjectionGeometry | null>(null);
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
   // checkout — the static `featuredEvent` import never has a wixEventId.
@@ -60,6 +84,67 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
   const djVisualAvailable = (djVideoReady && !djVideoFailed) || staticMobileDj;
   const djVisualActive = djMode && djVisualAvailable;
+
+  useLayoutEffect(() => {
+    if (!djVisualActive) return;
+
+    const surface = scratchSurfaceRef.current;
+    const projector = djProjectorRef.current;
+    const emitter = projectionEmitterRef.current;
+    if (!surface || !projector || !emitter) return;
+
+    let frame = 0;
+    const updateGeometry = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        // The emitter is translated by -50%, so its CSS offset is already its
+        // visual centre in the scratch-surface coordinate system.
+        const sourceX = emitter.offsetLeft;
+        const sourceY = emitter.offsetTop;
+        const projectorX = projector.offsetLeft;
+        const projectorY = projector.offsetTop;
+        const projectorWidth = projector.offsetWidth;
+        const projectorHeight = projector.offsetHeight;
+
+        const rays = PROJECTION_TARGETS.map(([xRatio, yRatio]) => {
+          const targetX = projectorX + projectorWidth * xRatio;
+          const targetY = projectorY + projectorHeight * yRatio;
+          const deltaX = targetX - sourceX;
+          const deltaY = targetY - sourceY;
+          return {
+            length: Math.hypot(deltaX, deltaY),
+            angle: (Math.atan2(deltaY, deltaX) * 180) / Math.PI,
+          };
+        });
+
+        const beamTargetX = projectorX + projectorWidth * 0.68;
+        const beamTargetY = projectorY + projectorHeight * 0.52;
+        const beamDeltaX = beamTargetX - sourceX;
+        const beamDeltaY = beamTargetY - sourceY;
+
+        setProjectionGeometry({
+          sourceX,
+          sourceY,
+          beamLength: Math.hypot(beamDeltaX, beamDeltaY),
+          beamAngle: (Math.atan2(beamDeltaY, beamDeltaX) * 180) / Math.PI,
+          beamSpread: projectorHeight * 0.78,
+          rays,
+        });
+      });
+    };
+
+    updateGeometry();
+    const observer = new ResizeObserver(updateGeometry);
+    observer.observe(surface);
+    observer.observe(projector);
+    window.addEventListener("resize", updateGeometry);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("resize", updateGeometry);
+    };
+  }, [djVisualActive, isDesktop, staticMobileDj]);
 
   useEffect(() => {
     djModeRef.current = djMode;
@@ -422,6 +507,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
           onMouseLeave={onLeave}
         >
           <motion.div
+            ref={scratchSurfaceRef}
             style={{
               rotateX: isDesktop ? rx : 0,
               rotateY: isDesktop ? ry : 0,
@@ -436,6 +522,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             <div className="pointer-events-none absolute inset-[16%] rounded-full border border-amber/10 opacity-70 [mask-image:linear-gradient(90deg,transparent,black,transparent)] sm:inset-[8%]" />
 
             <div
+              ref={djProjectorRef}
               className={`dj-hologram-projector ${djVisualActive ? "is-active" : ""} ${staticMobileDj ? "is-static-mobile" : ""}`}
               aria-hidden="true"
             >
@@ -467,14 +554,23 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               />
             </div>
 
-            <div className={`dj-projection-rays ${djVisualActive ? "is-active" : ""}`} aria-hidden="true">
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
-              <span />
+            <div
+              className={`dj-projection-rays ${djVisualActive && projectionGeometry ? "is-active" : ""}`}
+              aria-hidden="true"
+            >
+              {projectionGeometry?.rays.map((ray, index) => (
+                <span
+                  key={index}
+                  style={
+                    {
+                      "--ray-x": `${projectionGeometry.sourceX}px`,
+                      "--ray-y": `${projectionGeometry.sourceY}px`,
+                      "--ray-length": `${ray.length}px`,
+                      "--ray-angle": `${ray.angle}deg`,
+                    } as CSSProperties
+                  }
+                />
+              ))}
             </div>
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
@@ -590,7 +686,18 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             </motion.div>
 
             <div
-              className={`dj-projection-beam ${djVisualActive ? "is-active" : ""}`}
+              className={`dj-projection-beam ${djVisualActive && projectionGeometry ? "is-active" : ""}`}
+              style={
+                projectionGeometry
+                  ? ({
+                      "--beam-x": `${projectionGeometry.sourceX}px`,
+                      "--beam-y": `${projectionGeometry.sourceY}px`,
+                      "--beam-length": `${projectionGeometry.beamLength}px`,
+                      "--beam-angle": `${projectionGeometry.beamAngle}deg`,
+                      "--beam-spread": `${projectionGeometry.beamSpread}px`,
+                    } as CSSProperties)
+                  : undefined
+              }
               aria-hidden="true"
             />
 
@@ -608,6 +715,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
             </button>
 
             <div
+              ref={projectionEmitterRef}
               className={`dj-projection-emitter ${djVisualActive ? "is-active" : ""}`}
               aria-hidden="true"
             />
