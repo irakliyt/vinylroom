@@ -471,6 +471,10 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <span />
               <span />
               <span />
+              <span />
+              <span />
+              <span />
+              <span />
             </div>
 
             {/* The scene's quiet technical layer gives the record a sense of place. */}
