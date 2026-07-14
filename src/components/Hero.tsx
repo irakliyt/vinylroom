@@ -284,27 +284,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     };
   }, [djMediaResolved, staticMobileDj]);
 
-  // Keep DJ mode off on first paint, then warm the full-quality video only
-  // after the document has finished loading. This does not hold Chrome's page
-  // loading indicator open, but makes the video ready before most visitors
-  // discover the DJ control.
-  useEffect(() => {
-    if (!djMediaResolved || staticMobileDj) return;
-
-    let warmTimer = 0;
-    const warm = () => {
-      warmTimer = window.setTimeout(prepareDjVideo, 900);
-    };
-
-    if (document.readyState === "complete") warm();
-    else window.addEventListener("load", warm, { once: true });
-
-    return () => {
-      window.removeEventListener("load", warm);
-      window.clearTimeout(warmTimer);
-    };
-  }, [djMediaResolved, prepareDjVideo, staticMobileDj]);
-
   // The 54 KB WebM primer is already buffered by the browser before interaction.
   // Start it immediately while the full-quality video crosses from `canplay`
   // to `playing`, then pause it behind the seamless fade once HD takes over.
@@ -925,10 +904,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
           <div
             className={`dj-mode-control ${djMode ? "is-active" : "is-idle"} absolute z-[60] flex items-center gap-1.5 rounded-full border border-amber/50 bg-void/95 px-1.5 py-1.5 backdrop-blur-md`}
+            onPointerEnter={prepareDjVideo}
           >
             <button
               type="button"
               onClick={toggleDjMode}
+              onFocus={prepareDjVideo}
               aria-pressed={djMode}
               aria-label={djMode ? "Turn DJ mode off" : "Try DJ mode"}
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[0.56rem] font-bold uppercase tracking-[0.16em] transition-colors clickable sm:px-3.5 sm:py-2 sm:text-[0.62rem] sm:tracking-[0.18em] ${

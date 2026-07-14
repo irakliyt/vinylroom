@@ -192,7 +192,6 @@ function wixClient(config: BackendConfig) {
     events: {
       createEvent: typeof wixEventsV2.createEvent;
       deleteEvent: typeof wixEventsV2.deleteEvent;
-      publishDraftEvent: typeof wixEventsV2.publishDraftEvent;
     };
     ticketDefinitions: {
       createTicketDefinition: typeof ticketDefinitionsV2.createTicketDefinition;
@@ -300,7 +299,7 @@ export async function handleHostEvent(request: Request, config: BackendConfig) {
         registration: { initialType: "TICKETING" },
         guestListSettings: { displayedPublicly: false },
       },
-      { draft: true },
+      { draft: isPrivate },
     );
     if (!event._id) throw new Error("Wix created an event without returning its ID.");
     eventId = event._id;
@@ -323,17 +322,23 @@ export async function handleHostEvent(request: Request, config: BackendConfig) {
         message: "Private room created as a Wix draft.",
       }, 201);
     }
-    const published = await client.events.publishDraftEvent(eventId);
     return json(request, {
       eventId,
-      slug: published.event?.slug ?? event.slug,
-      eventPageUrl: published.event?.eventPageUrl ?? event.eventPageUrl,
-      status: published.event?.status ?? "UPCOMING",
+      slug: event.slug,
+      eventPageUrl: event.eventPageUrl,
+      status: event.status ?? "UPCOMING",
       message: "Your listening room is live.",
     }, 201);
   } catch (error) {
     if (eventId) await client.events.deleteEvent(eventId).catch(() => undefined);
-    console.error("host-events create failed", { memberId, eventId, message: errorMessage(error) });
-    return json(request, { error: errorMessage(error) }, 502);
+    const message = errorMessage(error);
+    const permissionDenied = /permission|WIX_EVENTS\.|ExternalAppIdentity/i.test(message);
+    console.error("host-events create failed", { memberId, eventId, message });
+    if (isPrivate && /WIX_EVENTS\.READ_DRAFT_EVENTS/i.test(message)) {
+      return json(request, {
+        error: "Private rooms require the Wix draft-events permission. Switch the room to Public or grant WIX_EVENTS.READ_DRAFT_EVENTS to the backend app.",
+      }, 403);
+    }
+    return json(request, { error: message }, permissionDenied ? 403 : 502);
   }
 }
