@@ -18,19 +18,20 @@ const nextSteps = [
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "");
 const dayIndex: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 
-function nextRoomDate(day: string, time: string) {
+function nextRoomDate(room: (typeof demoRooms)[number]) {
+  if (room.startDate) return new Date(room.startDate);
   const now = new Date();
   const date = new Date(now);
-  const target = dayIndex[day] ?? now.getDay();
+  const target = dayIndex[room.day] ?? now.getDay();
   const add = (target - now.getDay() + 7) % 7 || 7;
   date.setDate(now.getDate() + add);
-  const [hours = "20", minutes = "00"] = time.split(":");
+  const [hours = "20", minutes = "00"] = room.time.split(":");
   date.setHours(Number(hours), Number(minutes), 0, 0);
   return date;
 }
 
 function calendarHref(room: (typeof demoRooms)[number], orderRef: string) {
-  const starts = nextRoomDate(room.day, room.time);
+  const starts = nextRoomDate(room);
   const ends = new Date(starts.getTime() + 2 * 60 * 60 * 1000);
   const stamp = (date: Date) => date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
   const body = [
@@ -105,7 +106,7 @@ export default function ThankYouContent() {
             </h1>
             <p className="mt-5 max-w-md text-lg text-parchment">
               You&apos;re on the list for{" "}
-              <span className="text-cream">{room.title}</span> — {room.day} · {room.time}, {room.city}.
+              <span className="text-cream">{room.title}</span> — {room.dateLabel ?? room.day} · {room.time}, {room.city}.
             </p>
           </>
         ) : (
@@ -164,7 +165,7 @@ export default function ThankYouContent() {
                     </div>
                     <div>
                       <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Doors</span>
-                      <span className="text-parchment">{room.day} · {room.time}</span>
+                      <span className="text-parchment">{room.dateLabel ?? room.day} · {room.time}</span>
                     </div>
                     <div className="col-span-2">
                       <span className="block text-[0.58rem] uppercase tracking-[0.16em] text-dust">Room</span>

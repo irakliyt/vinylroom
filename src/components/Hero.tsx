@@ -88,7 +88,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const featured = rooms?.find((r) => r.id === featuredEvent.id) ?? featuredEvent;
   const activeTrack = player.current;
   const stageTitle = activeTrack ? activeTrack.track : featured.title;
-  const stageSubtitle = activeTrack ? activeTrack.artist : `${featured.day} · ${featured.time}`;
+  const stageSubtitle = activeTrack ? activeTrack.artist : `${featured.dateLabel ?? featured.day} · ${featured.time}`;
   const stageLocation = activeTrack?.city ?? featured.city;
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";

@@ -23,6 +23,16 @@ export default function Navigation({
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [liveRoomCount, setLiveRoomCount] = useState(roomCount);
+
+  useEffect(() => {
+    const onRoomsRefreshed = (event: Event) => {
+      const count = (event as CustomEvent<{ count?: number }>).detail?.count;
+      if (typeof count === "number") setLiveRoomCount(count);
+    };
+    window.addEventListener("vinylroom:rooms-refreshed", onRoomsRefreshed);
+    return () => window.removeEventListener("vinylroom:rooms-refreshed", onRoomsRefreshed);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -73,10 +83,10 @@ export default function Navigation({
             <div className="hidden shrink-0 items-center gap-2 rounded-full border border-edge bg-pitch/40 px-3 py-1.5 xl:flex" title={source === "wix" ? "Live from Wix Events" : "Demo data — connect Wix to go live"}>
               <Waveform bars={4} className="h-3 w-4" color={source === "wix" ? "var(--color-amber)" : "var(--color-beige)"} />
               <span className="hidden whitespace-nowrap text-[0.58rem] uppercase tracking-[0.18em] text-dust 2xl:inline">
-                {source === "wix" ? `${roomCount} rooms live` : "Demo mode"}
+                {source === "wix" ? `${liveRoomCount} rooms live` : "Demo mode"}
               </span>
               <span className="whitespace-nowrap text-[0.58rem] uppercase tracking-[0.16em] text-dust 2xl:hidden">
-                {source === "wix" ? `${roomCount} live` : "Demo"}
+                {source === "wix" ? `${liveRoomCount} live` : "Demo"}
               </span>
             </div>
             <span className="fixed left-[10.75rem] top-3.5 z-[60] block xl:static">

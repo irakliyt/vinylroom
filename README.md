@@ -9,8 +9,8 @@ like a 2026 lifestyle product rather than a marketing page.
 - **Next.js 16** (App Router, Turbopack) · **React 19** · **TypeScript**
 - **Tailwind CSS v4** (`@theme inline` design tokens)
 - **Framer Motion 12** for scroll reveals, layout transitions, and magnetic motion
-- Zero image assets — every record sleeve, vinyl disc, and texture is generated
-  in CSS/SVG (gradients, grooves, feTurbulence grain)
+- Collectible event sleeves are generated in CSS/Canvas; the interactive DJ
+  hologram uses an optimized video asset loaded only for DJ mode.
 
 ## Run
 
@@ -28,9 +28,9 @@ built-in demo data; set a Headless OAuth **Client ID** and it goes live:
 cp .env.example .env.local     # add NEXT_PUBLIC_WIX_CLIENT_ID
 ```
 
-- Data: [`src/lib/wix/rooms.ts`](src/lib/wix/rooms.ts) fetches events server-side
-  (ISR, 60s) and maps them to rooms, merging the editorial extras (genre, mood,
-  vinyl lineup, equipment) by slug. Any failure falls back to demo data.
+- Data: [`src/lib/wix/rooms.ts`](src/lib/wix/rooms.ts) fetches upcoming events at
+  build time and maps them to rooms. A deferred browser refresh keeps the count,
+  dates, availability, and newly created events current without delaying LCP.
 - Booking: **Reserve a seat** opens a multi-step modal that reserves tickets
   (`orders.createReservation`) and redirects to the Wix-hosted checkout for
   payment (`redirects.createRedirectSession`). See
@@ -40,6 +40,23 @@ cp .env.example .env.local     # add NEXT_PUBLIC_WIX_CLIENT_ID
   ([`src/lib/wix/auth.ts`](src/lib/wix/auth.ts)); tokens persist in the browser so
   a guest's bookings tie to their member account. After paying, visitors land on
   the cinematic **`/thank-you`** page. All of this degrades gracefully in demo mode.
+- Hosting: a signed-in member can publish a Wix Event directly from the host
+  studio. The browser creates a matching collectible PNG sleeve, then the Wix App
+  backend verifies the member token, uploads the image, creates the event and
+  ticket definition, and publishes public events.
+
+### Services and APIs used (reviewer summary)
+
+- **Wix Headless OAuth + Wix Members** — visitor/member authentication and the
+  sign-in callback.
+- **Wix Events V2** — upcoming-event query plus draft creation and publishing.
+- **Wix Ticket Definitions / Orders** — capacity, availability, reservations,
+  ticket pricing, and Wix-hosted checkout handoff.
+- **Wix Media** — stores the automatically generated collectible event cover.
+- **Wix Redirects** — creates the secure checkout redirect session.
+- **Wix App backend / Wix hosting** — keeps API keys server-side and exposes the
+  authenticated `/api/host-events` endpoint. The public site is a static Next.js
+  export, so the critical page remains fast on desktop and mobile.
 
 Full walkthrough: **[WIX_SETUP.md](WIX_SETUP.md)**. Optional seed script:
 [`scripts/seed-wix-events.mjs`](scripts/seed-wix-events.mjs).

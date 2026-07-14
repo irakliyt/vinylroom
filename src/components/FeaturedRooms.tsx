@@ -202,6 +202,9 @@ export default function FeaturedRooms({
   const [mode, setMode] = useState<DialMode>("mood");
   const [showAllMobile, setShowAllMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [refreshedRooms, setRefreshedRooms] = useState<Room[] | null>(null);
+  const displayedRooms = refreshedRooms ?? rooms;
+  const displayedSource = refreshedRooms?.length ? "wix" : source;
 
   useEffect(() => {
     const media = window.matchMedia("(min-width: 640px)");
@@ -211,9 +214,53 @@ export default function FeaturedRooms({
     return () => media.removeEventListener("change", update);
   }, []);
 
+  useEffect(() => {
+    let alive = true;
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+    let idleId: number | undefined;
+
+    const refresh = async (expectedEventId?: string) => {
+      try {
+        const { getLiveListeningRooms } = await import("@/lib/wix/liveRooms");
+        for (let attempt = 0; attempt < (expectedEventId ? 3 : 1); attempt += 1) {
+          const live = await getLiveListeningRooms();
+          if (!alive) return;
+          if (live.length) {
+            setRefreshedRooms(live);
+            window.dispatchEvent(new CustomEvent("vinylroom:rooms-refreshed", { detail: { count: live.length } }));
+          }
+          if (!expectedEventId || live.some((room) => room.wixEventId === expectedEventId)) return;
+          await new Promise((resolve) => setTimeout(resolve, 1200));
+        }
+      } catch {
+        // Keep the baked rooms. A live refresh is progressive enhancement only.
+      }
+    };
+
+    const onCreated = (event: Event) => {
+      const eventId = (event as CustomEvent<{ eventId?: string }>).detail?.eventId;
+      refreshTimer = setTimeout(() => void refresh(eventId), 500);
+    };
+    window.addEventListener("vinylroom:event-created", onCreated);
+
+    const startIdleRefresh = () => void refresh();
+    if ("requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(startIdleRefresh, { timeout: 6000 });
+    } else {
+      refreshTimer = setTimeout(startIdleRefresh, 4000);
+    }
+
+    return () => {
+      alive = false;
+      window.removeEventListener("vinylroom:event-created", onCreated);
+      if (refreshTimer) clearTimeout(refreshTimer);
+      if (idleId !== undefined && "cancelIdleCallback" in window) window.cancelIdleCallback(idleId);
+    };
+  }, []);
+
   const filtered = useMemo(
-    () => [...rooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, isDesktop || showAllMobile ? 6 : 3),
-    [isDesktop, mode, rooms, showAllMobile],
+    () => [...displayedRooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, isDesktop || showAllMobile ? 6 : 3),
+    [displayedRooms, isDesktop, mode, showAllMobile],
   );
 
   return (
@@ -224,20 +271,20 @@ export default function FeaturedRooms({
             <span className="eyebrow">Featured listening rooms</span>
             <span
               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[0.58rem] uppercase tracking-[0.16em] ${
-                source === "wix"
+                displayedSource === "wix"
                   ? "border-amber/40 text-amber"
                   : "border-edge text-dust"
               }`}
               title={
-                source === "wix"
+                displayedSource === "wix"
                   ? "Rooms are loaded live from Wix Events"
                   : "Showing built-in demo data — connect Wix to go live"
               }
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${source === "wix" ? "animate-pulse bg-amber" : "bg-dust"}`}
+                className={`h-1.5 w-1.5 rounded-full ${displayedSource === "wix" ? "animate-pulse bg-amber" : "bg-dust"}`}
               />
-              {source === "wix" ? "Live from Wix" : "Demo data"}
+              {displayedSource === "wix" ? "Live from Wix" : "Demo data"}
             </span>
           </div>
           <h2 className="mt-4 text-balance font-display text-[clamp(2.2rem,5vw,3.8rem)] leading-[0.98] text-cream">
@@ -254,7 +301,7 @@ export default function FeaturedRooms({
         <Reveal delay={0.1}>
           <ListeningDial mode={mode} onChange={setMode} />
         </Reveal>
-        <LiveSignalBoard rooms={rooms} source={source} />
+        <LiveSignalBoard rooms={displayedRooms} source={displayedSource} />
       </div>
 
       {/* grid */}
@@ -274,7 +321,7 @@ export default function FeaturedRooms({
           ))}
         </AnimatePresence>
       </motion.div>
-      {!isDesktop && !showAllMobile && rooms.length > 3 && (
+      {!isDesktop && !showAllMobile && displayedRooms.length > 3 && (
         <div className="mt-7 flex justify-center sm:hidden">
           <button
             type="button"

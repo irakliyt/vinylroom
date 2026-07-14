@@ -1,6 +1,8 @@
 import { getBrowserClient } from "./browser";
 import { routeUrl } from "@/lib/site";
 import { type Room } from "@/data/rooms";
+import { ordersCompat } from "./ordersCompat";
+import { redirectsCompat } from "./sdkCompat";
 
 export type CheckoutResult =
   | { status: "redirect"; url: string }
@@ -48,6 +50,7 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
   }
 
   try {
+    const orderClient = ordersCompat(client.orders);
     const eventSlug = room.wixEventSlug;
     if (!eventSlug) {
       return { status: "error", reason: "This live event is missing its Wix checkout slug." };
@@ -57,7 +60,7 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
     //    ask for the event's available tickets).
     let ticketDefinitionId = room.wixTicketDefinitionId;
     if (!ticketDefinitionId) {
-      const avail = await client.orders.queryAvailableTickets({
+      const avail = await orderClient.queryAvailableTickets({
         filter: { eventId: room.wixEventId },
         limit: 1,
       });
@@ -68,7 +71,7 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
     }
 
     // 2. Reserve the seats.
-    const reservation = await client.orders.createReservation(room.wixEventId, {
+    const reservation = await orderClient.createReservation(room.wixEventId, {
       ticketQuantities: [{ ticketDefinitionId, quantity }],
     });
     const reservationId = reservation._id;
@@ -79,7 +82,7 @@ export async function startEventCheckout(room: Room, quantity: number): Promise<
     // 3. Build the Wix-hosted checkout URL and hand off.
     const returnUrl = routeUrl("/thank-you", { event: eventSlug });
     const homeUrl = routeUrl("/");
-    const session = await client.redirects.createRedirectSession({
+    const session = await redirectsCompat(client.redirects).createRedirectSession({
       eventsCheckout: { eventSlug, reservationId },
       callbacks: {
         thankYouPageUrl: returnUrl,

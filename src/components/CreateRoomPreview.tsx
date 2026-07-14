@@ -8,22 +8,18 @@ import Reveal from "./Reveal";
 import { usePlayer, type Track } from "./player/PlayerProvider";
 import { artworkVariant } from "@/lib/artwork";
 import { type Genre, type Sleeve } from "@/data/rooms";
+import { useMember } from "@/components/member/MemberProvider";
+import { getBrowserClient } from "@/lib/wix/browser";
+import { createEventCoverPng } from "@/lib/eventCover";
 import previewsData from "@/data/previews.json";
 
 type Preview = { track: string; artist: string; previewUrl: string; artwork: string };
-type HostDraft = {
-  id: string;
-  title: string;
-  genre: Genre;
-  moods: string[];
-  date: string;
-  time: string;
-  venue: string;
-  capacity: number;
-  price: number;
-  isPrivate: boolean;
-  records: string[];
-  createdAt: string;
+type CreatedEvent = {
+  eventId: string;
+  slug?: string;
+  status: string;
+  message: string;
+  eventPageUrl?: string;
 };
 
 // Searchable album pool built from the real (iTunes-backed) catalogue.
@@ -46,8 +42,7 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 ];
 
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
-const HOST_DRAFTS_KEY = "vinylroom:host-drafts";
-const WIX_DASHBOARD_URL = "https://manage.wix.com/dashboard/89625c22-ba90-416d-bbb7-07d789b5cf3e/events";
+const HOST_EVENTS_API = `${process.env.NEXT_PUBLIC_WIX_APP_API_URL ?? "https://5k293v-881f90aac2a74e41-irakliyt.wix-host.com"}/api/host-events`;
 const STUDIO_STEPS = ["Record", "Mood", "Room", "Tickets"];
 
 function defaultEventDate() {
@@ -77,11 +72,12 @@ export default function CreateRoomPreview() {
     "Miles Davis — Kind of Blue",
     "Bill Evans Trio — Waltz for Debby",
   ]);
-  const [justOpened, setJustOpened] = useState(false);
-  const [draftMessage, setDraftMessage] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createMessage, setCreateMessage] = useState("");
   const [formError, setFormError] = useState("");
-  const [lastDraft, setLastDraft] = useState<HostDraft | null>(null);
+  const [createdEvent, setCreatedEvent] = useState<CreatedEvent | null>(null);
   const player = usePlayer();
+  const { member, loading: memberLoading, login } = useMember();
 
   const genre = GENRE_OPTS[genreIdx];
 
@@ -129,72 +125,72 @@ export default function CreateRoomPreview() {
     Boolean(venue.trim() && eventDate && eventTime),
     capacity > 0 && price >= 0,
   ];
-  const draftSummary = (draft: HostDraft) => [
-    `Event title: ${draft.title}`,
-    `Genre: ${draft.genre}`,
-    `Mood: ${draft.moods.join(", ") || "Not set"}`,
-    `When: ${scheduleLabel(draft.date, draft.time)}`,
-    `Where: ${draft.venue}`,
-    `Capacity: ${draft.capacity}`,
-    `Seat price: ${draft.price === 0 ? "Free" : `$${draft.price}`}`,
-    `Visibility: ${draft.isPrivate ? "Private" : "Public"}`,
-    "",
-    "Crate:",
-    ...draft.records.map((record) => `- ${record}`),
-  ].join("\n");
-
-  const saveDraft = () => {
+  const createWixEvent = async () => {
     if (!title.trim() || !eventDate || !eventTime || !venue.trim() || records.length === 0) {
-      setFormError("Add a title, date, time, location, and at least one record before preparing the event.");
+      setFormError("Add a title, date, time, location, and at least one record before creating the event.");
+      return;
+    }
+    if (memberLoading) {
+      setFormError("Checking your member session. Try again in a moment.");
+      return;
+    }
+    if (!member) {
+      setFormError("Sign in as a Vinyl Rooms member to create this event.");
+      login("/#host");
       return;
     }
 
-    const draft: HostDraft = {
-      id: `room-${Date.now()}`,
-      title: title.trim() || "Untitled listening room",
-      genre: genre.g,
-      moods,
-      date: eventDate,
-      time: eventTime,
-      venue: venue.trim(),
-      capacity,
-      price,
-      isPrivate,
-      records,
-      createdAt: new Date().toISOString(),
-    };
-
-    try {
-      const existing = JSON.parse(localStorage.getItem(HOST_DRAFTS_KEY) ?? "[]") as HostDraft[];
-      localStorage.setItem(HOST_DRAFTS_KEY, JSON.stringify([draft, ...existing].slice(0, 12)));
-      setLastDraft(draft);
-      setJustOpened(true);
-      setFormError("");
-      setDraftMessage("Room brief ready. Continue in Wix Events to create the ticketed event.");
-      setTimeout(() => setJustOpened(false), 2800);
-    } catch {
-      setLastDraft(draft);
-      setJustOpened(true);
-      setFormError("");
-      setDraftMessage("Room brief ready. Copy it before opening Wix Events.");
+    const client = getBrowserClient();
+    if (!client) {
+      setFormError("Wix Headless is not configured for this site.");
+      return;
     }
-  };
 
-  const copyDraft = async () => {
-    if (!lastDraft) return;
+    setCreating(true);
+    setCreatedEvent(null);
+    setFormError("");
     try {
-      await navigator.clipboard.writeText(draftSummary(lastDraft));
-      setDraftMessage("Draft copied. Paste it into your Wix Events setup.");
-    } catch {
-      setDraftMessage("Could not copy automatically. Select the draft details and copy them.");
+      setCreateMessage("Pressing your collectible event sleeve…");
+      const coverDataUrl = await createEventCoverPng({
+        title: title.trim(),
+        genre: genre.g,
+        moods,
+        sleeve: genre.sleeve,
+      });
+      setCreateMessage("Creating the ticketed room in Wix Events…");
+      const response = await client.fetchWithAuth(HOST_EVENTS_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: title.trim(),
+          genre: genre.g,
+          moods,
+          date: eventDate,
+          time: eventTime,
+          venue: venue.trim(),
+          capacity,
+          price,
+          isPrivate,
+          records,
+          timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Warsaw",
+          coverDataUrl,
+        }),
+      });
+      const result = (await response.json().catch(() => ({}))) as CreatedEvent & { error?: string };
+      if (response.status === 401) {
+        login("/#host");
+        throw new Error(result.error || "Your member session expired. Sign in and try again.");
+      }
+      if (!response.ok) throw new Error(result.error || "Wix could not create this event.");
+      setCreatedEvent(result);
+      setCreateMessage(result.message);
+      window.dispatchEvent(new CustomEvent("vinylroom:event-created", { detail: result }));
+    } catch (error) {
+      setCreateMessage("");
+      setFormError(error instanceof Error ? error.message : "Wix could not create this event.");
+    } finally {
+      setCreating(false);
     }
-  };
-
-  const openWixDashboard = () => {
-    if (!lastDraft) return;
-    void navigator.clipboard.writeText(draftSummary(lastDraft)).catch(() => {});
-    window.open(WIX_DASHBOARD_URL, "_blank", "noopener,noreferrer");
-    setDraftMessage("Wix dashboard opened. The room brief is ready to paste into a new ticketed event.");
   };
 
   return (
@@ -586,47 +582,53 @@ export default function CreateRoomPreview() {
 
             <button
               type="button"
-              onClick={saveDraft}
-              className="mt-4 w-full rounded-full py-3.5 text-sm font-medium text-void transition-all clickable"
+              onClick={() => void createWixEvent()}
+              disabled={creating}
+              className="mt-4 w-full rounded-full py-3.5 text-sm font-medium text-void transition-all clickable disabled:cursor-wait disabled:opacity-70"
               style={{ background: "linear-gradient(135deg,#e8b45f,#b45f2a)", boxShadow: "0 16px 40px -14px rgba(216,154,69,0.6)" }}
             >
-              {justOpened ? "✓ Wix room brief ready" : "Prepare Wix Events draft"}
+              {creating
+                ? createMessage || "Creating your room…"
+                : member
+                  ? isPrivate
+                    ? "Create private Wix Event draft"
+                    : "Create and publish Wix Event"
+                  : "Sign in to create this event"}
             </button>
             <div className="mt-3 rounded-2xl border border-edge bg-pitch/45 px-3 py-2.5">
               <div className="flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_10px_rgba(226,165,82,0.8)]" />
                 <span className="text-[0.58rem] uppercase tracking-[0.2em] text-beige">
-                  Wix Events handoff
+                  Direct Wix Events publishing
                 </span>
               </div>
               <p className="mt-1.5 text-[0.72rem] leading-relaxed text-dust">
-                The brief copies title, date, capacity, price, mood, and crate so the ticketed Wix Event can be created without retyping.
+                Signed-in members create the real ticketed event here. Its collectible cover is generated automatically in the same Vinyl Rooms style.
               </p>
             </div>
             {formError && <p className="mt-3 text-sm text-amber">{formError}</p>}
-            {lastDraft && (
-              <div className="mt-3 rounded-2xl border border-edge bg-void/50 p-3 text-left">
+            {createdEvent && (
+              <div className="mt-3 rounded-2xl border border-amber/35 bg-amber/10 p-3 text-left">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-xs text-parchment">{draftMessage}</p>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={copyDraft}
-                      className="rounded-full border border-edge-strong px-3 py-1.5 text-xs text-cream transition-colors hover:border-amber/50 clickable"
-                    >
-                      Copy brief
-                    </button>
-                    <button
-                      type="button"
-                      onClick={openWixDashboard}
+                  <div>
+                    <div className="text-[0.58rem] uppercase tracking-[0.2em] text-amber">
+                      {createdEvent.status === "DRAFT" ? "Private draft created" : "Room published"}
+                    </div>
+                    <p className="mt-1 text-xs text-parchment">{createdEvent.message}</p>
+                  </div>
+                  {createdEvent.eventPageUrl?.startsWith("http") && (
+                    <a
+                      href={createdEvent.eventPageUrl}
+                      target="_blank"
+                      rel="noreferrer"
                       className="rounded-full bg-cream px-3 py-1.5 text-xs font-medium text-void transition-transform hover:scale-[1.03] clickable"
                     >
-                      Open Wix Events
-                    </button>
-                  </div>
+                      View event
+                    </a>
+                  )}
                 </div>
                 <p className="mt-2 text-[0.68rem] text-dust">
-                  Prepared fields: event details, ticket capacity and price, visibility, mood, and crate.
+                  Event details, tickets, visibility, crate notes, and the generated sleeve are now stored in Wix Events.
                 </p>
               </div>
             )}

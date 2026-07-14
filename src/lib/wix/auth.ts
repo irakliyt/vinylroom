@@ -194,7 +194,12 @@ export async function getCurrentMember(): Promise<Member> {
   const client = getBrowserClient();
   if (!client || !client.auth.loggedIn()) return null;
   try {
-    const res = (await client.members.getCurrentMember()) as Record<string, unknown>;
+    // The generated Members package still exposes this visitor method at runtime,
+    // although its current aggregate module type omits it.
+    const memberClient = client.members as unknown as {
+      getCurrentMember: () => Promise<unknown>;
+    };
+    const res = (await memberClient.getCurrentMember()) as Record<string, unknown>;
     const m = ((res.member ?? res) ?? {}) as Record<string, unknown>;
     const profile = (m.profile ?? {}) as Record<string, unknown>;
     const contact = (m.contact ?? {}) as Record<string, unknown>;

@@ -28,6 +28,10 @@ export type Room = {
   city: string;
   venue: string;
   day: string;
+  /** Full calendar label for Wix-backed events, for example "Wed, Jul 22". */
+  dateLabel?: string;
+  /** ISO start moment used by calendar exports and other exact-date flows. */
+  startDate?: string;
   time: string;
   price: string;
   capacity: number;

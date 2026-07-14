@@ -1,6 +1,9 @@
 import "server-only";
 import { rooms as demoRooms, type Room } from "@/data/rooms";
 import { getWixClient } from "./client";
+import { ordersCompat } from "./ordersCompat";
+import { eventsCompat } from "./sdkCompat";
+import { eventSchedule, isUpcomingEvent } from "./eventSchedule";
 
 export type RoomsResult = {
   rooms: Room[];
@@ -19,33 +22,19 @@ function formatPrice(amount?: string | number, currency?: string, fallback = "")
   return currency === "PLN" ? `${n} zł` : sym ? `${sym}${n}` : `${n} ${currency ?? ""}`.trim();
 }
 
-function startFromEvent(ev: Record<string, unknown>): { day?: string; time?: string } {
-  // Wix Events keeps the start moment in a couple of possible shapes depending
-  // on version; probe them defensively and format to "Fri" / "21:00".
-  const settings = (ev.dateAndTimeSettings ?? ev.scheduling) as Record<string, unknown> | undefined;
-  const raw =
-    (settings?.startDate as string | undefined) ??
-    ((settings?.config as Record<string, unknown> | undefined)?.startDate as string | undefined);
-  if (!raw) return {};
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return {};
-  return {
-    day: d.toLocaleDateString("en-US", { weekday: "short" }),
-    time: d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false }),
-  };
-}
-
 /**
  * Overlay live Wix Events fields onto a demo room (matched by slug), keeping the
  * editorial extras (genre, mood, vinyl lineup, equipment, sleeve) that Wix Events
  * has no native home for. Anything we can't read confidently keeps its demo value.
  */
 function mergeEvent(base: Room, ev: Record<string, unknown>, ticket?: Record<string, unknown>): Room {
-  const { day, time } = startFromEvent(ev);
+  const schedule = eventSchedule(ev);
   const location = ev.location as Record<string, unknown> | undefined;
   const price = ticket?.price as Record<string, unknown> | undefined;
   const limits = ticket?.dashboard as Record<string, unknown> | undefined;
   const sold = typeof limits?.ticketsSold === "number" ? (limits.ticketsSold as number) : undefined;
+  const locationName = String(location?.name || "");
+  const genericCity = /^A room in (.+)$/i.exec(locationName)?.[1]?.trim();
 
   return {
     ...base,
@@ -53,9 +42,12 @@ function mergeEvent(base: Room, ev: Record<string, unknown>, ticket?: Record<str
     wixEventId: ev._id as string,
     wixEventSlug: (ev.slug as string) || base.wixEventSlug,
     wixTicketDefinitionId: (ticket?._id as string) || base.wixTicketDefinitionId,
-    day: day ?? base.day,
-    time: time ?? base.time,
-    city: (location?.name as string) || (location?.city as string) || base.city,
+    day: schedule?.day ?? base.day,
+    dateLabel: schedule?.dateLabel,
+    startDate: schedule?.startDate,
+    time: schedule?.time ?? base.time,
+    city: genericCity || (location?.city as string) || base.city,
+    venue: location?.locationTbd ? base.venue : locationName || base.venue,
     price: formatPrice(price?.amount as string, price?.currency as string, base.price),
     seatsLeft: sold != null ? Math.max(0, base.capacity - sold) : base.seatsLeft,
     source: "wix",
@@ -72,8 +64,12 @@ export async function getListeningRooms(): Promise<RoomsResult> {
   if (!client) return { rooms: demoRooms, source: "mock" };
 
   try {
-    const res = await client.wixEventsV2.queryEvents().limit(50).find();
-    const events = (res.items ?? []) as Record<string, unknown>[];
+    const orderClient = ordersCompat(client.orders);
+    const res = await eventsCompat(client.wixEventsV2)
+      .queryEvents({ fields: ["DETAILS", "URLS"] })
+      .limit(50)
+      .find();
+    const events = ((res.items ?? []) as Record<string, unknown>[]).filter(isUpcomingEvent);
     if (events.length === 0) return { rooms: demoRooms, source: "mock" };
 
     // Pull one on-sale ticket per event (for price + a ticketDefinitionId),
@@ -81,8 +77,8 @@ export async function getListeningRooms(): Promise<RoomsResult> {
     const withTickets = await Promise.all(
       events.map(async (ev) => {
         try {
-          const avail = await client.orders.queryAvailableTickets({
-            filter: { eventId: ev._id },
+          const avail = await orderClient.queryAvailableTickets({
+            filter: { eventId: String(ev._id || "") },
             limit: 1,
           });
           return { ev, ticket: avail.definitions?.[0] as Record<string, unknown> | undefined };

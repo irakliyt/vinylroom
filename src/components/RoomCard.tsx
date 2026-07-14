@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from "framer-motion";
 import AlbumArt from "./AlbumArt";
 import VinylDisc from "./VinylDisc";
@@ -12,6 +12,42 @@ function Heart({ filled }: { filled: boolean }) {
     <svg viewBox="0 0 24 24" className="h-4 w-4" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6">
       <path d="M12 21s-7.5-4.6-10-9.2C.4 8.4 2 5 5.3 5 7.3 5 8.8 6.2 12 9c3.2-2.8 4.7-4 6.7-4C22 5 23.6 8.4 22 11.8 19.5 16.4 12 21 12 21z" />
     </svg>
+  );
+}
+
+function countdownLabel(startDate: string, now: number) {
+  const remaining = new Date(startDate).getTime() - now;
+  if (!Number.isFinite(remaining) || remaining <= 0) return "Starting soon";
+  const minutes = Math.floor(remaining / 60_000);
+  const days = Math.floor(minutes / 1_440);
+  const hours = Math.floor((minutes % 1_440) / 60);
+  if (days > 0) return `${days}d ${hours}h left`;
+  if (hours > 0) return `${hours}h ${minutes % 60}m left`;
+  return `${Math.max(1, minutes)}m left`;
+}
+
+function EventCountdown({ startDate }: { startDate?: string }) {
+  const [now, setNow] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!startDate) return;
+    const update = () => setNow(Date.now());
+    const frame = requestAnimationFrame(update);
+    const timer = window.setInterval(update, 60_000);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearInterval(timer);
+    };
+  }, [startDate]);
+
+  if (!startDate || now === null) return null;
+  return (
+    <time
+      dateTime={startDate}
+      className="ml-auto shrink-0 rounded-full border border-amber/30 bg-amber/[0.08] px-2 py-0.5 font-mono text-[0.58rem] uppercase tracking-[0.12em] text-amber"
+    >
+      {countdownLabel(startDate, now)}
+    </time>
   );
 }
 
@@ -149,7 +185,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
                 <span className="truncate text-[0.56rem] uppercase tracking-[0.18em] text-amber">Tonight</span>
               </div>
               <span className="shrink-0 text-[0.58rem] uppercase tracking-[0.12em] text-cream/70">
-                {room.day} · {room.time}
+                {room.dateLabel ?? room.day} · {room.time}
               </span>
             </div>
             <div className="mt-1 truncate font-display text-base leading-none text-cream">{leadRecord}</div>
@@ -189,7 +225,8 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
           <span className="rounded-full border border-edge px-2 py-0.5 text-[0.6rem] uppercase tracking-[0.16em] text-beige">
             {room.genre}
           </span>
-          <span className="text-[0.68rem] text-dust">{room.mood}</span>
+          <span className="min-w-0 flex-1 truncate text-[0.68rem] text-dust">{room.mood}</span>
+          <EventCountdown startDate={room.startDate} />
         </div>
 
         <h3 className="mt-2 font-display text-2xl leading-tight text-cream">{room.title}</h3>
@@ -224,7 +261,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             <span className={scarce ? "text-amber" : "text-parchment"}>
               {room.seatsLeft} of {room.capacity} seats left
             </span>
-            <span className="text-dust">{room.day} · {room.time}</span>
+            <span className="text-dust">{room.dateLabel ?? room.day} · {room.time}</span>
           </div>
           <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-edge">
             <motion.div

@@ -62,7 +62,7 @@ export default function EventDetailPreview({ event }: { event?: Room }) {
         <div className="space-y-12">
           {/* meta grid */}
           <Reveal className="grid grid-cols-2 gap-6 border-b border-edge pb-8 sm:grid-cols-4">
-            <Meta label="When" value={`${e.day} · ${e.time}`} />
+            <Meta label="When" value={`${e.dateLabel ?? e.day} · ${e.time}`} />
             <Meta label="Where" value={e.city} />
             <Meta label="Room" value={e.venue} />
             <Meta label="Seats" value={`${e.seatsLeft} of ${e.capacity} left`} />

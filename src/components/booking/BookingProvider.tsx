@@ -194,7 +194,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
                     {room.title}
                   </h3>
                   <div className="text-xs text-parchment">
-                    {room.day} · {room.time} · {room.price} / seat
+                    {room.dateLabel ?? room.day} · {room.time} · {room.price} / seat
                   </div>
                 </div>
                 <button
