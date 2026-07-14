@@ -61,6 +61,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
+  const djStartupVideoRef = useRef<HTMLVideoElement>(null);
   const djVideoFallbackTried = useRef(false);
   const djMediaPrepared = useRef(false);
   const staticMobileDjRef = useRef(false);
@@ -278,6 +279,30 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
       window.clearTimeout(warmTimer);
     };
   }, [djMediaResolved, prepareDjVideo, staticMobileDj]);
+
+  // The 54 KB WebM primer is already buffered by the browser before interaction.
+  // Start it immediately while the full-quality video crosses from `canplay`
+  // to `playing`, then pause it behind the seamless fade once HD takes over.
+  useEffect(() => {
+    const startupVideo = djStartupVideoRef.current;
+    if (!startupVideo) return;
+
+    const shouldPlayStartup =
+      djVisualActive &&
+      !staticMobileDj &&
+      !reduce &&
+      (!djVideoReady || djVideoFailed);
+
+    if (shouldPlayStartup) {
+      void startupVideo.play().catch(() => {});
+      return;
+    }
+
+    startupVideo.pause();
+    if (!djMode && startupVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      startupVideo.currentTime = 0;
+    }
+  }, [djMode, djVideoFailed, djVideoReady, djVisualActive, reduce, staticMobileDj]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -622,20 +647,33 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 poster={djMode && djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
                 tabIndex={-1}
               />
-              {djVisualActive && !staticMobileDj && !reduce && !djVideoReady && !djVideoFailed ? (
-                <video
-                  className="dj-hologram dj-hologram-startup"
-                  muted
-                  playsInline
-                  autoPlay
-                  loop
-                  preload="auto"
-                  tabIndex={-1}
-                >
-                  <source src={DJ_STARTUP_WEBM_SRC} type="video/webm" />
-                  <source src={DJ_STARTUP_MP4_SRC} type="video/mp4" />
-                </video>
-              ) : null}
+              <video
+                ref={djStartupVideoRef}
+                className={`dj-hologram dj-hologram-startup ${
+                  djVisualActive &&
+                  !staticMobileDj &&
+                  !reduce &&
+                  (!djVideoReady || djVideoFailed)
+                    ? "is-visible"
+                    : ""
+                }`}
+                muted
+                playsInline
+                loop
+                preload="auto"
+                tabIndex={-1}
+              >
+                <source
+                  src={DJ_STARTUP_WEBM_SRC}
+                  type="video/webm"
+                  media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+                />
+                <source
+                  src={DJ_STARTUP_MP4_SRC}
+                  type="video/mp4"
+                  media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+                />
+              </video>
               {/* Image animation avoids the unstable mobile video compositor. */}
               {djVisualActive && staticMobileDj ? (
                 <>

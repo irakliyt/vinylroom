@@ -368,6 +368,12 @@
     position: absolute;
     inset: 0;
     z-index: 2;
+    opacity: 0;
+    visibility: hidden;
+    animation: none !important;
+    transition:
+      opacity 160ms ease,
+      visibility 0s linear 160ms;
     filter:
       brightness(0.88)
       contrast(0.96)
@@ -375,6 +381,12 @@
       blur(0.25px)
       drop-shadow(0 0 10px rgba(226, 165, 82, 0.16))
       drop-shadow(0 0 24px rgba(120, 70, 55, 0.1));
+  }
+
+  .dj-hologram-startup.is-visible {
+    opacity: 0.86;
+    visibility: visible;
+    transition-delay: 0s;
   }
 
   .dj-hologram-projector.is-static-mobile {
