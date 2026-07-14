@@ -25,6 +25,7 @@ const DJ_VIDEO_WEBM_SRC = "/assets/video/dj-hologram.webm";
 const DJ_VIDEO_MP4_SRC = "/assets/video/dj-hologram.mp4";
 const DJ_STARTUP_WEBM_SRC = "/assets/video/dj-hologram-startup.webm";
 const DJ_STARTUP_MP4_SRC = "/assets/video/dj-hologram-startup.mp4";
+const DJ_MASK_SRC = "/assets/video/dj-hologram-mask.png?v=2";
 const RITUAL_STEPS = [
   { label: "Sleeve", note: "choose the room" },
   { label: "Reveal", note: "record slides out" },
@@ -79,6 +80,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [djMediaResolved, setDjMediaResolved] = useState(false);
   const [djVideoReady, setDjVideoReady] = useState(false);
   const [djVideoFailed, setDjVideoFailed] = useState(false);
+  const [djMaskReady, setDjMaskReady] = useState(false);
   const [projectionGeometry, setProjectionGeometry] = useState<ProjectionGeometry | null>(null);
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
@@ -96,6 +98,11 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   // actually playing; phones keep their existing animated WebP path.
   const djVisualAvailable = djMediaResolved || staticMobileDj;
   const djVisualActive = djMode && djVisualAvailable;
+  const djStartupVisible =
+    djVisualActive &&
+    !staticMobileDj &&
+    !reduce &&
+    (!djVideoReady || !djMaskReady || djVideoFailed);
 
   useLayoutEffect(() => {
     if (!djVisualActive) return;
@@ -259,6 +266,24 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     };
   }, [onDjMetadataLoaded, reduce]);
 
+  // Warm the silhouette matte independently of DJ mode. The startup video has
+  // its own CSS-only feather, so an uncached matte can never delay first motion.
+  useEffect(() => {
+    if (!djMediaResolved || staticMobileDj) return;
+
+    let disposed = false;
+    const mask = new Image();
+    mask.decoding = "async";
+    mask.onload = () => {
+      if (!disposed) setDjMaskReady(true);
+    };
+    mask.src = DJ_MASK_SRC;
+
+    return () => {
+      disposed = true;
+    };
+  }, [djMediaResolved, staticMobileDj]);
+
   // Keep DJ mode off on first paint, then warm the full-quality video only
   // after the document has finished loading. This does not hold Chrome's page
   // loading indicator open, but makes the video ready before most visitors
@@ -287,13 +312,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     const startupVideo = djStartupVideoRef.current;
     if (!startupVideo) return;
 
-    const shouldPlayStartup =
-      djVisualActive &&
-      !staticMobileDj &&
-      !reduce &&
-      (!djVideoReady || djVideoFailed);
-
-    if (shouldPlayStartup) {
+    if (djStartupVisible) {
       void startupVideo.play().catch(() => {});
       return;
     }
@@ -302,7 +321,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     if (!djMode && startupVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
       startupVideo.currentTime = 0;
     }
-  }, [djMode, djVideoFailed, djVideoReady, djVisualActive, reduce, staticMobileDj]);
+  }, [djMode, djStartupVisible]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -639,7 +658,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <video
                 ref={djVideoRef}
                 id="djHologram"
-                className="dj-hologram"
+                className="dj-hologram dj-hologram-main"
                 muted
                 playsInline
                 loop
@@ -649,14 +668,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               />
               <video
                 ref={djStartupVideoRef}
-                className={`dj-hologram dj-hologram-startup ${
-                  djVisualActive &&
-                  !staticMobileDj &&
-                  !reduce &&
-                  (!djVideoReady || djVideoFailed)
-                    ? "is-visible"
-                    : ""
-                }`}
+                className={`dj-hologram dj-hologram-startup ${djStartupVisible ? "is-visible" : ""}`}
                 muted
                 playsInline
                 loop
