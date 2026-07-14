@@ -467,7 +467,7 @@ export default function CreateRoomPreview() {
               <span className="text-[0.62rem] uppercase tracking-[0.22em] text-dust">Live preview</span>
             </div>
             <div className="overflow-hidden rounded-2xl border border-edge bg-gradient-to-b from-charcoal/60 to-pitch/80 p-4 glow-warm">
-              <div className="relative">
+              <div className="relative pt-10 sm:pt-0">
                 <div className="pointer-events-none absolute -right-[18%] top-[16%] z-0 h-[72%] w-[72%] rounded-full grooves opacity-55 ring-1 ring-edge" />
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -482,7 +482,7 @@ export default function CreateRoomPreview() {
                     </div>
                   </motion.div>
                 </AnimatePresence>
-                <span className={`absolute right-2 top-2 rounded-full px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.16em] backdrop-blur-sm ${isPrivate ? "bg-burnt/80 text-cream" : "bg-void/70 text-cream/80"}`}>
+                <span className={`absolute right-2 top-1 z-20 rounded-full px-2.5 py-1 text-[0.6rem] uppercase tracking-[0.16em] backdrop-blur-sm sm:top-2 ${isPrivate ? "bg-burnt/80 text-cream" : "bg-void/70 text-cream/80"}`}>
                   {isPrivate ? "Private" : "Public"}
                 </span>
                 <div className="absolute bottom-3 right-3 z-20 rounded-xl border border-edge bg-void/75 px-3 py-2">
