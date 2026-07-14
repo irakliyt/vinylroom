@@ -25,7 +25,7 @@ export default function EventDetailPreview({ event }: { event?: Room }) {
   return (
     <section id="event" className="relative z-10 mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
       <Reveal className="mb-12 flex items-center gap-4">
-        <span className="eyebrow">A night, in full</span>
+        <span className="eyebrow">Next room, in full</span>
         <span className="h-px flex-1 bg-edge" />
       </Reveal>
 
@@ -92,7 +92,7 @@ export default function EventDetailPreview({ event }: { event?: Room }) {
               {timeline.map((t, i) => (
                 <motion.li
                   key={t.time}
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={false}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.07, duration: 0.5 }}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import RoomCard from "./RoomCard";
 import Reveal from "./Reveal";
 import { rooms as demoRooms, type Room } from "@/data/rooms";
@@ -135,7 +135,6 @@ function ListeningDial({
 }
 
 function LiveSignalBoard({ rooms, source }: { rooms: Room[]; source: "wix" | "mock" }) {
-  const reduce = useReducedMotion();
   const signals = useMemo(
     () =>
       [...rooms]
@@ -161,7 +160,7 @@ function LiveSignalBoard({ rooms, source }: { rooms: Room[]; source: "wix" | "mo
         {signals.map((signal, index) => (
           <motion.div
             key={`${signal.city}-${signal.state}`}
-            initial={reduce ? false : { opacity: 0, x: -12 }}
+            initial={false}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.45, delay: index * 0.08 }}
@@ -311,7 +310,7 @@ export default function FeaturedRooms({
             <motion.div
               key={room.id}
               layout
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={false}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}

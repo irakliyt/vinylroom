@@ -1,17 +1,16 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 import VinylDisc from "./VinylDisc";
 import MagneticButton from "./MagneticButton";
 
 export default function FinalCTA() {
-  const reduce = useReducedMotion();
   return (
     <section id="final" className="relative z-10 overflow-hidden px-5 py-32 sm:px-8 lg:py-44">
       {/* giant ghost vinyl */}
       <motion.div
         aria-hidden
-        initial={reduce ? false : { opacity: 0, scale: 0.9 }}
+        initial={false}
         whileInView={{ opacity: 0.5, scale: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
@@ -23,7 +22,7 @@ export default function FinalCTA() {
 
       <div className="relative mx-auto max-w-2xl text-center">
         <motion.span
-          initial={reduce ? false : { opacity: 0, y: 16 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
@@ -32,7 +31,7 @@ export default function FinalCTA() {
           Your records deserve a room
         </motion.span>
         <motion.h2
-          initial={reduce ? false : { opacity: 0, y: 24 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
@@ -41,7 +40,7 @@ export default function FinalCTA() {
           Create a listening night. <span className="italic">Open a few seats.</span>
         </motion.h2>
         <motion.p
-          initial={reduce ? false : { opacity: 0, y: 16 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.16 }}
@@ -50,7 +49,7 @@ export default function FinalCTA() {
           Let the right people discover the music with you.
         </motion.p>
         <motion.div
-          initial={reduce ? false : { opacity: 0, y: 16 }}
+          initial={false}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, delay: 0.24 }}

@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
+import SecondaryPageShell from "./SecondaryPageShell";
 
 export default function HostResourcePage({
   eyebrow,
@@ -12,31 +12,5 @@ export default function HostResourcePage({
   summary: string;
   children: ReactNode;
 }) {
-  return (
-    <main className="min-h-[100svh] bg-void px-5 py-8 text-cream sm:px-8 sm:py-12">
-      <div className="mx-auto max-w-4xl">
-        <Link href="/" className="inline-flex items-center gap-3 text-sm text-parchment transition-colors hover:text-amber">
-          <span aria-hidden="true">←</span>
-          Vinyl Rooms
-        </Link>
-
-        <header className="mt-14 border-b border-edge pb-10 sm:mt-20 sm:pb-14">
-          <div className="eyebrow">{eyebrow}</div>
-          <h1 className="mt-5 max-w-3xl font-display text-[clamp(3rem,9vw,6.75rem)] leading-[0.88] tracking-[-0.045em]">
-            {title}
-          </h1>
-          <p className="mt-7 max-w-2xl text-base leading-relaxed text-parchment sm:text-lg">{summary}</p>
-        </header>
-
-        <article className="legal-copy py-10 sm:py-14">{children}</article>
-
-        <div className="flex flex-col gap-3 border-t border-edge py-8 sm:flex-row sm:items-center sm:justify-between">
-          <Link href="/#host" className="inline-flex w-fit rounded-full bg-amber px-6 py-3 text-sm font-medium text-void transition-colors hover:bg-cream">
-            Open the room builder
-          </Link>
-          <Link href="/" className="text-sm text-parchment transition-colors hover:text-amber">Return home</Link>
-        </div>
-      </div>
-    </main>
-  );
+  return <SecondaryPageShell eyebrow={eyebrow} title={title} summary={summary}>{children}</SecondaryPageShell>;
 }

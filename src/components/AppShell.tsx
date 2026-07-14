@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import { type Room } from "@/data/rooms";
 import { LayoutGroup } from "framer-motion";
+import { useEffect } from "react";
 import { MemberProvider } from "@/components/member/MemberProvider";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
 import { BookingProvider } from "@/components/booking/BookingProvider";
@@ -15,12 +14,14 @@ import Hero from "@/components/Hero";
 import FeaturedRooms from "@/components/FeaturedRooms";
 import HowItWorks from "@/components/HowItWorks";
 import NowPlayingWidget from "@/components/NowPlayingWidget";
+import DeferredPageSections from "@/components/DeferredPageSections";
 
-const DeferredPageSections = dynamic(() => import("@/components/DeferredPageSections"), {
-  ssr: false,
-});
-
-const DEFERRED_HASHES = new Set(["#event", "#host", "#community", "#final"]);
+function nextDetailedRoom(rooms: Room[]) {
+  const datedRooms = rooms
+    .filter((room) => room.startDate && !Number.isNaN(Date.parse(room.startDate)))
+    .sort((left, right) => Date.parse(left.startDate!) - Date.parse(right.startDate!));
+  return datedRooms[0] ?? rooms.find((room) => room.featured) ?? rooms[0];
+}
 
 export default function AppShell({
   rooms,
@@ -29,44 +30,29 @@ export default function AppShell({
   rooms: Room[];
   source: "wix" | "mock";
 }) {
-  const deferredSentinelRef = useRef<HTMLDivElement>(null);
-  const [showDeferredSections, setShowDeferredSections] = useState(false);
+  const detailedRoom = nextDetailedRoom(rooms);
 
   useEffect(() => {
-    const revealForHash = () => {
-      if (DEFERRED_HASHES.has(window.location.hash)) setShowDeferredSections(true);
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+
+    let cancelled = false;
+    const alignHashTarget = () => {
+      if (!cancelled) {
+        document.getElementById(id)?.scrollIntoView({ block: "start", behavior: "auto" });
+      }
     };
-    window.addEventListener("hashchange", revealForHash);
 
-    const sentinel = deferredSentinelRef.current;
-    const observer = sentinel
-      ? new IntersectionObserver(
-          ([entry]) => {
-            if (!entry.isIntersecting) return;
-            setShowDeferredSections(true);
-          },
-          { rootMargin: "1000px 0px" },
-        )
-      : null;
-    if (sentinel) observer?.observe(sentinel);
-
-    if (DEFERRED_HASHES.has(window.location.hash)) {
-      queueMicrotask(() => setShowDeferredSections(true));
-    }
+    const frame = requestAnimationFrame(() => requestAnimationFrame(alignHashTarget));
+    const timers = [window.setTimeout(alignHashTarget, 250), window.setTimeout(alignHashTarget, 900)];
+    void document.fonts?.ready.then(alignHashTarget);
 
     return () => {
-      window.removeEventListener("hashchange", revealForHash);
-      observer?.disconnect();
+      cancelled = true;
+      cancelAnimationFrame(frame);
+      timers.forEach(window.clearTimeout);
     };
   }, []);
-
-  useEffect(() => {
-    if (!showDeferredSections || !DEFERRED_HASHES.has(window.location.hash)) return;
-    const frame = requestAnimationFrame(() => {
-      document.querySelector(window.location.hash)?.scrollIntoView({ behavior: "smooth" });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [showDeferredSections]);
 
   return (
     <MemberProvider>
@@ -83,8 +69,7 @@ export default function AppShell({
               <Hero rooms={rooms} />
               <FeaturedRooms rooms={rooms} source={source} />
               <HowItWorks />
-              <div ref={deferredSentinelRef} className="h-px" aria-hidden="true" />
-              {showDeferredSections ? <DeferredPageSections event={rooms[0]} /> : null}
+              {detailedRoom ? <DeferredPageSections event={detailedRoom} /> : null}
             </main>
           </BookingProvider>
         </LayoutGroup>

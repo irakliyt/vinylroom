@@ -46,10 +46,11 @@ export default function TermsOfUse() {
       </section>
 
       <section>
-        <h2>Host drafts</h2>
+        <h2>Hosting rooms</h2>
         <p>
-          The host studio is currently a planning tool. Drafts are stored in your browser and do not create a
-          published event, commercial relationship, or promise that a proposed room will be accepted.
+          The host studio stores work in progress in your browser. A room is only created after a signed-in
+          member submits the final step and Wix confirms the event. Hosts are responsible for accurate venue,
+          schedule, capacity, pricing, and record-lineup information.
         </p>
       </section>
 

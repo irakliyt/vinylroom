@@ -69,7 +69,14 @@ export async function getListeningRooms(): Promise<RoomsResult> {
       .queryEvents({ fields: ["DETAILS", "URLS"] })
       .limit(50)
       .find();
-    const events = ((res.items ?? []) as Record<string, unknown>[]).filter(isUpcomingEvent);
+    const events = ((res.items ?? []) as Record<string, unknown>[])
+      .filter(isUpcomingEvent)
+      .sort((left, right) => {
+        const leftStart = Date.parse(eventSchedule(left)?.startDate ?? "");
+        const rightStart = Date.parse(eventSchedule(right)?.startDate ?? "");
+        return (Number.isNaN(leftStart) ? Number.MAX_SAFE_INTEGER : leftStart)
+          - (Number.isNaN(rightStart) ? Number.MAX_SAFE_INTEGER : rightStart);
+      });
     if (events.length === 0) return { rooms: demoRooms, source: "mock" };
 
     // Pull one on-sale ticket per event (for price + a ticketDefinitionId),

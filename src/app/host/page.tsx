@@ -24,7 +24,7 @@ export default function HostPage() {
       </section>
       <section>
         <h2>How publishing works</h2>
-        <p>The builder prepares a room brief in your browser. Copy that brief into Wix Events to publish the event, manage tickets, and receive reservations.</p>
+        <p>Sign in as a Vinyl Rooms member, finish the room builder, and create the event directly. The connected Wix Events backend publishes public rooms, creates the ticket definition, and keeps reservations and capacity in one place.</p>
       </section>
     </HostResourcePage>
   );

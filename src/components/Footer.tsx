@@ -1,3 +1,7 @@
+import NewsletterSignup from "./NewsletterSignup";
+import ContactForm from "./ContactForm";
+import WarmPageLink from "./WarmPageLink";
+
 const cols = [
   {
     title: "Discover",
@@ -23,7 +27,7 @@ const cols = [
       { label: "Our story", href: "#community" },
       { label: "Collector culture", href: "#community" },
       { label: "Journal", href: "#community" },
-      { label: "Contact", href: "#final" },
+      { label: "Contact", href: "#contact" },
     ],
   },
 ];
@@ -52,9 +56,11 @@ export default function Footer() {
               <ul className="mt-4 space-y-2.5">
                 {c.links.map((l) => (
                   <li key={l.label}>
-                    <a href={l.href} className="text-sm text-parchment transition-colors hover:text-cream clickable">
-                      {l.label}
-                    </a>
+                    {l.href.endsWith(".html") ? (
+                      <WarmPageLink href={l.href} className="text-sm text-parchment transition-colors hover:text-cream clickable">{l.label}</WarmPageLink>
+                    ) : (
+                      <a href={l.href} className="text-sm text-parchment transition-colors hover:text-cream clickable">{l.label}</a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -62,12 +68,20 @@ export default function Footer() {
           ))}
         </div>
 
+        <div className="mt-12">
+          <ContactForm />
+        </div>
+
+        <div className="mt-6">
+          <NewsletterSignup />
+        </div>
+
         <a
           href="https://www.instagram.com/vinylroom.online/"
           target="_blank"
           rel="noreferrer"
           aria-label="Follow Vinyl Rooms on Instagram"
-          className="group relative mt-12 flex overflow-hidden rounded-2xl border border-amber/20 bg-gradient-to-r from-amber/[0.08] via-pitch/70 to-burnt/[0.08] p-4 transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-amber/45 hover:shadow-[0_20px_60px_-28px_rgba(226,165,82,0.5)] sm:items-center sm:gap-5 sm:p-5"
+          className="group relative mt-6 flex overflow-hidden rounded-2xl border border-amber/20 bg-gradient-to-r from-amber/[0.08] via-pitch/70 to-burnt/[0.08] p-4 transition-[border-color,transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:border-amber/45 hover:shadow-[0_20px_60px_-28px_rgba(226,165,82,0.5)] sm:items-center sm:gap-5 sm:p-5"
         >
           <span className="pointer-events-none absolute inset-0 translate-x-[-110%] bg-[linear-gradient(110deg,transparent_25%,rgba(248,240,221,0.08)_48%,transparent_70%)] transition-transform duration-700 group-hover:translate-x-[110%]" />
           <span className="relative mr-4 flex h-14 w-14 shrink-0 items-center justify-center sm:mr-0">

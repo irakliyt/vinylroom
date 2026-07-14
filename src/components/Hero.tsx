@@ -266,6 +266,20 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     };
   }, [onDjMetadataLoaded, reduce]);
 
+  // Warm the 750 KB full-quality loop shortly after hydration. This request
+  // is not part of the document's critical render path, but it normally
+  // finishes well before a visitor reaches for DJ mode. Clicking still calls
+  // `prepareDjVideo` immediately as a fallback.
+  useEffect(() => {
+    if (!djMediaResolved || staticMobileDj || reduce) return;
+
+    const timeout = window.setTimeout(prepareDjVideo, 900);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [djMediaResolved, prepareDjVideo, reduce, staticMobileDj]);
+
   // Warm the silhouette matte independently of DJ mode. The startup video has
   // its own CSS-only feather, so an uncached matte can never delay first motion.
   useEffect(() => {
@@ -642,7 +656,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 playsInline
                 loop
                 preload="none"
-                poster={djMode && djMediaResolved && !staticMobileDj ? "/assets/video/dj-hologram-poster.webp" : undefined}
+                poster="/assets/video/dj-hologram-poster.webp"
                 tabIndex={-1}
               />
               <video

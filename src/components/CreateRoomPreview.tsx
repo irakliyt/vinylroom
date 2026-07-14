@@ -42,7 +42,7 @@ const GENRE_OPTS: { g: Genre; sleeve: Sleeve }[] = [
 ];
 
 const MOODS = ["Warm", "Slow", "Intimate", "Loud", "Weightless", "Romantic", "Nocturnal"];
-const HOST_EVENTS_API = `${process.env.NEXT_PUBLIC_WIX_APP_API_URL ?? "https://5k293v-881f90aac2a74e41-irakliyt.wix-host.com"}/api/host-events`;
+const HOST_EVENTS_API = `${process.env.NEXT_PUBLIC_WIX_APP_API_URL ?? "https://tsksxe-881f90aac2a74e41-irakliyt.wix-host.com"}/api/host-events`;
 const STUDIO_STEPS = ["Record", "Mood", "Room", "Tickets"];
 
 function defaultEventDate() {
@@ -90,7 +90,7 @@ export default function CreateRoomPreview() {
     );
   }, [query, records]);
   const visibleResults = useMemo(() => {
-    if (showAllAlbums || query.trim()) return results.slice(0, 14);
+    if (showAllAlbums || query.trim()) return results;
     return results.slice(0, 8);
   }, [query, results, showAllAlbums]);
   const art = (record: string) => ALBUM_POOL.find((a) => a.record === record)?.artwork;
@@ -425,7 +425,7 @@ export default function CreateRoomPreview() {
                     onClick={() => setShowAllAlbums(true)}
                     className="w-full rounded-lg border border-edge px-3 py-2 text-center text-xs text-parchment transition-colors hover:border-edge-strong hover:text-cream clickable"
                   >
-                    Show more albums
+                    Show all {results.length} albums
                   </button>
                 )}
               </div>
