@@ -15,10 +15,10 @@ const cols = [
   {
     title: "Host",
     links: [
-      { label: "Open a room", href: "/host.html" },
-      { label: "Host guide", href: "/host-guide.html" },
-      { label: "Equipment tips", href: "/equipment.html" },
-      { label: "Pricing", href: "/pricing.html" },
+      { label: "Open a room", href: "/host" },
+      { label: "Host guide", href: "/host-guide" },
+      { label: "Equipment tips", href: "/equipment" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
@@ -56,7 +56,7 @@ export default function Footer() {
               <ul className="mt-4 space-y-2.5">
                 {c.links.map((l) => (
                   <li key={l.label}>
-                    {l.href.endsWith(".html") ? (
+                    {l.href.startsWith("/") ? (
                       <WarmPageLink href={l.href} className="text-sm text-parchment transition-colors hover:text-cream clickable">{l.label}</WarmPageLink>
                     ) : (
                       <a href={l.href} className="text-sm text-parchment transition-colors hover:text-cream clickable">{l.label}</a>
@@ -107,8 +107,8 @@ export default function Footer() {
         <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-edge pt-6 text-xs text-dust sm:flex-row sm:items-center">
           <span>© 2026 Vinyl Listening Rooms — a concept, pressed with care.</span>
           <span className="flex gap-6">
-            <a href="/privacy.html" className="transition-colors hover:text-cream">Privacy</a>
-            <a href="/terms.html" className="transition-colors hover:text-cream">Terms</a>
+            <WarmPageLink href="/privacy" className="transition-colors hover:text-cream">Privacy</WarmPageLink>
+            <WarmPageLink href="/terms" className="transition-colors hover:text-cream">Terms</WarmPageLink>
             <a
               href="https://www.instagram.com/vinylroom.online/"
               target="_blank"

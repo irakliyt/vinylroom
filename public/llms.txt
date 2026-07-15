@@ -7,14 +7,14 @@ Vinyl Rooms is a public-facing booking and discovery experience at https://www.v
 ## Key Pages
 
 - [Home](https://www.vinylroom.online/): Main discovery page with the listening ritual hero, featured rooms, room filtering, host studio, and community content.
-- [Open a room](https://www.vinylroom.online/host.html): What a host prepares before creating a ticketed listening room in Wix Events.
-- [Host guide](https://www.vinylroom.online/host-guide.html): Practical guidance for preparing and running a listening session.
-- [Equipment tips](https://www.vinylroom.online/equipment.html): A simple turntable, signal-path, and room checklist.
-- [Host pricing](https://www.vinylroom.online/pricing.html): How hosts set capacity and per-seat pricing before publishing through Wix Events.
-- [Privacy](https://www.vinylroom.online/privacy.html): How booking, member, and browser information is handled.
-- [Terms](https://www.vinylroom.online/terms.html): Terms for using Vinyl Rooms, member features, host drafts, and Wix-hosted services.
-- [Thank you](https://www.vinylroom.online/thank-you.html): Checkout return page that shows the booked room and digital ticket sleeve when Wix returns an order identifier.
-- [Login callback](https://www.vinylroom.online/login-callback.html): Wix member authentication callback page.
+- [Open a room](https://www.vinylroom.online/host): What a host prepares before creating a ticketed listening room in Wix Events.
+- [Host guide](https://www.vinylroom.online/host-guide): Practical guidance for preparing and running a listening session.
+- [Equipment tips](https://www.vinylroom.online/equipment): A simple turntable, signal-path, and room checklist.
+- [Host pricing](https://www.vinylroom.online/pricing): How hosts set capacity and per-seat pricing before publishing through Wix Events.
+- [Privacy](https://www.vinylroom.online/privacy): How booking, member, and browser information is handled.
+- [Terms](https://www.vinylroom.online/terms): Terms for using Vinyl Rooms, member features, host drafts, and Wix-hosted services.
+- [Thank you](https://www.vinylroom.online/thank-you): Checkout return page that shows the booked room and digital ticket sleeve when Wix returns an order identifier.
+- [Login callback](https://www.vinylroom.online/login-callback): Wix member authentication callback page.
 
 ## Primary User Flows
 

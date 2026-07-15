@@ -23,8 +23,6 @@ import { featuredEvent, stats, type Room } from "@/data/rooms";
 const SCRATCH_SRC = "/audio/freesound_community-babyscratch-87371.mp3";
 const DJ_VIDEO_WEBM_SRC = "/assets/video/dj-hologram.webm";
 const DJ_VIDEO_MP4_SRC = "/assets/video/dj-hologram.mp4";
-const DJ_STARTUP_WEBM_SRC = "/assets/video/dj-hologram-startup.webm";
-const DJ_STARTUP_MP4_SRC = "/assets/video/dj-hologram-startup.mp4";
 const RITUAL_STEPS = [
   { label: "Sleeve", note: "choose the room" },
   { label: "Reveal", note: "record slides out" },
@@ -61,7 +59,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const resumePlayerAfterScratch = useRef(false);
   const scratchCleanup = useRef<(() => void) | null>(null);
   const djVideoRef = useRef<HTMLVideoElement>(null);
-  const djStartupVideoRef = useRef<HTMLVideoElement>(null);
   const djVideoFallbackTried = useRef(false);
   const djMediaPrepared = useRef(false);
   const staticMobileDjRef = useRef(false);
@@ -91,17 +88,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const stageAccent = activeTrack?.accent ?? featured.sleeve.accent;
   const stageLabel = activeTrack ? "Now playing" : "Now spinning";
   const activeArtwork = artworkVariant(activeTrack?.artwork, 360);
-  // Reveal the projector as soon as device media has been resolved. Desktop
-  // uses a tiny animated startup layer until the full-quality video is
-  // actually playing; phones keep their existing animated WebP path.
-  const djVisualAvailable = djMediaResolved || staticMobileDj;
-  const djVisualActive = djMode && djVisualAvailable;
-  const djStartupVisible =
-    djVisualActive &&
-    !staticMobileDj &&
-    !reduce &&
-    !djVideoReady &&
-    !djVideoFailed;
+  // Phones keep their existing animated WebP path. Desktop shows only the
+  // full-quality video, and only after the browser has decoded a real frame.
+  // This removes the double-silhouette startup layer without adding work to
+  // the critical first paint.
+  const desktopDjReady = !staticMobileDj && djMediaResolved && djVideoReady && !djVideoFailed;
+  const djVisualActive = djMode && (staticMobileDj || desktopDjReady);
 
   useLayoutEffect(() => {
     if (!djVisualActive) return;
@@ -228,9 +220,15 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     const handleCanPlay = () => {
       setDjVideoFailed(false);
+      setDjVideoReady(true);
       if (djModeRef.current && !reduce && !staticMobileDjRef.current) {
         void djVideo.play().catch(() => {});
       }
+    };
+
+    const handleLoadedData = () => {
+      setDjVideoReady(true);
+      setDjVideoFailed(false);
     };
 
     const handlePlaying = () => {
@@ -239,6 +237,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     };
 
     djVideo.addEventListener("loadedmetadata", onDjMetadataLoaded);
+    djVideo.addEventListener("loadeddata", handleLoadedData);
     djVideo.addEventListener("canplay", handleCanPlay);
     djVideo.addEventListener("playing", handlePlaying);
     djVideo.addEventListener("error", handleError);
@@ -259,6 +258,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
     return () => {
       djVideo.removeEventListener("loadedmetadata", onDjMetadataLoaded);
+      djVideo.removeEventListener("loadeddata", handleLoadedData);
       djVideo.removeEventListener("canplay", handleCanPlay);
       djVideo.removeEventListener("playing", handlePlaying);
       djVideo.removeEventListener("error", handleError);
@@ -272,32 +272,12 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   useEffect(() => {
     if (!djMediaResolved || staticMobileDj || reduce) return;
 
-    const timeout = window.setTimeout(prepareDjVideo, 900);
+    const timeout = window.setTimeout(prepareDjVideo, 450);
 
     return () => {
       window.clearTimeout(timeout);
     };
   }, [djMediaResolved, prepareDjVideo, reduce, staticMobileDj]);
-
-  // Warm the silhouette matte independently of DJ mode. The startup video has
-  // its own CSS-only feather, so an uncached matte can never delay first motion.
-  // The 54 KB WebM primer is already buffered by the browser before interaction.
-  // Start it immediately while the full-quality video crosses from `canplay`
-  // to `playing`, then pause it behind the seamless fade once HD takes over.
-  useEffect(() => {
-    const startupVideo = djStartupVideoRef.current;
-    if (!startupVideo) return;
-
-    if (djStartupVisible) {
-      void startupVideo.play().catch(() => {});
-      return;
-    }
-
-    startupVideo.pause();
-    if (!djMode && startupVideo.readyState >= HTMLMediaElement.HAVE_METADATA) {
-      startupVideo.currentTime = 0;
-    }
-  }, [djMode, djStartupVisible]);
 
   useEffect(() => {
     const djVideo = djVideoRef.current;
@@ -634,7 +614,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <video
                 ref={djVideoRef}
                 id="djHologram"
-                className={`dj-hologram dj-hologram-main ${djStartupVisible ? "is-warming" : ""}`}
+                className="dj-hologram dj-hologram-main"
                 muted
                 playsInline
                 loop
@@ -642,26 +622,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
                 poster="/assets/video/dj-hologram-poster.webp"
                 tabIndex={-1}
               />
-              <video
-                ref={djStartupVideoRef}
-                className={`dj-hologram dj-hologram-startup ${djStartupVisible ? "is-visible" : ""}`}
-                muted
-                playsInline
-                loop
-                preload="auto"
-                tabIndex={-1}
-              >
-                <source
-                  src={DJ_STARTUP_WEBM_SRC}
-                  type="video/webm"
-                  media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
-                />
-                <source
-                  src={DJ_STARTUP_MP4_SRC}
-                  type="video/mp4"
-                  media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
-                />
-              </video>
               {/* Image animation avoids the unstable mobile video compositor. */}
               {djVisualActive && staticMobileDj ? (
                 <>

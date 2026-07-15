@@ -5,8 +5,9 @@ const nextConfig: NextConfig = {
   // Live Wix Events data is fetched at build time and baked into the HTML
   // (re-run `wix release` to refresh); booking + member auth stay client-side.
   output: "export",
-  // Wix static hosting strips trailing slashes, which 504s folder-style routes.
-  // Export flat files (thank-you.html) so bare paths resolve.
+  // Export flat files (thank-you.html). A postbuild script mirrors key pages
+  // into folder indexes too, so both `/pricing.html` and `/pricing` can be
+  // served by Wix static hosting without a client-side redirect.
   trailingSlash: false,
   images: { unoptimized: true },
 };
