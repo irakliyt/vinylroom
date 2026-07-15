@@ -25,7 +25,6 @@ const DJ_VIDEO_WEBM_SRC = "/assets/video/dj-hologram.webm";
 const DJ_VIDEO_MP4_SRC = "/assets/video/dj-hologram.mp4";
 const DJ_STARTUP_WEBM_SRC = "/assets/video/dj-hologram-startup.webm";
 const DJ_STARTUP_MP4_SRC = "/assets/video/dj-hologram-startup.mp4";
-const DJ_MASK_SRC = "/assets/video/dj-hologram-mask.png?v=2";
 const RITUAL_STEPS = [
   { label: "Sleeve", note: "choose the room" },
   { label: "Reveal", note: "record slides out" },
@@ -80,7 +79,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
   const [djMediaResolved, setDjMediaResolved] = useState(false);
   const [djVideoReady, setDjVideoReady] = useState(false);
   const [djVideoFailed, setDjVideoFailed] = useState(false);
-  const [djMaskReady, setDjMaskReady] = useState(false);
   const [projectionGeometry, setProjectionGeometry] = useState<ProjectionGeometry | null>(null);
 
   // Prefer the live (Wix-merged) room so "Reserve" actually reaches real
@@ -102,7 +100,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
     djVisualActive &&
     !staticMobileDj &&
     !reduce &&
-    (!djVideoReady || !djMaskReady || djVideoFailed);
+    !djVideoReady &&
+    !djVideoFailed;
 
   useLayoutEffect(() => {
     if (!djVisualActive) return;
@@ -282,22 +281,6 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
 
   // Warm the silhouette matte independently of DJ mode. The startup video has
   // its own CSS-only feather, so an uncached matte can never delay first motion.
-  useEffect(() => {
-    if (!djMediaResolved || staticMobileDj) return;
-
-    let disposed = false;
-    const mask = new Image();
-    mask.decoding = "async";
-    mask.onload = () => {
-      if (!disposed) setDjMaskReady(true);
-    };
-    mask.src = DJ_MASK_SRC;
-
-    return () => {
-      disposed = true;
-    };
-  }, [djMediaResolved, staticMobileDj]);
-
   // The 54 KB WebM primer is already buffered by the browser before interaction.
   // Start it immediately while the full-quality video crosses from `canplay`
   // to `playing`, then pause it behind the seamless fade once HD takes over.
@@ -651,7 +634,7 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
               <video
                 ref={djVideoRef}
                 id="djHologram"
-                className="dj-hologram dj-hologram-main"
+                className={`dj-hologram dj-hologram-main ${djStartupVisible ? "is-warming" : ""}`}
                 muted
                 playsInline
                 loop

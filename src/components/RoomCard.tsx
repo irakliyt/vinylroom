@@ -83,6 +83,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
   const scarce = room.seatsLeft <= 3;
   const leadRecord = room.records[0] ?? room.title;
   const nextRecord = room.records[1] ?? room.genre;
+  const statusLabel = index === 0 && room.nowSpinning ? "Now spinning" : scarce ? "Few seats left" : "Up next";
 
   return (
     <motion.article
@@ -103,14 +104,12 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
     >
       {/* hover glow */}
       <div className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{ boxShadow: "inset 0 0 60px rgba(216,154,69,0.08), 0 40px 80px -40px rgba(180,95,42,0.5)" }} />
-      <div className="pointer-events-none absolute left-4 right-4 top-3 z-20 flex items-center justify-between opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-        <span className="rounded-full border border-amber/35 bg-void/70 px-2 py-1 font-mono text-[0.5rem] uppercase tracking-[0.16em] text-amber">
-          VR-{String(index + 1).padStart(2, "0")}
-        </span>
-        <span className="rounded-full border border-edge bg-void/60 px-2 py-1 text-[0.52rem] uppercase tracking-[0.16em] text-beige">
-          Sleeve pull
-        </span>
-      </div>
+      <span className="pointer-events-none absolute left-4 top-12 z-20 rounded-full border border-amber/35 bg-void/70 px-2 py-1 font-mono text-[0.5rem] uppercase tracking-[0.16em] text-amber opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        VR-{String(index + 1).padStart(2, "0")}
+      </span>
+      <span className="pointer-events-none absolute right-14 top-3 z-20 rounded-full border border-edge bg-void/60 px-2 py-1 text-[0.52rem] uppercase tracking-[0.16em] text-beige opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+        Sleeve pull
+      </span>
 
       {/* artwork stage */}
       <div
@@ -199,7 +198,7 @@ export default function RoomCard({ room, index = 0 }: { room: Room; index?: numb
             <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-1rem)] items-center gap-1.5 rounded-full bg-void/70 px-2.5 py-1 backdrop-blur-sm">
               <span className="h-2 w-2 shrink-0 rounded-full ring-2 ring-cream/15" style={{ background: room.sleeve.accent }} />
               <span className="truncate text-[0.6rem] uppercase tracking-[0.16em] text-cream/80">
-                Now spinning
+                {statusLabel}
               </span>
             </div>
           )}

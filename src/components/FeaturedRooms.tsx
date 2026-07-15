@@ -201,6 +201,7 @@ export default function FeaturedRooms({
   const [mode, setMode] = useState<DialMode>("mood");
   const [showAllMobile, setShowAllMobile] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [page, setPage] = useState(0);
   const [refreshedRooms, setRefreshedRooms] = useState<Room[] | null>(null);
   const displayedRooms = refreshedRooms ?? rooms;
   const displayedSource = refreshedRooms?.length ? "wix" : source;
@@ -257,10 +258,23 @@ export default function FeaturedRooms({
     };
   }, []);
 
-  const filtered = useMemo(
-    () => [...displayedRooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)).slice(0, isDesktop || showAllMobile ? 6 : 3),
-    [displayedRooms, isDesktop, mode, showAllMobile],
+  const sortedRooms = useMemo(
+    () => [...displayedRooms].sort((a, b) => roomScore(a, mode) - roomScore(b, mode)),
+    [displayedRooms, mode],
   );
+
+  const pageSize = 6;
+  const pageCount = Math.max(1, Math.ceil(sortedRooms.length / pageSize));
+  const activePage = Math.min(page, pageCount - 1);
+  const filtered = useMemo(
+    () => {
+      if (!isDesktop) return showAllMobile ? sortedRooms : sortedRooms.slice(0, 3);
+      return sortedRooms.slice(activePage * pageSize, activePage * pageSize + pageSize);
+    },
+    [activePage, isDesktop, showAllMobile, sortedRooms],
+  );
+  const pageStart = activePage * pageSize + 1;
+  const pageEnd = Math.min(sortedRooms.length, pageStart + filtered.length - 1);
 
   return (
     <section id="rooms" className="relative z-10 mx-auto max-w-[100rem] px-5 py-24 sm:px-8 lg:py-32">
@@ -298,7 +312,13 @@ export default function FeaturedRooms({
 
       <div className="mt-10 grid gap-4 lg:grid-cols-[minmax(0,1fr)_19rem]">
         <Reveal delay={0.1}>
-          <ListeningDial mode={mode} onChange={setMode} />
+          <ListeningDial
+            mode={mode}
+            onChange={(nextMode) => {
+              setMode(nextMode);
+              setPage(0);
+            }}
+          />
         </Reveal>
         <LiveSignalBoard rooms={displayedRooms} source={displayedSource} />
       </div>
@@ -315,7 +335,7 @@ export default function FeaturedRooms({
               exit={{ opacity: 0, scale: 0.96 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <RoomCard room={room} index={i} />
+              <RoomCard room={room} index={isDesktop ? activePage * pageSize + i : i} />
             </motion.div>
           ))}
         </AnimatePresence>
@@ -329,6 +349,31 @@ export default function FeaturedRooms({
           >
             Show more rooms
           </button>
+        </div>
+      )}
+      {isDesktop && pageCount > 1 && (
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <span className="rounded-full border border-edge bg-void/35 px-3 py-2 text-[0.68rem] uppercase tracking-[0.14em] text-dust">
+            {pageStart}-{pageEnd} of {sortedRooms.length}
+          </span>
+          <div className="flex items-center gap-2 rounded-full border border-edge bg-void/35 p-1">
+            {Array.from({ length: pageCount }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Show room page ${i + 1}`}
+                aria-current={activePage === i ? "page" : undefined}
+                onClick={() => setPage(i)}
+                className={`h-9 min-w-9 rounded-full px-3 text-sm transition-colors clickable ${
+                  activePage === i
+                    ? "bg-amber text-void"
+                    : "text-parchment hover:bg-amber/10 hover:text-cream"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </section>
