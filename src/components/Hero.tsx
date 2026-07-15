@@ -33,13 +33,13 @@ const RITUAL_STEPS = [
 ];
 
 const PROJECTION_TARGETS = [
-  [0.51, 0.1],
-  [0.65, 0.18],
-  [0.79, 0.34],
-  [0.85, 0.52],
-  [0.75, 0.68],
-  [0.9, 0.82],
-  [0.64, 0.9],
+  [0.58, 0.18],
+  [0.72, 0.28],
+  [0.83, 0.42],
+  [0.88, 0.56],
+  [0.82, 0.68],
+  [0.72, 0.78],
+  [0.6, 0.86],
 ] as const;
 
 type ProjectionGeometry = {
@@ -136,8 +136,8 @@ export default function Hero({ rooms }: { rooms?: Room[] }) {
           };
         });
 
-        const beamTargetX = projectorX + projectorWidth * 0.68;
-        const beamTargetY = projectorY + projectorHeight * 0.52;
+        const beamTargetX = projectorX + projectorWidth * 0.78;
+        const beamTargetY = projectorY + projectorHeight * 0.56;
         const beamDeltaX = beamTargetX - sourceX;
         const beamDeltaY = beamTargetY - sourceY;
 

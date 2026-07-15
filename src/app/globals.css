@@ -908,10 +908,10 @@
   }
 
   .dj-hologram-projector {
-    top: -8%;
-    right: calc(100% + clamp(0px, calc(13.2vw - 190px), 84px));
+    top: -22%;
+    right: calc(100% + clamp(0px, calc(12vw - 178px), 72px));
     left: auto;
-    width: clamp(300px, 22vw, 340px);
+    width: clamp(300px, 21.5vw, 340px);
   }
 }
 
