@@ -1,4 +1,4 @@
-import { copyFile, rm, stat } from "node:fs/promises";
+import { copyFile, mkdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 const outDir = path.resolve("out");
@@ -15,7 +15,8 @@ const routes = [
 
 for (const route of routes) {
   const source = path.join(outDir, `${route}.html`);
-  const target = path.join(outDir, route);
+  const targetDir = path.join(outDir, route);
+  const target = path.join(targetDir, "index.html");
 
   try {
     await stat(source);
@@ -23,6 +24,6 @@ for (const route of routes) {
     continue;
   }
 
-  await rm(target, { force: true, recursive: true });
+  await mkdir(targetDir, { recursive: true });
   await copyFile(source, target);
 }
